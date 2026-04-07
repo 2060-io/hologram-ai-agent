@@ -1,14 +1,14 @@
+{{- if and .Values.postgres.enabled (not .Values.postgres.password.existingSecret.name) }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: postgres-secret
+  name: {{ include "chatbot.fullname" . }}-postgres-secret
   namespace: {{ .Release.Namespace }}
 type: Opaque
 stringData:
-  {{- range $key, $val := .Values.postgres.secret }}
-  {{ $key }}: {{ tpl $val $ | quote }}
-  {{- end }}
+  {{ .Values.postgres.password.existingSecret.key }}: {{ .Values.postgres.password.value | quote }}
 ---
+{{- end }}
 
 apiVersion: v1
 kind: Service
@@ -61,13 +61,11 @@ spec:
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
-            {{- range $key, $val := .Values.postgres.secret }}
-            - name: {{ $key }}
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name:  postgres-secret
-                  key: {{ $key }}
-            {{- end }}
+                  name: {{ if .Values.postgres.password.existingSecret.name }}{{ .Values.postgres.password.existingSecret.name }}{{ else }}{{ include "chatbot.fullname" . }}-postgres-secret{{ end }}
+                  key: {{ .Values.postgres.password.existingSecret.key }}
           volumeMounts:
             - name: pvc-{{ include "chatbot.fullname" . }}-postgres
               mountPath: /var/lib/postgresql/data

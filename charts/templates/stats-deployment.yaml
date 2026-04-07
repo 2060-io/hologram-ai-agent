@@ -1,3 +1,4 @@
+{{- if .Values.stats.secret }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -9,6 +10,7 @@ stringData:
   {{ $key }}: {{ tpl $val $ | quote }}
   {{- end }}
 ---
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -82,7 +84,12 @@ spec:
           env:
             {{- range .Values.stats.env }}
             - name: {{ .name }}
+              {{- if .valueFrom }}
+              valueFrom:
+                {{- toYaml .valueFrom | nindent 16 }}
+              {{- else }}
               value: {{ tpl .value $ | quote }}
+              {{- end }}
             {{- end }}
             {{- range $key, $val := .Values.stats.secret }}
             - name: {{ $key }}

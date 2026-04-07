@@ -79,6 +79,20 @@ chatbot:
       value: 'did:web:example.com?service=anoncreds&relativeRef=/credDef/example'
     - name: POSTGRES_HOST
       value: 'example-postgres-host'
+    - name: POSTGRES_USER
+      value: 'example_db_user'
+    - name: POSTGRES_DB_NAME
+      value: 'example_db'
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: chatbot-secret
+          key: OPENAI_API_KEY
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: chatbot-secret
+          key: POSTGRES_PASSWORD
     - name: LLM_TOOLS_CONFIG
       value: '[{"name":"getExampleData","endpoint":"https://example.com/api","method":"GET","requiresAuth":false}]'
     - name: STATISTICS_API_URL
@@ -100,11 +114,11 @@ chatbot:
         en:
           greetingMessage: "Welcome to your custom agent!"
           systemPrompt: "You are a helpful agent."
-  secret:
-    OPENAI_API_KEY: 'sk-example-openai-api-key'
-    POSTGRES_PASSWORD: 'example-db-password'
-    POSTGRES_USER: 'example_db_user'
-    POSTGRES_DB_NAME: 'example_db'
+  # secret: local dev only — chart creates and manages this Secret.
+  # secret:
+  #   OPENAI_API_KEY: 'sk-...'
+  #   POSTGRES_PASSWORD: 'example-db-password'
+  secret: {}
   service:
     type: ClusterIP
     port: 3003
@@ -175,10 +189,19 @@ postgres:
   env:
     - name: PGDATA
       value: '/var/lib/postgresql/data/pgdata'
-  secret:
-    POSTGRES_PASSWORD: 'example-db-password'
-    POSTGRES_USER: 'example-db-user'
-    POSTGRES_DB: 'example-db-name'
+    - name: POSTGRES_USER
+      value: 'example-db-user'
+    - name: POSTGRES_DB
+      value: 'example-db-name'
+  password:
+    # Value used when no existingSecret.name is provided (chart creates its own Secret).
+    value: 'example-db-password'
+    existingSecret:
+      # Name of an existing secret containing the postgres password.
+      # If set, the chart will NOT create a local Secret and will use this one instead.
+      name: 'example-secret'
+      # Key within the secret that holds the password.
+      key: 'POSTGRES_PASSWORD'
   resources:
     requests:
       cpu: '200m'
@@ -216,9 +239,21 @@ stats:
       value: 'jdbc:postgresql://example-postgres.namespace/db'
     - name: QUARKUS_DATASOURCE_USERNAME
       value: 'example-db-user'
-  secret:
-    QUARKUS_ARTEMIS_A0_PASSWORD: 'example-artemis-password'
-    QUARKUS_DATASOURCE_PASSWORD: 'example-db-password'
+    - name: QUARKUS_ARTEMIS_A0_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: stats-secret
+          key: QUARKUS_ARTEMIS_A0_PASSWORD
+    - name: QUARKUS_DATASOURCE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: stats-secret
+          key: QUARKUS_DATASOURCE_PASSWORD
+  # secret: local dev only — chart creates and manages this Secret.
+  # secret:
+  #   QUARKUS_ARTEMIS_A0_PASSWORD: 'example-password'
+  #   QUARKUS_DATASOURCE_PASSWORD: 'example-db-password'
+  secret: {}
   service:
     type: ClusterIP
     port: 8700

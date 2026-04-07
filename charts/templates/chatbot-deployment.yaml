@@ -1,3 +1,4 @@
+{{- if .Values.chatbot.secret }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -8,8 +9,8 @@ stringData:
   {{- range $key, $val := .Values.chatbot.secret }}
   {{ $key }}: {{ tpl $val $ | quote }}
   {{- end }}
-
 ---
+{{- end }}
 {{- $pack := .Values.chatbot.agentPack }}
 {{- $packName := default "custom-pack" $pack.name }}
 {{- $packMountPath := default (printf "/app/agent-packs/%s" $packName) $pack.mountPath }}
@@ -102,7 +103,12 @@ spec:
           env:
             {{- range .Values.chatbot.env }}
             - name: {{ .name }}
+              {{- if .valueFrom }}
+              valueFrom:
+                {{- toYaml .valueFrom | nindent 16 }}
+              {{- else }}
               value: {{ tpl .value $ | quote }}
+              {{- end }}
             {{- end }}
             {{- if $pack.enabled }}
             - name: AGENT_PACK_PATH
@@ -112,7 +118,7 @@ spec:
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name:  chatbot-secret
+                  name: chatbot-secret
                   key: {{ $key }}
             {{- end }}
           volumeMounts:
