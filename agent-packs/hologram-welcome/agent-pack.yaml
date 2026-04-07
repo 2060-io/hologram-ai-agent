@@ -26,6 +26,7 @@ languages:
       AUTH_PROCESS_STARTED: 'Authentication process has started. Please respond to the credential request.'
       STATS_ERROR: 'Sorry, we could not retrieve your statistics at the moment.'
       ERROR_MESSAGES: 'The service is not available at the moment. Please try again later.'
+      LOGOUT_CONFIRMATION: 'You have been logged out successfully.'
   es:
     greetingMessage: >-
       ¡Hola! 👋 Soy Holo, tu asistente inteligente en Hologram. Estoy aquí para ayudarte a descubrir todo lo que ofrecen Verana y Hologram.
@@ -43,6 +44,7 @@ languages:
       AUTH_PROCESS_STARTED: 'El proceso de autenticación ha comenzado. Por favor, responde a la solicitud de credencial.'
       STATS_ERROR: 'Lo sentimos, no pudimos obtener tus estadísticas en este momento.'
       ERROR_MESSAGES: 'El servicio no está disponible en este momento. Por favor, intenta de nuevo más tarde.'
+      LOGOUT_CONFIRMATION: 'Has cerrado sesión exitosamente.'
   fr:
     greetingMessage: >-
       Bonjour ! 👋 Je suis Holo, votre assistant intelligent sur Hologram. Je suis là pour vous aider à découvrir tout ce que Verana et Hologram ont à offrir.
@@ -60,13 +62,14 @@ languages:
       AUTH_PROCESS_STARTED: "Le processus d'authentification a commencé. Veuillez répondre à la demande de justificatif."
       STATS_ERROR: "Désolé, nous n'avons pas pu récupérer vos statistiques pour le moment."
       ERROR_MESSAGES: "Le service n'est pas disponible pour le moment. Veuillez réessayer plus tard."
+      LOGOUT_CONFIRMATION: 'Vous avez été déconnecté avec succès.'
   pt:
     greetingMessage: >-
       Olá! 👋 Eu sou o Holo, seu assistente inteligente na Hologram. Estou aqui para te ajudar a explorar tudo que a Verana e a Hologram oferecem.
 
 llm:
   provider: openai
-  model: gpt-3.5-turbo
+  model: gpt-5.4-mini
   temperature: 0.2
   agentPrompt: >-
     "You are Hologram IA, the greeter for the Hologram + Verana ecosystem.\n\
@@ -111,6 +114,9 @@ flows:
   authentication:
     enabled: true
     credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}
+    adminAvatars:
+      - mj
+      - "@fafa"
   menu:
     items:
       - id: authenticate
@@ -135,6 +141,25 @@ tools:
           label: default
           value: default
           description: default fallback value
+
+# MCP (Model Context Protocol) servers to connect to.
+# Each server exposes tools that the LLM agent can call dynamically.
+# Supports stdio (local process), sse (legacy), and streamable-http (modern) transports.
+# All values support ${ENV_VAR} placeholders resolved at startup.
+# Alternatively, set MCP_SERVERS_CONFIG env var with a JSON array.
+mcp:
+  servers: []
+  # Example — stdio server:
+  # - name: my-tools
+  #   transport: stdio
+  #   command: npx
+  #   args: ["-y", "@example/mcp-server"]
+  # Example — remote HTTP server:
+  # - name: remote-api
+  #   transport: streamable-http
+  #   url: ${MCP_SERVER_URL}
+  #   headers:
+  #     Authorization: "Bearer ${MCP_SERVER_TOKEN}"
 
 integrations:
   vsAgent:

@@ -16,7 +16,7 @@ import {
   VerifiableCredentialRequestedProofItem,
   VerifiableCredentialSubmittedProofItem,
 } from '@2060.io/vs-agent-nestjs-client'
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { JsonTransformer } from '@credo-ts/core'
 import { STAT_KPI } from './common'
@@ -39,7 +39,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly configService: ConfigService,
     private readonly chatBotService: ChatbotService,
     private readonly memoryService: MemoryService,
-    private readonly statProducer: StatProducerService,
+    @Optional() private readonly statProducer: StatProducerService,
     private readonly agentContent: AgentContentService,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
@@ -52,13 +52,22 @@ export class CoreService implements EventHandler, OnModuleInit {
     this.welcomeFlowConfig = this.agentContent.getWelcomeFlowConfig()
     this.authFlowConfig = this.agentContent.getAuthFlowConfig()
     this.credentialDefinitionId = this.authFlowConfig.credentialDefinitionId
+    this.logger.log(`[INIT] authFlowConfig: enabled=${this.authFlowConfig.enabled}, credDefId=${this.credentialDefinitionId?.substring(0, 40)}..., adminAvatars=${JSON.stringify(this.authFlowConfig.adminAvatars)}`)
+    this.logger.log(`[INIT] menuItems: ${JSON.stringify(this.menuItems.map(i => i.id))}`)
   }
 
   private readonly menuItems: { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string }[]
   private readonly menuActions: Record<string, string | undefined>
   private readonly welcomeFlowConfig: { enabled: boolean; sendOnProfile: boolean; templateKey: string }
-  private readonly authFlowConfig: { enabled: boolean; credentialDefinitionId?: string }
+  private readonly authFlowConfig: { enabled: boolean; credentialDefinitionId?: string; adminAvatars: string[] }
   private readonly credentialDefinitionId?: string
+
+  private isAdmin(session: SessionEntity): boolean {
+    if (!session.userName) return false
+    const normalize = (s: string) => s.replace(/^@/, '').toLowerCase()
+    const name = normalize(session.userName)
+    return this.authFlowConfig.adminAvatars.some((a) => normalize(a) === name)
+  }
 
   async onModuleInit() {}
 
@@ -238,6 +247,7 @@ export class CoreService implements EventHandler, OnModuleInit {
         }
 
         if (selectionId === 'logout') {
+          await this.sendText(connectionId, this.getText('LOGOUT_CONFIRMATION', lang), lang)
           session.isAuthenticated = false
           session.userName = ''
           await this.sessionRepository.save(session)
@@ -303,13 +313,15 @@ export class CoreService implements EventHandler, OnModuleInit {
               if (claims) {
                 const firstName = claims.find((c) => c.name === 'firstName')?.value
                 const lastName = claims.find((c) => c.name === 'lastName')?.value
-                session.userName = [firstName, lastName].filter(Boolean).join(' ').trim()
+                const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
+                session.userName = fullName || claims.find((c) => c.name === 'name')?.value || ''
               }
 
               session.state = StateStep.CHAT
               await this.sessionRepository.save(session)
 
-              this.logger.debug(`[AUTH] User ${connectionId} authenticated successfully.`)
+              const isAdmin = this.isAdmin(session)
+              this.logger.log(`[AUTH] User ${connectionId} authenticated as "${session.userName}" (admin=${isAdmin})`)
               const message = session.userName
                 ? this.getText('AUTH_SUCCESS_NAME', userLang).replace('{name}', session.userName)
                 : this.getText('AUTH_SUCCESS', userLang)
@@ -402,31 +414,37 @@ export class CoreService implements EventHandler, OnModuleInit {
           }),
       )
 
+    this.logger.log(`[MENU] options=${options.length}, isAuth=${session.isAuthenticated}, items=${this.menuItems.length}`)
     if (options.length === 0) {
-      this.logger.debug('[MENU] Skipping contextual menu: no auth options available.')
+      this.logger.log('[MENU] Skipping contextual menu: no visible options.')
       return await this.sessionRepository.save(session)
     }
 
-    const title =
-      session.isAuthenticated && session.userName
-        ? `${this.getText('ROOT_TITLE', session.lang)} ${session.userName}!`
-        : this.getText('ROOT_TITLE', session.lang)
+    const title = this.getText('ROOT_TITLE', session.lang)
+    const description = session.isAuthenticated
+      ? session.userName
+        ? `Authenticated as ${session.userName}${this.isAdmin(session) ? ' (Admin)' : ''}`
+        : 'Authenticated'
+      : 'Not Authenticated'
 
+    this.logger.log(`[MENU] Sending ContextualMenuUpdate: title="${title}", desc="${description}", options=${JSON.stringify(options.map(o => o.id))}`)
     await this.apiClient.messages.send(
       new ContextualMenuUpdateMessage({
         title,
+        description,
         connectionId: session.connectionId,
         options,
         timestamp: new Date(),
       }),
     )
+    this.logger.log(`[MENU] ContextualMenuUpdate sent successfully.`)
     return await this.sessionRepository.save(session)
   }
 
   async sendStats(kpi: STAT_KPI, session: SessionEntity) {
     this.logger.debug(`***send stats***`)
     const stats = [STAT_KPI[kpi]]
-    if (session !== null) await this.statProducer.spool(stats, session.connectionId, [new StatEnum(0, 'string')])
+    if (session !== null && this.statProducer) await this.statProducer.spool(stats, session.connectionId, [new StatEnum(0, 'string')])
   }
 
   private isMenuItemVisible(visibleWhen: string | undefined, isAuthenticated: boolean) {

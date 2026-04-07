@@ -1,5 +1,10 @@
 import { registerAs } from '@nestjs/config'
-import { loadAgentPack, pickNumber, pickString, resolveRagRemoteUrls, resolveToolsConfig } from './agent-pack.loader'
+import { config as dotenvConfig } from 'dotenv'
+import { loadAgentPack, pickNumber, pickString, resolveRagRemoteUrls, resolveToolsConfig, resolveMcpServers } from './agent-pack.loader'
+
+// Load .env early so resolvePlaceholders() in loadAgentPack() can resolve ${VAR} refs.
+// override: true ensures .env values win over stale shell env vars.
+dotenvConfig({ path: '.env', override: true })
 
 const agentPackResult = loadAgentPack()
 const agentPack = agentPackResult.pack
@@ -187,6 +192,13 @@ export default registerAs('appConfig', () => ({
   credentialDefinitionId: process.env.CREDENTIAL_DEFINITION_ID,
 
   /**
+   * Comma-separated list of avatar names that have admin privileges.
+   */
+  adminAvatars: process.env.ADMIN_AVATARS
+    ? process.env.ADMIN_AVATARS.split(',').map((s: string) => s.trim()).filter(Boolean)
+    : (agentPack?.flows?.authentication?.adminAvatars ?? []),
+
+  /**
    * Service Agent Admin API URL.
    */
   vsAgentAdminUrl: process.env.VS_AGENT_ADMIN_URL,
@@ -232,4 +244,12 @@ export default registerAs('appConfig', () => ({
    * If not set, it defaults to 200.
    */
   chunkOverlap: pickNumber('RAG_CHUNK_OVERLAP', agentPack?.rag?.chunkOverlap, 200),
+
+  // MCP (Model Context Protocol) Server Configuration
+
+  /**
+   * MCP servers to connect to at startup.
+   * Configurable via MCP_SERVERS_CONFIG env var (JSON array) or agent-pack mcp.servers.
+   */
+  mcpServers: resolveMcpServers(process.env.MCP_SERVERS_CONFIG, agentPack?.mcp?.servers),
 }))

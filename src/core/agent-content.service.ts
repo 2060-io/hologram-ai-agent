@@ -124,10 +124,13 @@ export class AgentContentService {
 
   getAuthFlowConfig() {
     const authConfig = this.agentPack?.flows?.authentication ?? {}
+    const credentialDefinitionId =
+      authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId')
+    const adminAvatars: string[] = this.configService.get('appConfig.adminAvatars') ?? []
     return {
       enabled: this.toBoolean(authConfig.enabled, true),
-      credentialDefinitionId:
-        authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId'),
+      credentialDefinitionId,
+      adminAvatars,
     }
   }
 

@@ -81,6 +81,7 @@ const AgentPackSchema = z
           .object({
             enabled: z.union([z.boolean(), z.string()]).optional(),
             credentialDefinitionId: z.string().optional(),
+            adminAvatars: z.array(z.string()).optional(),
           })
           .optional(),
         menu: z
@@ -103,6 +104,24 @@ const AgentPackSchema = z
       .object({
         dynamicConfig: z.any().optional(),
         bundled: z.record(z.any()).optional(),
+      })
+      .optional(),
+    mcp: z
+      .object({
+        servers: z
+          .array(
+            z.object({
+              name: z.string(),
+              transport: z.enum(['stdio', 'sse', 'streamable-http']),
+              url: z.string().optional(),
+              command: z.string().optional(),
+              args: z.union([z.array(z.string()), z.string()]).optional(),
+              env: z.record(z.string()).optional(),
+              headers: z.record(z.string()).optional(),
+              reconnect: z.union([z.boolean(), z.string()]).optional(),
+            }),
+          )
+          .optional(),
       })
       .optional(),
     integrations: z
@@ -309,10 +328,49 @@ export function resolveRagRemoteUrls(envRemote: string | undefined, packRemote: 
 }
 
 /**
- *
- * @param param0
- * @returns
+ * MCP server definition used at runtime.
  */
+export interface McpServerDef {
+  name: string
+  transport: 'stdio' | 'sse' | 'streamable-http'
+  url?: string
+  command?: string
+  args?: string[]
+  env?: Record<string, string>
+  headers?: Record<string, string>
+  reconnect?: boolean
+}
+
+/**
+ * Resolves MCP server configuration from env var (MCP_SERVERS_CONFIG) or agent-pack mcp.servers.
+ * Env var takes precedence. Accepts a JSON array string.
+ */
+export function resolveMcpServers(envRaw: string | undefined, packServers: unknown): McpServerDef[] {
+  const parse = (raw: string): McpServerDef[] => {
+    try {
+      const parsed = JSON.parse(raw)
+      if (!Array.isArray(parsed)) return []
+      return parsed as McpServerDef[]
+    } catch {
+      return []
+    }
+  }
+
+  if (envRaw && envRaw.trim().length > 0) {
+    return parse(envRaw)
+  }
+
+  if (Array.isArray(packServers)) {
+    return packServers.map((s) => ({
+      ...s,
+      args: typeof s.args === 'string' ? JSON.parse(s.args) : s.args,
+      reconnect: pickBoolean('', s.reconnect, false),
+    })) as McpServerDef[]
+  }
+
+  return []
+}
+
 export function resolveToolsConfig({
   envLlmTools,
   packDynamicTools,
@@ -323,7 +381,11 @@ export function resolveToolsConfig({
   packBundledTools?: Record<string, unknown>
 }) {
   const normalizeDynamic = (raw: unknown): string => {
-    if (typeof raw === 'string') return raw.trim().length > 0 ? raw : '[]'
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim()
+      if (trimmed.length === 0 || /^\$\{.+\}$/.test(trimmed)) return '[]'
+      return trimmed
+    }
     if (raw && typeof raw === 'object') {
       try {
         return JSON.stringify(raw)

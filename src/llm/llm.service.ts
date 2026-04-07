@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { z as zod } from 'zod'
 import { ChatOpenAI } from '@langchain/openai'
@@ -17,6 +17,7 @@ import { statisticsFetcherTool, authCheckerTool, createRagRetrieverTool } from '
 import { MemoryService } from 'src/memory/memory.service'
 import { LangchainSessionMemory } from 'src/memory/langchain-session-memory'
 import { RagService } from '../rag/rag.service'
+import { McpService } from '../mcp/mcp.service'
 
 /**
  * LlmService
@@ -26,7 +27,7 @@ import { RagService } from '../rag/rag.service'
  * This service is agnostic to the frontend and can be used from different orchestrators (chatbot, API, etc).
  */
 @Injectable()
-export class LlmService {
+export class LlmService implements OnModuleInit {
   /** Logger for LlmService operations */
   private readonly logger = new Logger(LlmService.name)
   /** The current LLM instance (OpenAI, Anthropic, or Ollama) */
@@ -37,6 +38,8 @@ export class LlmService {
   private tools: DynamicStructuredTool[] = []
   /** The agent's system prompt (loaded from environment) */
   private readonly agentPrompt: string
+  /** LLM provider name */
+  private readonly provider: SupportedProviders
 
   /**
    * Initializes the LlmService, selects the LLM provider, builds tools if defined,
@@ -44,28 +47,54 @@ export class LlmService {
    *
    * @param config - The NestJS ConfigService instance.
    * @param memoryService - Backend-agnostic chat memory service (in-memory / Redis).
+   * @param mcpService - MCP client service for connecting to external MCP servers.
    */
   constructor(
     private readonly config: ConfigService,
     private readonly memoryService: MemoryService,
     private readonly ragService: RagService,
+    private readonly mcpService: McpService,
   ) {
     this.agentPrompt = this.config.get<string>('appConfig.agentPrompt') ?? 'You are a helpful AI agent called Hologram.'
 
-    const provider = (this.config.get<string>('LLM_PROVIDER') ?? 'openai') as SupportedProviders
-    this.llm = this.instantiateLlm(provider)
+    this.provider = (this.config.get<string>('LLM_PROVIDER') ?? 'openai') as SupportedProviders
+    this.llm = this.instantiateLlm(this.provider)
     const tools: DynamicStructuredTool[] = this.buildTools()
     this.tools = tools
-    this.logger.debug(`*** TOOLS: ${JSON.stringify(tools, null, 2)}`)
+    this.logger.debug(`*** TOOLS (sync): ${JSON.stringify(tools.map((t) => t.name))}`)
 
-    if (tools.length && (provider === 'openai' || provider === 'anthropic')) {
+    if (tools.length && (this.provider === 'openai' || this.provider === 'anthropic')) {
       this.setupToolAgent(tools)
         .then(() => this.logger.log(`Tool-enabled agent initialised with ${tools.length} tools.`))
         .catch((err) => this.logger.error(`Failed to build Tool agent: ${err}`))
-    } else if (provider === 'ollama') {
+    } else if (this.provider === 'ollama') {
       this.logger.warn('Ollama does not support tools. Only plain prompts will be used.')
     } else {
       this.logger.log('Initializing without tools.')
+    }
+  }
+
+  /**
+   * After all modules are initialized, discover MCP tools asynchronously
+   * and rebuild the agent if new tools are found.
+   */
+  async onModuleInit() {
+    if (!this.mcpService.isConnected) return
+
+    try {
+      const mcpTools = await this.buildMcpTools()
+      if (mcpTools.length === 0) return
+
+      this.logger.log(`Discovered ${mcpTools.length} MCP tool(s): ${mcpTools.map((t) => t.name).join(', ')}`)
+      this.tools = [...this.tools, ...mcpTools]
+
+      // Rebuild the tool-calling agent with the expanded tool set
+      if (this.provider === 'openai' || this.provider === 'anthropic') {
+        await this.setupToolAgent(this.tools)
+        this.logger.log(`Tool agent rebuilt with ${this.tools.length} total tools (including MCP).`)
+      }
+    } catch (err) {
+      this.logger.error(`Failed to discover MCP tools: ${err}`)
     }
   }
 
@@ -183,12 +212,16 @@ export class LlmService {
         })
       case 'openai':
       default:
+      {
+        const maxTokens = this.config.get<number>('appConfig.openaiMaxTokens')
         return new ChatOpenAI({
           openAIApiKey: this.getOrThrow('OPENAI_API_KEY'),
           model: this.config.get<string>('appConfig.openaiModel') ?? 'gpt-4o',
           temperature: this.config.get<number>('appConfig.openaiTemperature'),
-          maxTokens: this.config.get<number>('appConfig.openaiMaxTokens'),
+          maxTokens: -1,
+          modelKwargs: maxTokens ? { max_completion_tokens: maxTokens } : undefined,
         })
+      }
     }
   }
 
@@ -273,6 +306,77 @@ export class LlmService {
 
     // Combine dynamic, static and auth tool
     return [...dynamicTools, ...staticTools]
+  }
+
+  /**
+   * Discovers tools from connected MCP servers and wraps each as a LangChain DynamicStructuredTool.
+   * Each MCP tool's JSON Schema input is converted to a Zod schema for LangChain compatibility.
+   */
+  private async buildMcpTools(): Promise<DynamicStructuredTool[]> {
+    const mcpToolInfos = await this.mcpService.listTools()
+    if (mcpToolInfos.length === 0) return []
+
+    return mcpToolInfos.map((info) => {
+      const zodSchema = this.jsonSchemaToZod(info.inputSchema)
+
+      return new LlmService.toolCtor({
+        name: `mcp_${info.serverName}_${info.name}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
+        description: info.description || `MCP tool "${info.name}" from server "${info.serverName}"`,
+        schema: zodSchema,
+        func: async (args: Record<string, unknown>) => {
+          this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Called with args: ${JSON.stringify(args)}`)
+          try {
+            const result = await this.mcpService.callTool(info.serverName, info.name, args)
+            this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Result: ${result.slice(0, 300)}`)
+            return result
+          } catch (err) {
+            this.logger.error(`[MCP Tool:${info.serverName}/${info.name}] Error: ${err}`)
+            return `Error calling MCP tool "${info.name}": ${err}`
+          }
+        },
+        returnDirect: false,
+      })
+    })
+  }
+
+  /**
+   * Converts a JSON Schema "properties" object into a Zod object schema.
+   * Handles string, number, integer, boolean, and array types.
+   * Falls back to a single { input: z.string() } if the schema is empty or unparseable.
+   */
+  private jsonSchemaToZod(schema: Record<string, unknown>): zod.ZodTypeAny {
+    const properties = (schema.properties ?? {}) as Record<string, { type?: string; description?: string; items?: { type?: string } }>
+    const required = (schema.required ?? []) as string[]
+
+    if (Object.keys(properties).length === 0) {
+      return zod.object({ input: zod.string().optional().describe('Input for the tool') })
+    }
+
+    const shape: Record<string, zod.ZodTypeAny> = {}
+    for (const [key, prop] of Object.entries(properties)) {
+      let field: zod.ZodTypeAny
+      switch (prop.type) {
+        case 'number':
+        case 'integer':
+          field = zod.number()
+          break
+        case 'boolean':
+          field = zod.boolean()
+          break
+        case 'array':
+          field = zod.array(prop.items?.type === 'number' ? zod.number() : zod.string())
+          break
+        case 'string':
+        default:
+          field = zod.string()
+          break
+      }
+      if (prop.description) field = field.describe(prop.description)
+      if (!required.includes(key)) field = field.optional()
+      shape[key] = field
+    }
+
+    return zod.object(shape) as zod.ZodTypeAny
   }
 
   /**

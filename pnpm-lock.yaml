@@ -13,19 +13,19 @@ importers:
     dependencies:
       '@2060.io/vs-agent-nestjs-client':
         specifier: 1.5.5
-        version: 1.5.5(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(pg@8.16.3)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(redis@4.7.1)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
+        version: 1.5.5(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(better-sqlite3@12.8.0)(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(pg@8.16.3)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(redis@4.7.1)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
       '@anthropic-ai/sdk':
         specifier: ^0.51.0
         version: 0.51.0
       '@credo-ts/core':
         specifier: ^0.5.18
-        version: 0.5.18(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+        version: 0.5.18(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@langchain/anthropic':
         specifier: ^0.3.21
         version: 0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76)
       '@langchain/community':
         specifier: ^0.3.43
-        version: 0.3.58(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76))(@ibm-cloud/watsonx-ai@1.7.3)(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(@pinecone-database/pinecone@6.1.3)(axios@1.13.2)(fast-xml-parser@4.5.3)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.4.4)(ignore@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(pdf-parse@1.1.4)(pg@8.16.3)(playwright@1.56.1)(redis@4.7.1)(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(weaviate-client@3.9.0)(ws@8.18.3)
+        version: 0.3.58(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@17.4.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76))(@ibm-cloud/watsonx-ai@1.7.3)(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(@pinecone-database/pinecone@6.1.3)(axios@1.13.2)(better-sqlite3@12.8.0)(fast-xml-parser@4.5.3)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.4.4)(ignore@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(pdf-parse@1.1.4)(pg@8.16.3)(playwright@1.56.1)(redis@4.7.1)(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(weaviate-client@3.9.0)(ws@8.18.3)
       '@langchain/core':
         specifier: ^0.3.57
         version: 0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
@@ -44,6 +44,9 @@ importers:
       '@langchain/textsplitters':
         specifier: ^0.1.0
         version: 0.1.0(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.29.0
+        version: 1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
       '@nestjs/common':
         specifier: ^11.0.1
         version: 11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -61,7 +64,7 @@ importers:
         version: 11.2.3(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)
       '@nestjs/typeorm':
         specifier: ^11.0.0
-        version: 11.0.0(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))
+        version: 11.0.0(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))
       '@pinecone-database/pinecone':
         specifier: ^6.0.0
         version: 6.1.3
@@ -92,6 +95,9 @@ importers:
       axios:
         specifier: ^1.9.0
         version: 1.13.2(debug@4.4.3)
+      better-sqlite3:
+        specifier: ^12.8.0
+        version: 12.8.0
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -101,12 +107,15 @@ importers:
       csv-parse:
         specifier: ^5.6.0
         version: 5.6.0
+      dotenv:
+        specifier: ^17.4.1
+        version: 17.4.1
       franc-min:
         specifier: ^6.2.0
         version: 6.2.0
       langchain:
         specifier: ^0.3.26
-        version: 0.3.36(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(axios@1.13.2)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(ws@8.18.3)
+        version: 0.3.36(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(axios@1.13.2)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(ws@8.18.3)
       langdetect:
         specifier: ^0.2.1
         version: 0.2.1
@@ -133,7 +142,7 @@ importers:
         version: 7.8.2
       typeorm:
         specifier: ^0.3.24
-        version: 0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
+        version: 0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
       yaml:
         specifier: ^2.8.1
         version: 2.8.1
@@ -162,6 +171,9 @@ importers:
       '@swc/core':
         specifier: ^1.10.7
         version: 1.15.2
+      '@types/better-sqlite3':
+        specifier: ^7.6.13
+        version: 7.6.13
       '@types/csv-parse':
         specifier: ^1.2.5
         version: 1.2.5
@@ -1242,6 +1254,12 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
+  '@hono/node-server@1.19.12':
+    resolution: {integrity: sha512-txsUW4SQ1iilgE0l9/e9VQWmELXifEFvmdA1j6WFh/aFPj99hIntrSsq/if0UWyGVkmrRPKA1wCeP+UCr1B9Uw==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
+
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
     engines: {node: '>=10.10.0'}
@@ -1964,6 +1982,16 @@ packages:
   '@microsoft/tsdoc@0.16.0':
     resolution: {integrity: sha512-xgAyonlVVS+q7Vc7qLW0UrJU7rSFcETRWsqdXZtjzRU8dF+6CkozTK4V4y1LwOX7j8r/vHphjDeMeGI4tNGeGA==}
 
+  '@modelcontextprotocol/sdk@1.29.0':
+    resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@cfworker/json-schema': ^4.1.1
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      '@cfworker/json-schema':
+        optional: true
+
   '@multiformats/base-x@4.0.1':
     resolution: {integrity: sha512-eMk0b9ReBbV23xXU693TAIrLyeO5iTgBZGSJfpqriG8UkYvr/hC9u9pyMlAakDNHWmbhMZCDs6KQO0jzKD8OTw==}
 
@@ -2675,6 +2703,9 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
+  '@types/better-sqlite3@7.6.13':
+    resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
+
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
 
@@ -2969,6 +3000,7 @@ packages:
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -3278,6 +3310,10 @@ packages:
     resolution: {integrity: sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==}
     engines: {node: '>=12.0.0'}
 
+  better-sqlite3@12.8.0:
+    resolution: {integrity: sha512-RxD2Vd96sQDjQr20kdP+F+dK/1OUNiVOl200vKBZY8u0vTwysfolF6Hq+3ZK2+h8My9YvZhHsF+RSGZW2VYrPQ==}
+    engines: {node: 20.x || 22.x || 23.x || 24.x || 25.x}
+
   big-integer@1.6.52:
     resolution: {integrity: sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==}
     engines: {node: '>=0.6'}
@@ -3297,6 +3333,9 @@ packages:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
 
+  bindings@1.5.0:
+    resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
+
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
 
@@ -3306,6 +3345,10 @@ packages:
 
   body-parser@2.2.0:
     resolution: {integrity: sha512-02qvAaxv8tp7fBa/mw1ga98OGm+eCbqzJOKoRt70sLmfEEi+jyBYVTDGfCL/k06/4EMk/z01gCe7HoCH/f2LTg==}
+    engines: {node: '>=18'}
+
+  body-parser@2.2.2:
+    resolution: {integrity: sha512-oP5VkATKlNwcgvxi0vM0p/D3n2C3EReYVX+DNYs5TjZFn/oQt2j+4sVJtSMr18pdRr8wjTcBl6LoV+FUwzPmNA==}
     engines: {node: '>=18'}
 
   borc@3.0.0:
@@ -3426,6 +3469,9 @@ packages:
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
+
+  chownr@1.1.4:
+    resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
 
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
@@ -3804,6 +3850,10 @@ packages:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
 
+  dotenv@17.4.1:
+    resolution: {integrity: sha512-k8DaKGP6r1G30Lx8V4+pCsLzKr8vLmV2paqEj1Y55GdAgJuIqpRp5FfajGF8KtwMxCz9qJc6wUIJnm053d/WCw==}
+    engines: {node: '>=12'}
+
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -3843,6 +3893,9 @@ packages:
   encodeurl@2.0.0:
     resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
     engines: {node: '>= 0.8'}
+
+  end-of-stream@1.4.5:
+    resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
 
   enhanced-resolve@5.18.3:
     resolution: {integrity: sha512-d4lC8xfavMeBjzGr2vECC3fsGXziXZQyJxD868h2M/mBI3PwAuODxAkLkq5HYuvrPYcUtiLzsTo8U3PgX3Ocww==}
@@ -4004,6 +4057,14 @@ packages:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
     engines: {node: '>=0.8.x'}
 
+  eventsource-parser@3.0.6:
+    resolution: {integrity: sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==}
+    engines: {node: '>=18.0.0'}
+
+  eventsource@3.0.7:
+    resolution: {integrity: sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA==}
+    engines: {node: '>=18.0.0'}
+
   exec-async@2.2.0:
     resolution: {integrity: sha512-87OpwcEiMia/DeiKFzaQNBNFeN3XkkpYIh9FyOqq5mS2oKv3CBE67PXoEKcr6nodWdXNogTiQ0jE2NGuoffXPw==}
 
@@ -4014,6 +4075,10 @@ packages:
   exit@0.1.2:
     resolution: {integrity: sha512-Zk/eNKV2zbjpKzrsQ+n1G6poVbErQxJ0LBOJXaKZ1EViLzH+hrLu9cdXI4zw9dBQJslwBEpbQ2P1oS7nDxs6jQ==}
     engines: {node: '>= 0.8.0'}
+
+  expand-template@2.0.3:
+    resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
+    engines: {node: '>=6'}
 
   expect@29.7.0:
     resolution: {integrity: sha512-2Zks0hf1VLFYI1kbh0I5jP3KHHyCHpkfyHBzsSXRFgl/Bg9mWYfMW8oD+PdMPlEwy5HNsR9JutYy6pMeOh61nw==}
@@ -4095,12 +4160,22 @@ packages:
   exponential-backoff@3.1.3:
     resolution: {integrity: sha512-ZgEeZXj30q+I0EN+CbSSpIyPaJ5HVQD18Z1m+u1FXbAeT94mr1zw50q4q6jiiC447Nl/YTcIYSAftiGqetwXCA==}
 
+  express-rate-limit@8.3.2:
+    resolution: {integrity: sha512-77VmFeJkO0/rvimEDuUC5H30oqUC4EyOhyGccfqoLebB0oiEYfM7nwPrsDsBL1gsTpwfzX8SFy2MT3TDyRq+bg==}
+    engines: {node: '>= 16'}
+    peerDependencies:
+      express: '>= 4.11'
+
   express@4.21.2:
     resolution: {integrity: sha512-28HqgMZAmih1Czt9ny7qr6ek2qddF4FclbMzwhCREB6OFfH+rXAnuNCwo1/wFvrtbgsQDb4kSbX9de9lFbrXnA==}
     engines: {node: '>= 0.10.0'}
 
   express@5.1.0:
     resolution: {integrity: sha512-DT9ck5YIRU+8GYzzU5kT3eHGA5iL+1Zd0EutOmTE9Dtk+Tvuzd23VBU+ec7HPNSTxXYO55gPV/hq4pSBJDjFpA==}
+    engines: {node: '>= 18'}
+
+  express@5.2.1:
+    resolution: {integrity: sha512-hIS4idWWai69NezIdRt2xFVofaF4j+6INOpJlVOLDO8zXGpUVEVzIYk12UUi2JzjEzWL3IOAxcTubgz9Po0yXw==}
     engines: {node: '>= 18'}
 
   ext-list@2.2.2:
@@ -4188,6 +4263,9 @@ packages:
   file-type@21.1.0:
     resolution: {integrity: sha512-boU4EHmP3JXkwDo4uhyBhTt5pPstxB6eEXKJBu2yu2l7aAMMm7QQYQEzssJmKReZYrFdFOJS8koVo6bXIBGDqA==}
     engines: {node: '>=20'}
+
+  file-uri-to-path@1.0.0:
+    resolution: {integrity: sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==}
 
   filename-reserved-regex@3.0.0:
     resolution: {integrity: sha512-hn4cQfU6GOT/7cFHXBqeBg2TbrMBgdD0kcjLhvSQYYwm3s4B6cjvBfb7nBALJLAXqmU5xajSa7X2NnUud/VCdw==}
@@ -4318,6 +4396,9 @@ packages:
     resolution: {integrity: sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==}
     engines: {node: '>= 0.8'}
 
+  fs-constants@1.0.0:
+    resolution: {integrity: sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==}
+
   fs-extra@10.1.0:
     resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
     engines: {node: '>=12'}
@@ -4376,6 +4457,9 @@ packages:
   getenv@2.0.0:
     resolution: {integrity: sha512-VilgtJj/ALgGY77fiLam5iD336eSWi96Q15JSAG1zi8NRBysm3LXKdGnHb4m5cuyxvOLQQKWpBZAT6ni4FI2iQ==}
     engines: {node: '>=6'}
+
+  github-from-package@0.0.0:
+    resolution: {integrity: sha512-SyHy3T1v2NUXn29OsWdxmK6RwHD+vkj3v8en8AOBZ1wBQ/hCAQ5bAQTD02kW4W9tUp/3Qh6J8r9EvntiyCmOOw==}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -4483,6 +4567,10 @@ packages:
   hermes-parser@0.32.0:
     resolution: {integrity: sha512-g4nBOWFpuiTqjR3LZdRxKUkij9iyveWeuks7INEsMX741f3r9xxrOe8TeQfUxtda0eXmiIFiMQzoeSQEno33Hw==}
 
+  hono@4.12.11:
+    resolution: {integrity: sha512-r4xbIa3mGGGoH9nN4A14DOg2wx7y2oQyJEb5O57C/xzETG/qx4c7CVDQ5WMeKHZ7ORk2W0hZ/sQKXTav3cmYBA==}
+    engines: {node: '>=16.9.0'}
+
   hosted-git-info@7.0.2:
     resolution: {integrity: sha512-puUZAUKT5m8Zzvs72XWy3HtvVbTWljRE66cP60bxJzAqf2DgICo7lYTY2IHUmLnNpjYvw5bvmoHvPc0QO2a62w==}
     engines: {node: ^16.14.0 || >=18.0.0}
@@ -4572,6 +4660,10 @@ packages:
 
   invariant@2.2.4:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
+
+  ip-address@10.1.0:
+    resolution: {integrity: sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==}
+    engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
@@ -4831,6 +4923,9 @@ packages:
   jimp-compact@0.16.1:
     resolution: {integrity: sha512-dZ6Ra7u1G8c4Letq/B5EzAxj4tLFHL+cGtdpR+PVm4yzPDj+lCk+AbivWt1eOM+ikzkowtyV7qSqX6qr3t71Ww==}
 
+  jose@6.2.2:
+    resolution: {integrity: sha512-d7kPDd34KO/YnzaDOlikGpOurfF0ByC2sEV4cANCtdqLlTfBlw2p14O/5d/zv40gJPbIQxfES3nSx1/oYNyuZQ==}
+
   js-base64@3.7.8:
     resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
@@ -4871,6 +4966,9 @@ packages:
 
   json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
+
+  json-schema-typed@8.0.2:
+    resolution: {integrity: sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA==}
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
@@ -5458,6 +5556,9 @@ packages:
     resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
     engines: {node: '>= 18'}
 
+  mkdirp-classic@0.5.3:
+    resolution: {integrity: sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==}
+
   mkdirp@0.5.6:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
@@ -5505,6 +5606,9 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  napi-build-utils@2.0.0:
+    resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -5534,6 +5638,10 @@ packages:
 
   nice-grpc@2.1.14:
     resolution: {integrity: sha512-GK9pKNxlvnU5FAdaw7i2FFuR9CqBspcE+if2tqnKXBcE0R8525wj4BZvfcwj7FjvqbssqKxRHt2nwedalbJlww==}
+
+  node-abi@3.89.0:
+    resolution: {integrity: sha512-6u9UwL0HlAl21+agMN3YAMXcKByMqwGx+pq+P76vii5f7hTPtKDp08/H9py6DY+cfDw7kQNTGEj/rly3IgbNQA==}
+    engines: {node: '>=10'}
 
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
@@ -5853,6 +5961,10 @@ packages:
   piscina@4.9.2:
     resolution: {integrity: sha512-Fq0FERJWFEUpB4eSY59wSNwXD4RYqR+nR/WiEVcZW8IWfVBxJJafcgTEZDQo8k3w0sUarJ8RyVbbUF4GQ2LGbQ==}
 
+  pkce-challenge@5.0.1:
+    resolution: {integrity: sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==}
+    engines: {node: '>=16.20.0'}
+
   pkg-dir@4.2.0:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
@@ -5910,6 +6022,12 @@ packages:
   postgres@3.4.7:
     resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
     engines: {node: '>=12'}
+
+  prebuild-install@7.1.3:
+    resolution: {integrity: sha512-8Mf2cbV7x1cXPUILADGI3wuhfqWvtiLA1iclTDbFRZkgRQS0NqsPZphna9V+HyTEadheuPmjaJMsbzKQFOzLug==}
+    engines: {node: '>=10'}
+    deprecated: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+    hasBin: true
 
   prelude-ls@1.1.2:
     resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
@@ -5969,6 +6087,9 @@ packages:
   psl@1.15.0:
     resolution: {integrity: sha512-JZd3gMVBAVQkSs6HdNZo9Sdo0LNcQeMNP3CozBJb3JYC/QUYZTnKxP+f8oWRX4rHP5EurWxqAHTSwUCjlNKa1w==}
 
+  pump@3.0.4:
+    resolution: {integrity: sha512-VS7sjc6KR7e1ukRFhQSY5LM2uBWAUPiOPa/A3mkKmiMwSmRFUITt0xuj+/lesgnCv+dPIEYlkzrcyXgquIHMcA==}
+
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -5993,6 +6114,10 @@ packages:
 
   qs@6.14.0:
     resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
+    engines: {node: '>=0.6'}
+
+  qs@6.15.0:
+    resolution: {integrity: sha512-mAZTtNCeetKMH+pSjrb76NAM8V9a05I9aBZOHztWy/UqcJdQYNsf59vrRKWnojAT9Y+GbIvoTBC++CPHqpDBhQ==}
     engines: {node: '>=0.6'}
 
   query-string@7.1.3:
@@ -6333,6 +6458,12 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  simple-concat@1.0.1:
+    resolution: {integrity: sha512-cSFtAPtRhljv69IK0hTVZQ+OfE9nePi/rtJmw5UjHeVyVroEqJXP1sFztKUy1qU+xvz3u/sfYJLa947b7nAN2Q==}
+
+  simple-get@4.0.1:
+    resolution: {integrity: sha512-brv7p5WgH0jmQJr1ZDDfKDOSeWWg+OVypG99A/5vYGPqJ6pxiaHLy8nxtFjBA7oMa01ebA9gfh1uMCFqOuXxvA==}
+
   simple-plist@1.3.1:
     resolution: {integrity: sha512-iMSw5i0XseMnrhtIzRb7XpQEXepa9xhWxGUojHBL43SIpQuDQkh3Wpy67ZbDzZVr6EKxvwVChnVpdl8hEVLDiw==}
 
@@ -6555,12 +6686,20 @@ packages:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
     engines: {node: '>=6'}
 
+  tar-fs@2.1.4:
+    resolution: {integrity: sha512-mDAjwmZdh7LTT6pNleZ05Yt65HC3E+NiQzl672vQG38jIrehtJk/J3mNwIg+vShQPcLF/LV7CMnDW6vjj6sfYQ==}
+
+  tar-stream@2.2.0:
+    resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
+    engines: {node: '>=6'}
+
   tar-stream@3.1.7:
     resolution: {integrity: sha512-qJj60CXt7IU1Ffyc3NJMjh6EkuCFej46zUqJ4J7pqYlThyd9bO0XBTmcOIhSzZJVWfsLks0+nle/j538YAW9RQ==}
 
   tar@7.5.2:
     resolution: {integrity: sha512-7NyxrTE4Anh8km8iEy7o0QYPs+0JKBTj5ZaqHg6B39erLg0qYXN3BijtShwbsNSvQ+LN75+KV+C4QR/f6Gwnpg==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   temp-dir@2.0.0:
     resolution: {integrity: sha512-aoBAniQmmwtcKp/7BzsH8Cxzv8OL736p7v1ihGb5e9DJ9kTwGWHrQrVB5+lfVDzfGrdRzXch+ig7LHaY1JTOrg==}
@@ -6731,6 +6870,9 @@ packages:
   tsyringe@4.10.0:
     resolution: {integrity: sha512-axr3IdNuVIxnaK5XGEUFTu3YmAQ6lllgrvqfEoR16g/HGnYY/6We4oWENtAnzK6/LpJ2ur9PAb80RBt7/U4ugw==}
     engines: {node: '>= 6.0.0'}
+
+  tunnel-agent@0.6.0:
+    resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
 
   type-check@0.3.2:
     resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
@@ -7190,6 +7332,11 @@ packages:
     peerDependencies:
       zod: ^3.25 || ^4
 
+  zod-to-json-schema@3.25.2:
+    resolution: {integrity: sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA==}
+    peerDependencies:
+      zod: ^3.25.28 || ^4
+
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
@@ -7200,9 +7347,9 @@ snapshots:
       graphql: 16.12.0
     optional: true
 
-  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(typescript@5.9.3)':
+  '@2060.io/credo-ts-didcomm-mrtd@0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(typescript@5.9.3)':
     dependencies:
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@li0ard/tsemrtd': 0.2.2(typescript@5.9.3)
       '@peculiar/x509': 1.14.2
       '@types/pkijs': 3.0.1
@@ -7218,9 +7365,9 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@2060.io/credo-ts-didcomm-receipts@0.0.7(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
+  '@2060.io/credo-ts-didcomm-receipts@0.0.7(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@credo-ts/core': 0.5.13(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.13(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.2
       reflect-metadata: 0.1.14
@@ -7236,10 +7383,10 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-client@1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-client@1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@2060.io/vs-agent-model': 1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@2060.io/vs-agent-model': 1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
       express: 4.21.2
@@ -7253,11 +7400,11 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-model@1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-model@1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(typescript@5.9.3)
-      '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(typescript@5.9.3)
+      '@2060.io/credo-ts-didcomm-receipts': 0.0.7(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       class-transformer: 0.5.1
       class-validator: 0.14.1
       mrz: 4.2.1
@@ -7270,20 +7417,20 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@2060.io/vs-agent-nestjs-client@1.5.5(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(pg@8.16.3)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(redis@4.7.1)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
+  '@2060.io/vs-agent-nestjs-client@1.5.5(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(better-sqlite3@12.8.0)(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(pg@8.16.3)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(redis@4.7.1)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(typescript@5.9.3)
-      '@2060.io/vs-agent-client': 1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
-      '@2060.io/vs-agent-model': 1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
-      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@2060.io/credo-ts-didcomm-mrtd': 0.0.17(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(typescript@5.9.3)
+      '@2060.io/vs-agent-client': 1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
+      '@2060.io/vs-agent-model': 1.5.5(@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)
+      '@credo-ts/core': 0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@nestjs/common': 11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.9(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express': 10.4.20(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)
-      '@nestjs/typeorm': 10.0.2(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))
+      '@nestjs/typeorm': 10.0.2(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))
       reflect-metadata: 0.2.2
       rhea: 3.0.4
       rxjs: 7.8.2
-      typeorm: 0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
+      typeorm: 0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
     transitivePeerDependencies:
       - '@google-cloud/spanner'
       - '@sap/hana-client'
@@ -8097,17 +8244,17 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@browserbasehq/stagehand@1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76)':
+  '@browserbasehq/stagehand@1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@17.4.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76)':
     dependencies:
       '@anthropic-ai/sdk': 0.27.3
       '@browserbasehq/sdk': 2.6.0
       '@playwright/test': 1.56.1
       deepmerge: 4.3.1
-      dotenv: 16.6.1
+      dotenv: 17.4.1
       openai: 4.104.0(ws@8.18.3)(zod@3.25.76)
       ws: 8.18.3
       zod: 3.25.76
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
+      zod-to-json-schema: 3.25.2(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -8118,11 +8265,11 @@ snapshots:
   '@colors/colors@1.5.0':
     optional: true
 
-  '@credo-ts/core@0.5.13(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
+  '@credo-ts/core@0.5.13(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(typescript@5.9.3)(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/vc': 6.0.1(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/vc': 6.0.1(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@multiformats/base-x': 4.0.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
@@ -8171,14 +8318,14 @@ snapshots:
       - typescript
       - web-streams-polyfill
 
-  '@credo-ts/core@0.5.18(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@credo-ts/core@0.5.18(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@animo-id/mdoc': 0.2.38
       '@animo-id/pex': 4.1.1-alpha.0
       '@astronautlabs/jsonpath': 1.1.2
-      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/vc': 6.0.1(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/vc': 6.0.1(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@multiformats/base-x': 4.0.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
@@ -8222,14 +8369,14 @@ snapshots:
       - supports-color
       - web-streams-polyfill
 
-  '@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@credo-ts/core@0.5.18-alpha-20250930143725(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@animo-id/mdoc': 0.2.38
       '@animo-id/pex': 4.1.1-alpha.0
       '@astronautlabs/jsonpath': 1.1.2
-      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/vc': 6.0.1(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/vc': 6.0.1(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@multiformats/base-x': 4.0.1
       '@noble/curves': 1.9.7
       '@noble/hashes': 1.8.0
@@ -8323,11 +8470,11 @@ snapshots:
       '@digitalcredentials/base64url-universal': 2.0.6
       pako: 2.1.0
 
-  '@digitalcredentials/ed25519-signature-2020@3.0.2(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/ed25519-signature-2020@3.0.2(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@digitalcredentials/base58-universal': 1.0.1
       '@digitalcredentials/ed25519-verification-key-2020': 3.2.2
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       ed25519-signature-2018-context: 1.1.0
       ed25519-signature-2020-context: 1.1.0
     transitivePeerDependencies:
@@ -8351,12 +8498,12 @@ snapshots:
       - domexception
       - web-streams-polyfill
 
-  '@digitalcredentials/jsonld-signatures@9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/jsonld-signatures@9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@digitalbazaar/security-context': 1.0.1
-      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       fast-text-encoding: 1.0.6
-      isomorphic-webcrypto: 2.3.8(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      isomorphic-webcrypto: 2.3.8(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
       serialize-error: 8.1.0
     transitivePeerDependencies:
       - domexception
@@ -8364,10 +8511,10 @@ snapshots:
       - react-native
       - web-streams-polyfill
 
-  '@digitalcredentials/jsonld@5.2.2(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/jsonld@5.2.2(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@digitalcredentials/http-client': 1.2.2(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/rdf-canonize': 1.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      '@digitalcredentials/rdf-canonize': 1.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
       canonicalize: 1.0.8
       lru-cache: 6.0.0
     transitivePeerDependencies:
@@ -8376,10 +8523,10 @@ snapshots:
       - react-native
       - web-streams-polyfill
 
-  '@digitalcredentials/jsonld@6.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/jsonld@6.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@digitalcredentials/http-client': 1.2.2(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/rdf-canonize': 1.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      '@digitalcredentials/rdf-canonize': 1.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
       canonicalize: 1.0.8
       lru-cache: 6.0.0
     transitivePeerDependencies:
@@ -8390,19 +8537,19 @@ snapshots:
 
   '@digitalcredentials/open-badges-context@2.1.0': {}
 
-  '@digitalcredentials/rdf-canonize@1.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))':
+  '@digitalcredentials/rdf-canonize@1.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))':
     dependencies:
       fast-text-encoding: 1.0.6
-      isomorphic-webcrypto: 2.3.8(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      isomorphic-webcrypto: 2.3.8(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
     transitivePeerDependencies:
       - expo
       - react-native
 
-  '@digitalcredentials/vc-status-list@5.0.2(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/vc-status-list@5.0.2(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@digitalbazaar/vc-status-list-context': 3.1.1
       '@digitalcredentials/bitstring': 2.0.1
-      '@digitalcredentials/vc': 4.2.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/vc': 4.2.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       credentials-context: 2.0.0
     transitivePeerDependencies:
       - domexception
@@ -8410,10 +8557,10 @@ snapshots:
       - react-native
       - web-streams-polyfill
 
-  '@digitalcredentials/vc@4.2.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/vc@4.2.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
-      '@digitalcredentials/jsonld': 5.2.2(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld': 5.2.2(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       credentials-context: 2.0.0
     transitivePeerDependencies:
       - domexception
@@ -8421,14 +8568,14 @@ snapshots:
       - react-native
       - web-streams-polyfill
 
-  '@digitalcredentials/vc@6.0.1(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
+  '@digitalcredentials/vc@6.0.1(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)':
     dependencies:
       '@digitalbazaar/vc-status-list': 7.1.0(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/ed25519-signature-2020': 3.0.2(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
-      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/ed25519-signature-2020': 3.0.2(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld': 6.0.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/jsonld-signatures': 9.4.0(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       '@digitalcredentials/open-badges-context': 2.1.0
-      '@digitalcredentials/vc-status-list': 5.0.2(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
+      '@digitalcredentials/vc-status-list': 5.0.2(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(web-streams-polyfill@3.3.3)
       credentials-context: 2.0.0
       fix-esm: 1.0.1
     transitivePeerDependencies:
@@ -8552,7 +8699,7 @@ snapshots:
 
   '@eslint/js@9.39.1': {}
 
-  '@expo/cli@54.0.16(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))':
+  '@expo/cli@54.0.16(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))':
     dependencies:
       '@0no-co/graphql.web': 1.2.0(graphql@16.12.0)
       '@expo/code-signing-certificates': 0.0.5
@@ -8562,13 +8709,13 @@ snapshots:
       '@expo/env': 2.0.7
       '@expo/image-utils': 0.8.7
       '@expo/json-file': 10.0.7
-      '@expo/mcp-tunnel': 0.1.0
+      '@expo/mcp-tunnel': 0.1.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))
       '@expo/metro': 54.1.0
-      '@expo/metro-config': 54.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
+      '@expo/metro-config': 54.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
       '@expo/osascript': 2.3.7
       '@expo/package-manager': 1.9.8
       '@expo/plist': 0.4.7
-      '@expo/prebuild-config': 54.0.6(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
+      '@expo/prebuild-config': 54.0.6(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
       '@expo/schema-utils': 0.1.7
       '@expo/spawn-async': 1.7.2
       '@expo/ws-tunnel': 1.0.6
@@ -8587,7 +8734,7 @@ snapshots:
       connect: 3.7.0
       debug: 4.4.3
       env-editor: 0.4.2
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       expo-server: 1.0.4
       freeport-async: 2.0.0
       getenv: 2.0.0
@@ -8742,17 +8889,19 @@ snapshots:
       json5: 2.2.3
     optional: true
 
-  '@expo/mcp-tunnel@0.1.0':
+  '@expo/mcp-tunnel@0.1.0(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))':
     dependencies:
       ws: 8.18.3
       zod: 3.25.76
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
+      zod-to-json-schema: 3.25.2(zod@3.25.76)
+    optionalDependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
     optional: true
 
-  '@expo/metro-config@54.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))':
+  '@expo/metro-config@54.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))':
     dependencies:
       '@babel/code-frame': 7.27.1
       '@babel/core': 7.28.5
@@ -8776,7 +8925,7 @@ snapshots:
       postcss: 8.4.49
       resolve-from: 5.0.0
     optionalDependencies:
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -8826,7 +8975,7 @@ snapshots:
       xmlbuilder: 15.1.1
     optional: true
 
-  '@expo/prebuild-config@54.0.6(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))':
+  '@expo/prebuild-config@54.0.6(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))':
     dependencies:
       '@expo/config': 12.0.10
       '@expo/config-plugins': 54.0.2
@@ -8835,7 +8984,7 @@ snapshots:
       '@expo/json-file': 10.0.7
       '@react-native/normalize-colors': 0.81.5
       debug: 4.4.3
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       resolve-from: 5.0.0
       semver: 7.7.3
       xml2js: 0.6.0
@@ -8857,9 +9006,9 @@ snapshots:
   '@expo/sudo-prompt@9.3.2':
     optional: true
 
-  '@expo/vector-icons@15.0.3(expo-font@14.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)':
+  '@expo/vector-icons@15.0.3(expo-font@14.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)':
     dependencies:
-      expo-font: 14.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo-font: 14.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       react: 19.2.0
       react-native: 0.82.1(@babel/core@7.28.5)(react@19.2.0)
     optional: true
@@ -8892,6 +9041,10 @@ snapshots:
       long: 5.3.2
       protobufjs: 7.5.4
       yargs: 17.7.2
+
+  '@hono/node-server@1.19.12(hono@4.12.11)':
+    dependencies:
+      hono: 4.12.11
 
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
@@ -9293,9 +9446,9 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  '@langchain/community@0.3.58(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76))(@ibm-cloud/watsonx-ai@1.7.3)(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(@pinecone-database/pinecone@6.1.3)(axios@1.13.2)(fast-xml-parser@4.5.3)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.4.4)(ignore@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(pdf-parse@1.1.4)(pg@8.16.3)(playwright@1.56.1)(redis@4.7.1)(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(weaviate-client@3.9.0)(ws@8.18.3)':
+  '@langchain/community@0.3.58(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@17.4.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76))(@ibm-cloud/watsonx-ai@1.7.3)(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(@pinecone-database/pinecone@6.1.3)(axios@1.13.2)(better-sqlite3@12.8.0)(fast-xml-parser@4.5.3)(handlebars@4.7.8)(ibm-cloud-sdk-core@5.4.4)(ignore@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(pdf-parse@1.1.4)(pg@8.16.3)(playwright@1.56.1)(redis@4.7.1)(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(weaviate-client@3.9.0)(ws@8.18.3)':
     dependencies:
-      '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76)
+      '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.56.1)(deepmerge@4.3.1)(dotenv@17.4.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76)
       '@ibm-cloud/watsonx-ai': 1.7.3
       '@langchain/core': 0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
       '@langchain/openai': 0.5.18(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(ws@8.18.3)
@@ -9304,7 +9457,7 @@ snapshots:
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.4.4
       js-yaml: 4.1.1
-      langchain: 0.3.36(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(axios@1.13.2)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(ws@8.18.3)
+      langchain: 0.3.36(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(axios@1.13.2)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(ws@8.18.3)
       langsmith: 0.3.80(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
       math-expression-evaluator: 2.0.7
       openai: 4.104.0(ws@8.18.3)(zod@3.25.76)
@@ -9313,6 +9466,7 @@ snapshots:
     optionalDependencies:
       '@browserbasehq/sdk': 2.6.0
       '@pinecone-database/pinecone': 6.1.3
+      better-sqlite3: 12.8.0
       fast-xml-parser: 4.5.3
       ignore: 5.3.2
       jsonwebtoken: 9.0.2
@@ -9321,7 +9475,7 @@ snapshots:
       pg: 8.16.3
       playwright: 1.56.1
       redis: 4.7.1
-      typeorm: 0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
+      typeorm: 0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
       weaviate-client: 3.9.0
       ws: 8.18.3
     transitivePeerDependencies:
@@ -9416,6 +9570,30 @@ snapshots:
   '@lukeed/csprng@1.1.0': {}
 
   '@microsoft/tsdoc@0.16.0': {}
+
+  '@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76)':
+    dependencies:
+      '@hono/node-server': 1.19.12(hono@4.12.11)
+      ajv: 8.17.1
+      ajv-formats: 3.0.1(ajv@8.17.1)
+      content-type: 1.0.5
+      cors: 2.8.5
+      cross-spawn: 7.0.6
+      eventsource: 3.0.7
+      eventsource-parser: 3.0.6
+      express: 5.2.1
+      express-rate-limit: 8.3.2(express@5.2.1)
+      hono: 4.12.11
+      jose: 6.2.2
+      json-schema-typed: 8.0.2
+      pkce-challenge: 5.0.1
+      raw-body: 3.0.1
+      zod: 3.25.76
+      zod-to-json-schema: 3.25.2(zod@3.25.76)
+    optionalDependencies:
+      '@cfworker/json-schema': 4.1.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@multiformats/base-x@4.0.1': {}
 
@@ -9623,22 +9801,22 @@ snapshots:
     optionalDependencies:
       '@nestjs/platform-express': 11.1.9(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)
 
-  '@nestjs/typeorm@10.0.2(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))':
+  '@nestjs/typeorm@10.0.2(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))':
     dependencies:
       '@nestjs/common': 11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.9(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
       rxjs: 7.8.2
-      typeorm: 0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
+      typeorm: 0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
       uuid: 9.0.1
 
-  '@nestjs/typeorm@11.0.0(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))':
+  '@nestjs/typeorm@11.0.0(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))':
     dependencies:
       '@nestjs/common': 11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.9(@nestjs/common@11.1.9(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.9)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
       rxjs: 7.8.2
-      typeorm: 0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
+      typeorm: 0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
 
   '@noble/curves@1.9.7':
     dependencies:
@@ -10267,6 +10445,10 @@ snapshots:
   '@types/babel__traverse@7.28.0':
     dependencies:
       '@babel/types': 7.28.5
+
+  '@types/better-sqlite3@7.6.13':
+    dependencies:
+      '@types/node': 22.19.1
 
   '@types/body-parser@1.19.6':
     dependencies:
@@ -10986,7 +11168,7 @@ snapshots:
       '@babel/plugin-syntax-private-property-in-object': 7.14.5(@babel/core@7.28.5)
       '@babel/plugin-syntax-top-level-await': 7.14.5(@babel/core@7.28.5)
 
-  babel-preset-expo@54.0.7(@babel/core@7.28.5)(@babel/runtime@7.28.4)(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-refresh@0.14.2):
+  babel-preset-expo@54.0.7(@babel/core@7.28.5)(@babel/runtime@7.28.4)(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-refresh@0.14.2):
     dependencies:
       '@babel/helper-module-imports': 7.27.1
       '@babel/plugin-proposal-decorators': 7.28.0(@babel/core@7.28.5)
@@ -11013,7 +11195,7 @@ snapshots:
       resolve-from: 5.0.0
     optionalDependencies:
       '@babel/runtime': 7.28.4
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
     transitivePeerDependencies:
       - '@babel/core'
       - supports-color
@@ -11050,6 +11232,11 @@ snapshots:
       open: 8.4.2
     optional: true
 
+  better-sqlite3@12.8.0:
+    dependencies:
+      bindings: 1.5.0
+      prebuild-install: 7.1.3
+
   big-integer@1.6.52: {}
 
   bignumber.js@9.3.1: {}
@@ -11066,6 +11253,10 @@ snapshots:
       find-versions: 5.1.0
 
   binary-extensions@2.3.0: {}
+
+  bindings@1.5.0:
+    dependencies:
+      file-uri-to-path: 1.0.0
 
   bl@4.1.0:
     dependencies:
@@ -11099,6 +11290,20 @@ snapshots:
       iconv-lite: 0.6.3
       on-finished: 2.4.1
       qs: 6.14.0
+      raw-body: 3.0.1
+      type-is: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  body-parser@2.2.2:
+    dependencies:
+      bytes: 3.1.2
+      content-type: 1.0.5
+      debug: 4.4.3
+      http-errors: 2.0.0
+      iconv-lite: 0.7.0
+      on-finished: 2.4.1
+      qs: 6.15.0
       raw-body: 3.0.1
       type-is: 2.0.1
     transitivePeerDependencies:
@@ -11235,6 +11440,8 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
+
+  chownr@1.1.4: {}
 
   chownr@3.0.0:
     optional: true
@@ -11519,8 +11726,7 @@ snapshots:
 
   dedent@1.7.0: {}
 
-  deep-extend@0.6.0:
-    optional: true
+  deep-extend@0.6.0: {}
 
   deep-is@0.1.4: {}
 
@@ -11549,8 +11755,7 @@ snapshots:
 
   destroy@1.2.0: {}
 
-  detect-libc@2.1.2:
-    optional: true
+  detect-libc@2.1.2: {}
 
   detect-newline@3.1.0: {}
 
@@ -11576,11 +11781,13 @@ snapshots:
 
   dotenv-expand@12.0.1:
     dependencies:
-      dotenv: 16.4.7
+      dotenv: 16.6.1
 
   dotenv@16.4.7: {}
 
   dotenv@16.6.1: {}
+
+  dotenv@17.4.1: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -11611,6 +11818,10 @@ snapshots:
   encodeurl@1.0.2: {}
 
   encodeurl@2.0.0: {}
+
+  end-of-stream@1.4.5:
+    dependencies:
+      once: 1.4.0
 
   enhanced-resolve@5.18.3:
     dependencies:
@@ -11809,6 +12020,12 @@ snapshots:
 
   events@3.3.0: {}
 
+  eventsource-parser@3.0.6: {}
+
+  eventsource@3.0.7:
+    dependencies:
+      eventsource-parser: 3.0.6
+
   exec-async@2.2.0:
     optional: true
 
@@ -11826,6 +12043,8 @@ snapshots:
 
   exit@0.1.2: {}
 
+  expand-template@2.0.3: {}
+
   expect@29.7.0:
     dependencies:
       '@jest/expect-utils': 29.7.0
@@ -11834,44 +12053,44 @@ snapshots:
       jest-message-util: 29.7.0
       jest-util: 29.7.0
 
-  expo-asset@12.0.10(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0):
+  expo-asset@12.0.10(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0):
     dependencies:
       '@expo/image-utils': 0.8.7
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
-      expo-constants: 18.0.10(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo-constants: 18.0.10(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
       react: 19.2.0
       react-native: 0.82.1(@babel/core@7.28.5)(react@19.2.0)
     transitivePeerDependencies:
       - supports-color
     optional: true
 
-  expo-constants@18.0.10(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0)):
+  expo-constants@18.0.10(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0)):
     dependencies:
       '@expo/config': 12.0.10
       '@expo/env': 2.0.7
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       react-native: 0.82.1(@babel/core@7.28.5)(react@19.2.0)
     transitivePeerDependencies:
       - supports-color
     optional: true
 
-  expo-file-system@19.0.19(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0)):
+  expo-file-system@19.0.19(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0)):
     dependencies:
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       react-native: 0.82.1(@babel/core@7.28.5)(react@19.2.0)
     optional: true
 
-  expo-font@14.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0):
+  expo-font@14.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0):
     dependencies:
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       fontfaceobserver: 2.3.0
       react: 19.2.0
       react-native: 0.82.1(@babel/core@7.28.5)(react@19.2.0)
     optional: true
 
-  expo-keep-awake@15.0.7(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react@19.2.0):
+  expo-keep-awake@15.0.7(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react@19.2.0):
     dependencies:
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       react: 19.2.0
     optional: true
 
@@ -11900,33 +12119,33 @@ snapshots:
       react-native: 0.82.1(@babel/core@7.28.5)(react@19.2.0)
     optional: true
 
-  expo-random@14.0.1(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)):
+  expo-random@14.0.1(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)):
     dependencies:
       base64-js: 1.5.1
-      expo: 54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo: 54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
     optional: true
 
   expo-server@1.0.4:
     optional: true
 
-  expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0):
+  expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0):
     dependencies:
       '@babel/runtime': 7.28.4
-      '@expo/cli': 54.0.16(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      '@expo/cli': 54.0.16(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
       '@expo/config': 12.0.10
       '@expo/config-plugins': 54.0.2
       '@expo/devtools': 0.1.7(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       '@expo/fingerprint': 0.15.3
       '@expo/metro': 54.1.0
-      '@expo/metro-config': 54.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
-      '@expo/vector-icons': 15.0.3(expo-font@14.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      '@expo/metro-config': 54.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
+      '@expo/vector-icons': 15.0.3(expo-font@14.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       '@ungap/structured-clone': 1.3.0
-      babel-preset-expo: 54.0.7(@babel/core@7.28.5)(@babel/runtime@7.28.4)(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-refresh@0.14.2)
-      expo-asset: 12.0.10(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
-      expo-constants: 18.0.10(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
-      expo-file-system: 19.0.19(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
-      expo-font: 14.0.9(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
-      expo-keep-awake: 15.0.7(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react@19.2.0)
+      babel-preset-expo: 54.0.7(@babel/core@7.28.5)(@babel/runtime@7.28.4)(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-refresh@0.14.2)
+      expo-asset: 12.0.10(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo-constants: 18.0.10(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      expo-file-system: 19.0.19(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
+      expo-font: 14.0.9(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
+      expo-keep-awake: 15.0.7(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react@19.2.0)
       expo-modules-autolinking: 3.0.22
       expo-modules-core: 3.0.26(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0)
       pretty-format: 29.7.0
@@ -11946,6 +12165,11 @@ snapshots:
 
   exponential-backoff@3.1.3:
     optional: true
+
+  express-rate-limit@8.3.2(express@5.2.1):
+    dependencies:
+      express: 5.2.1
+      ip-address: 10.1.0
 
   express@4.21.2:
     dependencies:
@@ -11992,6 +12216,39 @@ snapshots:
       cookie: 0.7.2
       cookie-signature: 1.2.2
       debug: 4.4.3
+      encodeurl: 2.0.0
+      escape-html: 1.0.3
+      etag: 1.8.1
+      finalhandler: 2.1.0
+      fresh: 2.0.0
+      http-errors: 2.0.0
+      merge-descriptors: 2.0.0
+      mime-types: 3.0.2
+      on-finished: 2.4.1
+      once: 1.4.0
+      parseurl: 1.3.3
+      proxy-addr: 2.0.7
+      qs: 6.14.0
+      range-parser: 1.2.1
+      router: 2.2.0
+      send: 1.2.0
+      serve-static: 2.2.0
+      statuses: 2.0.2
+      type-is: 2.0.1
+      vary: 1.1.2
+    transitivePeerDependencies:
+      - supports-color
+
+  express@5.2.1:
+    dependencies:
+      accepts: 2.0.0
+      body-parser: 2.2.2
+      content-disposition: 1.0.1
+      content-type: 1.0.5
+      cookie: 0.7.2
+      cookie-signature: 1.2.2
+      debug: 4.4.3
+      depd: 2.0.0
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
@@ -12101,6 +12358,8 @@ snapshots:
       uint8array-extras: 1.5.0
     transitivePeerDependencies:
       - supports-color
+
+  file-uri-to-path@1.0.0: {}
 
   filename-reserved-regex@3.0.0: {}
 
@@ -12260,6 +12519,8 @@ snapshots:
 
   fresh@2.0.0: {}
 
+  fs-constants@1.0.0: {}
+
   fs-extra@10.1.0:
     dependencies:
       graceful-fs: 4.2.11
@@ -12316,6 +12577,8 @@ snapshots:
 
   getenv@2.0.0:
     optional: true
+
+  github-from-package@0.0.0: {}
 
   glob-parent@5.1.2:
     dependencies:
@@ -12444,6 +12707,8 @@ snapshots:
       hermes-estree: 0.32.0
     optional: true
 
+  hono@4.12.11: {}
+
   hosted-git-info@7.0.2:
     dependencies:
       lru-cache: 10.4.3
@@ -12542,8 +12807,7 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  ini@1.3.8:
-    optional: true
+  ini@1.3.8: {}
 
   inspect-with-kind@1.0.5:
     dependencies:
@@ -12553,6 +12817,8 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
     optional: true
+
+  ip-address@10.1.0: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -12606,7 +12872,7 @@ snapshots:
 
   iso-url@1.2.1: {}
 
-  isomorphic-webcrypto@2.3.8(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0)):
+  isomorphic-webcrypto@2.3.8(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0)):
     dependencies:
       '@peculiar/webcrypto': 1.5.0
       asmcrypto.js: 0.22.0
@@ -12618,7 +12884,7 @@ snapshots:
     optionalDependencies:
       '@unimodules/core': 7.1.2
       '@unimodules/react-native-adapter': 6.3.9
-      expo-random: 14.0.1(expo@54.0.25(@babel/core@7.28.5)(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
+      expo-random: 14.0.1(expo@54.0.25(@babel/core@7.28.5)(@modelcontextprotocol/sdk@1.29.0(@cfworker/json-schema@4.1.1)(zod@3.25.76))(graphql@16.12.0)(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))(react@19.2.0))
       react-native-securerandom: 0.1.1(react-native@0.82.1(@babel/core@7.28.5)(react@19.2.0))
     transitivePeerDependencies:
       - expo
@@ -12997,6 +13263,8 @@ snapshots:
   jimp-compact@0.16.1:
     optional: true
 
+  jose@6.2.2: {}
+
   js-base64@3.7.8: {}
 
   js-tiktoken@1.0.21:
@@ -13031,6 +13299,8 @@ snapshots:
   json-schema-traverse@0.4.1: {}
 
   json-schema-traverse@1.0.0: {}
+
+  json-schema-typed@8.0.2: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
@@ -13133,7 +13403,7 @@ snapshots:
   lan-network@0.1.7:
     optional: true
 
-  langchain@0.3.36(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(axios@1.13.2)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(ws@8.18.3):
+  langchain@0.3.36(@langchain/anthropic@0.3.33(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(zod@3.25.76))(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(@langchain/ollama@0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))))(axios@1.13.2)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)))(ws@8.18.3):
     dependencies:
       '@langchain/core': 0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76))
       '@langchain/openai': 0.5.18(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))(ws@8.18.3)
@@ -13152,7 +13422,7 @@ snapshots:
       '@langchain/ollama': 0.2.4(@langchain/core@0.3.79(openai@4.104.0(ws@8.18.3)(zod@3.25.76)))
       axios: 1.13.2(debug@4.4.3)
       handlebars: 4.7.8
-      typeorm: 0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
+      typeorm: 0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3))
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - '@opentelemetry/exporter-trace-otlp-proto'
@@ -13788,6 +14058,8 @@ snapshots:
       minipass: 7.1.2
     optional: true
 
+  mkdirp-classic@0.5.3: {}
+
   mkdirp@0.5.6:
     dependencies:
       minimist: 1.2.8
@@ -13830,6 +14102,8 @@ snapshots:
 
   nanoid@3.3.11: {}
 
+  napi-build-utils@2.0.0: {}
+
   natural-compare@1.4.0: {}
 
   negotiator@0.6.3: {}
@@ -13858,6 +14132,10 @@ snapshots:
       '@grpc/grpc-js': 1.14.1
       abort-controller-x: 0.4.3
       nice-grpc-common: 2.0.2
+
+  node-abi@3.89.0:
+    dependencies:
+      semver: 7.7.3
 
   node-abort-controller@3.1.1: {}
 
@@ -14172,6 +14450,8 @@ snapshots:
     optionalDependencies:
       '@napi-rs/nice': 1.1.1
 
+  pkce-challenge@5.0.1: {}
+
   pkg-dir@4.2.0:
     dependencies:
       find-up: 4.1.0
@@ -14225,6 +14505,21 @@ snapshots:
       xtend: 4.0.2
 
   postgres@3.4.7: {}
+
+  prebuild-install@7.1.3:
+    dependencies:
+      detect-libc: 2.1.2
+      expand-template: 2.0.3
+      github-from-package: 0.0.0
+      minimist: 1.2.8
+      mkdirp-classic: 0.5.3
+      napi-build-utils: 2.0.0
+      node-abi: 3.89.0
+      pump: 3.0.4
+      rc: 1.2.8
+      simple-get: 4.0.1
+      tar-fs: 2.1.4
+      tunnel-agent: 0.6.0
 
   prelude-ls@1.1.2: {}
 
@@ -14289,6 +14584,11 @@ snapshots:
     dependencies:
       punycode: 2.3.1
 
+  pump@3.0.4:
+    dependencies:
+      end-of-stream: 1.4.5
+      once: 1.4.0
+
   punycode@2.3.1: {}
 
   pure-rand@6.1.0: {}
@@ -14307,6 +14607,10 @@ snapshots:
       side-channel: 1.1.0
 
   qs@6.14.0:
+    dependencies:
+      side-channel: 1.1.0
+
+  qs@6.15.0:
     dependencies:
       side-channel: 1.1.0
 
@@ -14354,7 +14658,6 @@ snapshots:
       ini: 1.3.8
       minimist: 1.2.8
       strip-json-comments: 2.0.1
-    optional: true
 
   rdf-canonize@3.4.0:
     dependencies:
@@ -14774,6 +15077,14 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
+  simple-concat@1.0.1: {}
+
+  simple-get@4.0.1:
+    dependencies:
+      decompress-response: 6.0.0
+      once: 1.4.0
+      simple-concat: 1.0.1
+
   simple-plist@1.3.1:
     dependencies:
       bplist-creator: 0.1.0
@@ -14914,8 +15225,7 @@ snapshots:
 
   strip-final-newline@2.0.0: {}
 
-  strip-json-comments@2.0.1:
-    optional: true
+  strip-json-comments@2.0.1: {}
 
   strip-json-comments@3.1.1: {}
 
@@ -14997,6 +15307,21 @@ snapshots:
       '@pkgr/core': 0.2.9
 
   tapable@2.3.0: {}
+
+  tar-fs@2.1.4:
+    dependencies:
+      chownr: 1.1.4
+      mkdirp-classic: 0.5.3
+      pump: 3.0.4
+      tar-stream: 2.2.0
+
+  tar-stream@2.2.0:
+    dependencies:
+      bl: 4.1.0
+      end-of-stream: 1.4.5
+      fs-constants: 1.0.0
+      inherits: 2.0.4
+      readable-stream: 3.6.2
 
   tar-stream@3.1.7:
     dependencies:
@@ -15195,6 +15520,10 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
+  tunnel-agent@0.6.0:
+    dependencies:
+      safe-buffer: 5.2.1
+
   type-check@0.3.2:
     dependencies:
       prelude-ls: 1.1.2
@@ -15233,7 +15562,7 @@ snapshots:
 
   typedarray@0.0.6: {}
 
-  typeorm@0.3.27(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)):
+  typeorm@0.3.27(better-sqlite3@12.8.0)(pg@8.16.3)(redis@4.7.1)(reflect-metadata@0.2.2)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)):
     dependencies:
       '@sqltools/formatter': 1.2.5
       ansis: 3.17.0
@@ -15251,6 +15580,7 @@ snapshots:
       uuid: 11.1.0
       yargs: 17.7.2
     optionalDependencies:
+      better-sqlite3: 12.8.0
       pg: 8.16.3
       redis: 4.7.1
       ts-node: 10.9.2(@swc/core@1.15.2)(@types/node@22.19.1)(typescript@5.9.3)
@@ -15595,6 +15925,10 @@ snapshots:
   yoctocolors-cjs@2.1.3: {}
 
   zod-to-json-schema@3.25.0(zod@3.25.76):
+    dependencies:
+      zod: 3.25.76
+
+  zod-to-json-schema@3.25.2(zod@3.25.76):
     dependencies:
       zod: 3.25.76
 
