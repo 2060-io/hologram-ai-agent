@@ -1,260 +1,368 @@
 # 🤖 hologram-generic-ai-agent-vs
 
-Welcome to **hologram-generic-ai-agent-vs** – a modular, multi-language AI agent built with NestJS, designed for welcoming users, providing personalized information, and integrating with any LLM, Retrieval Augmented Generation (RAG), and external APIs.
-
----
-
-## 🚦 Environment Variables
-
-All configuration is managed via environment variables.
-
-**Below is a summary of all supported environment variables and their purpose:**
-
-| Variable Name              | Description                                                                                           | Example Value / Default  |
-| -------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------ |
-| `APP_PORT`                 | Port on which the application runs                                                                    | `3000`                   |
-| `LOG_LEVEL`                | Log level (`1=error`, `2=warn`, `3=info`, `4=debug`)                                                  | `3`                      |
-| `AGENT_PROMPT`             | Defines the agent's persona and instructions                                                          | See below for example    |
-| `AGENT_PACK_PATH`          | Filesystem path to the agent pack manifest (`agent-pack.yaml`); if missing, falls back to env vars    | `./agent-packs/hologram-welcome` |
-| `LLM_PROVIDER`             | LLM backend: `openai`, `ollama`, `anthropic`, etc.                                                    | `ollama`                 |
-| `OPENAI_API_KEY`           | API key for OpenAI (required if using OpenAI)                                                         | `sk-xxx`                 |
-| `OPENAI_MODEL`             | OpenAI model to use (e.g., `gpt-3.5-turbo`, `gpt-4o-mini`)                                            | `gpt-4o-mini`            |
-| `OPENAI_TEMPERATURE`       | Temperature for OpenAI completions (0-1)                                                              | `0.3`                    |
-| `OPENAI_MAX_TOKENS`        | Max tokens per completion for OpenAI                                                                  | `512`                    |
-| `OLLAMA_ENDPOINT`          | Ollama endpoint (use container URL if running with Docker Compose)                                    | `http://ollama:11435`    |
-| `OLLAMA_MODEL`             | Ollama model to use (`llama3`, etc.)                                                                  | `llama3`                 |
-| `ANTHROPIC_API_KEY`        | API key for Anthropic (Claude)                                                                        |                          |
-| `RAG_PROVIDER`             | RAG backend orchestrator: `vectorstore` (custom) or `langchain`                                       | `vectorstore`            |
-| `RAG_DOCS_PATH`            | Base directory for RAG documents and remote cache (`.txt`, `.md`, `.pdf`, `.csv`).                   | `/app/rag/docs`      |
-| `RAG_CHUNK_SIZE`           | Max characters per document chunk during splitting (RAG)                                              | `1000`                   |
-| `RAG_CHUNK_OVERLAP`        | Overlap size (characters) between consecutive chunks during splitting                                 | `200`                    |
-| `RAG_REMOTE_URLS`          | Optional list of remote document URLs (CSV or JSON array). Supports `.txt`, `.md`, `.pdf`, `.csv`.   | `https://host/test.pdf,https://host/test.csv` |
-| `VECTOR_STORE`             | Vector store provider for RAG: `pinecone`, `redis`                                                    | `redis`                  |
-| `VECTOR_INDEX_NAME`        | Index name for both Pinecone and Redis vector stores                                                  | `hologram-ia`            |
-| `PINECONE_API_KEY`         | API key for Pinecone vector store                                                                     | `pcsk_xxx`               |
-| `AGENT_MEMORY_BACKEND`     | Memory backend for chat context: `memory` or `redis`                                                  | `redis`                  |
-| `AGENT_MEMORY_WINDOW`      | Number of messages stored in chat memory window                                                       | `8`                      |
-| `REDIS_URL`                | Redis connection URL for vector store or memory backend                                               | `redis://localhost:6379` |
-| `POSTGRES_HOST`            | Hostname/IP for PostgreSQL database                                                                   | `postgres`               |
-| `POSTGRES_USER`            | Username for PostgreSQL database                                                                      | `2060demo`               |
-| `POSTGRES_DB_NAME`         | Database name for PostgreSQL                                                                          | `test-service-agent`     |
-| `POSTGRES_PASSWORD`        | Password for PostgreSQL                                                                               | `2060demo`               |
-| `CREDENTIAL_DEFINITION_ID` | Verifiable credential definition ID or URL. If omitted, the authentication menu is hidden.            | `http://localhost:3000`  |
-| `VS_AGENT_ADMIN_URL`       | Service Agent Admin API URL                                                                           |                          |
-| `LLM_TOOLS_CONFIG`         | Defines external tools (API integrations) available to the agent as a JSON string.                    | `[]`                     |
-| `STATISTICS_API_URL`       | Base URL for the statistics API service. The agent uses this endpoint to fetch statistics via tools.  |                          |
-| `STATISTICS_REQUIRE_AUTH`  | Indicates whether user authentication is required to access statistics via tools (`true` or `false`). | `false`                  |
-
-**Example `AGENT_PROMPT`:**
-
-```text
-You are an AI agent called Karen. You welcome users and provide information about Hologram. Do not reveal you are an AI.
-```
+A modular, multi-language AI agent built with NestJS for the Hologram + Verana ecosystem. Supports LLM integration (OpenAI, Ollama, Anthropic), RAG, MCP (Model Context Protocol) servers, verifiable credential authentication, and per-user tool configuration — all driven by a single `agent-pack.yaml` manifest.
 
 ---
 
 ## 🚀 Overview
 
-**hologram-generic-ai-agent-vs** is a backend conversational AI agent that serves as the intelligent welcoming agent for Hologram and related ecosystems. The system is designed to:
-
-- **Send a personalized, AI-generated welcome message** when a new user connects.
-- **Provide information about Hologram, Verana, and more** via natural conversation.
-- **Support authentication-aware features and localizable menus** (“Authenticate” or “Logout” as appropriate, with menu titles personalized per user status). The menu is only shown when an auth credential is configured.
-- **Seamlessly integrate with multiple LLMs** (OpenAI, Ollama, Anthropic) with model/content generation configurable by environment variables.
-- **Retrieve contextual knowledge** from local files using RAG (Retrieval Augmented Generation) with Pinecone + LangChain integration.
-- **Support session memory** (in-memory or Redis-based), so the agent can remember the context of each user’s conversation.
-- **Expose a flexible tools system** for integration with APIs (e.g., statistics, user state, etc.).
-- **Operate in multiple languages** (English, Spanish, French out-of-the-box; easily extendable).
-- **Centralize all configuration** via `.env` and the NestJS config system.
-- **Deploy with Docker Compose** including ready-to-use Redis and Ollama containers.
-
----
-
-## 📦 Agent Packs (declarative config)
-
-You can bundle all agent configuration (prompts, greeting messages, menus, RAG, tools, integrations) into a single `agent-pack.yaml` and mount it at runtime.
-
-- Set `AGENT_PACK_PATH` to the directory containing `agent-pack.yaml` (e.g., `/app/agent-packs/hologram-welcome`).
-- If the pack is missing or invalid, the app falls back to legacy environment variables.
-- The manifest supports `${VAR}` placeholders resolved from `process.env`.
-- Full schema and examples: [`docs/agent-pack-schema.md`](./docs/agent-pack-schema.md).
-
-With Docker Compose/Helm, mount your pack at `/app/agent-packs/<your-pack>/agent-pack.yaml` and set `AGENT_PACK_PATH=/app/agent-packs/<your-pack>`.
+- **Personalized AI welcome** — sends a greeting message when a user connects via Hologram
+- **Multi-LLM support** — OpenAI, Ollama, Anthropic with configurable model, temperature, and tokens
+- **RAG** — Retrieval Augmented Generation with Pinecone or Redis vector stores
+- **MCP integration** — connect to remote MCP servers (e.g. GitHub Copilot MCP) and expose their tools to the LLM agent
+- **Per-user MCP credentials** — users configure their own tokens via an in-chat flow; stored with AES-256-GCM encryption
+- **Lazy tool discovery** — MCP servers that require user tokens connect on-demand, not at startup
+- **Verifiable credential authentication** — DIDComm-based auth with contextual menus
+- **Session memory** — in-memory or Redis-backed conversation context
+- **Multi-language** — English, Spanish, French, Portuguese out-of-the-box
+- **Agent Packs** — all configuration in one `agent-pack.yaml` manifest with `${ENV_VAR}` placeholders
+- **Helm chart** — production-ready Kubernetes deployment
 
 ---
 
 ## 🗂️ Project Structure
 
-```sh
+```text
 src/
-  ├── chatbot/        # Core chatbot service, prompt logic, and session handling
-  ├── llm/            # LLM provider interface + adapters (OpenAI, Ollama, Anthropic)
+  ├── core/           # CoreService (message routing, state machine, menus, auth, MCP config flow)
+  ├── chatbot/        # Chatbot service, prompt logic, session handling
+  ├── llm/            # LLM provider adapters (OpenAI, Ollama, Anthropic) + LangChain agent
+  ├── mcp/            # MCP client (connections, lazy discovery, per-user config, tool cache)
   ├── rag/            # RAG services (vector store, document ingestion, context retrieval)
-  ├── memory/         # Memory service (in-memory/Redis backends)
-  ├── common/         # Utilities, language detection, prompt templates
-  ├── main.ts         # Application bootstrap
+  ├── memory/         # Memory service (in-memory / Redis backends)
+  ├── config/         # Agent-pack loader + Zod schema validation
+  ├── integrations/   # VS Agent, stats, PostgreSQL integrations
+  ├── common/         # Utilities, language detection
+  └── main.ts         # Application bootstrap
+
+scripts/
+  ├── setup.sh        # Full local setup: VS Agent + ngrok + veranad + credentials
+  └── start.sh        # Start chatbot in dev mode (hot-reload)
+
+docker/
+  └── docker-compose.yml   # Infrastructure services (VS Agent, Redis, PostgreSQL)
+
+common/
+  └── common.sh       # Shared shell helpers (logging, network config, credential helpers)
+
+agent-packs/
+  ├── hologram-welcome/    # Default welcome agent pack
+  └── github-agent/        # GitHub MCP agent pack (example)
+
+charts/                    # Helm chart for Kubernetes deployment
 ```
 
 ---
 
-## 📝 Bot Conversation Flow Diagram
+## 💻 Local Development Setup
 
-Below is a high-level flowchart representing how the `CoreService` This diagram summarizes the main states (`START`, `AUTH`, `CHAT`), how messages are handled, and what menu options are available at each step.
+### Prerequisites
 
-![Hologram IA Agent fl](./docs/assets/hologram-ia-flow.png)
+- **Node.js 22+** and **pnpm** (corepack)
+- **Docker** (for infrastructure services)
+- **ngrok** (authenticated, for VS Agent public URL tunneling)
 
----
-
-## 🐳 Running with Docker Compose
-
-You can start the full system (API, Redis, PostgreSQL, and Service Agent) using Docker Compose:
+### Step 1: Clone and install
 
 ```bash
-docker compose up --build
+git clone git@github.com:2060-io/hologram-generic-ai-agent-vs.git
+cd hologram-generic-ai-agent-vs
+corepack enable
+pnpm install
 ```
 
-This will launch:
+### Step 2: Create `.env`
 
-- The AI agent backend (NestJS)
-- Redis (for chat memory and Service Agent state)
-- PostgreSQL (for session and agent storage)
-- Service Agent (for DIDComm communication and credential handling)
-- Artemis (JMS broker to use active stats)
-- Stats module service
-- Adminer (for browsing the PostgreSQL database)
+Copy and adapt the example below:
 
-The chatbot API will be available at [http://localhost:3000/api](http://localhost:3000/api)  
-The Service Agent will be available at [http://localhost:3001](http://localhost:3001)  
-Adminer UI will be accessible at [http://localhost:8080](http://localhost:8080)
-The Stats module server API be available at [http://localhost:8700/q/swagger-ui](http://localhost:8700/q/swagger-ui)
+```env
+# App
+APP_PORT=3010
+LOG_LEVEL=3
 
-### ⚙️ Environment Configuration
+# LLM
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-proj-xxx
+OPENAI_MODEL=gpt-4o-mini
 
-Before running the system, you **must create a `.env` file** in the root directory with the required environment variables.
+# Agent Pack (choose one)
+AGENT_PACK_PATH=./agent-packs/github-agent
+# AGENT_PACK_PATH=./agent-packs/hologram-welcome
 
-These variables configure:
+# Infrastructure
+REDIS_URL=redis://localhost:6379
+POSTGRES_HOST=localhost
+POSTGRES_USER=hologram
+POSTGRES_PASSWORD=hologram
+POSTGRES_DB_NAME=hologram-agent
 
-- LLM provider and API key
-- Vector store (e.g., Pinecone)
-- RAG configuration and document paths
-- Redis and PostgreSQL credentials
-- Service Agent communication settings
-- Agent prompt and memory configuration
+# RAG
+VECTOR_STORE=redis
+RAG_PROVIDER=langchain
+RAG_DOCS_PATH=./docs
 
-👉 Refer to the [Environment Variables](#-environment-variables) section for the full list of required variables and their purpose.
+# Memory
+AGENT_MEMORY_BACKEND=memory
+AGENT_MEMORY_WINDOW=8
+
+# VS Agent ports (used by docker-compose and scripts)
+VS_AGENT_ADMIN_PORT=3002
+VS_AGENT_PUBLIC_PORT=3003
+
+# Auth (optional — omit to hide the Authenticate menu)
+# CREDENTIAL_DEFINITION_ID=did:webvh:...
+
+# MCP — GitHub remote MCP server (optional)
+GITHUB_MCP_URL=https://api.githubcopilot.com/mcp/
+# GITHUB_PERSONAL_ACCESS_TOKEN=github_pat_xxx   # optional admin token
+MCP_CONFIG_ENCRYPTION_KEY=<64-char-hex-string>   # required for per-user MCP config
+
+# Stats (disable for local dev)
+VS_AGENT_STATS_ENABLED=false
+```
+
+Generate an encryption key with:
+
+```bash
+openssl rand -hex 32
+```
+
+### Step 3: Start infrastructure services
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+This starts:
+- **Redis** on port 6379 (vector store + memory)
+- **PostgreSQL** on port 5432 (sessions, MCP user config)
+- **VS Agent** on ports 3002 (admin) / 3003 (public)
+
+### Step 4: Run the full setup (optional, for VS Agent + credentials)
+
+If you need the VS Agent with DIDComm, ngrok tunneling, and verifiable credentials:
+
+```bash
+./scripts/setup.sh
+```
+
+This script:
+1. Pulls and starts the VS Agent Docker container with an ngrok tunnel
+2. Sets up a `veranad` CLI account on testnet (or devnet)
+3. Obtains a Service credential from an organization-vs instance
+4. Optionally creates an AnonCreds credential definition for authentication
+
+Output is saved to `ids.env`.
+
+### Step 5: Start the chatbot
+
+```bash
+./scripts/start.sh
+```
+
+Or directly:
+
+```bash
+pnpm start:dev
+```
+
+The chatbot runs on `http://localhost:3010` with hot-reload enabled.
 
 ---
 
-## 📚 API Usage
+## 📦 Agent Packs
 
-### POST `/chatbot/ask`
+All agent configuration lives in a single `agent-pack.yaml` manifest. Set `AGENT_PACK_PATH` to point to the directory containing the manifest.
 
-Request:
+Two example packs are included:
 
-```json
-{
-  "question": "What is Hologram?",
-  "connectionId": "user-123"
-}
+- **`agent-packs/hologram-welcome/`** — default Hologram welcome agent
+- **`agent-packs/github-agent/`** — GitHub MCP-enabled agent with per-user token configuration
+
+Full schema reference: [`docs/agent-pack-schema.md`](./docs/agent-pack-schema.md)
+
+### Key sections
+
+| Section      | Description |
+|-------------|-------------|
+| `metadata`  | Agent ID, display name, description, tags |
+| `languages` | Per-language greeting messages, system prompts, and i18n strings |
+| `llm`       | Provider, model, temperature, agent prompt |
+| `rag`       | RAG provider, docs path, vector store config |
+| `memory`    | Backend (memory/redis), window size |
+| `flows`     | Welcome flow, authentication flow, contextual menu items |
+| `tools`     | Dynamic HTTP tools, bundled tools (statistics) |
+| `mcp`       | MCP server definitions (see below) |
+| `integrations` | VS Agent, PostgreSQL, stats |
+
+---
+
+## 🔌 MCP (Model Context Protocol) Integration
+
+The agent can connect to remote MCP servers and expose their tools to the LLM. MCP servers are declared in the `mcp.servers` section of the agent pack.
+
+### Example: GitHub MCP server
+
+```yaml
+mcp:
+  servers:
+    - name: github
+      transport: streamable-http
+      url: ${GITHUB_MCP_URL}
+      headers:
+        Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      accessMode: user-controlled
+      userConfig:
+        fields:
+          - name: token
+            type: secret
+            label:
+              en: "Please enter your GitHub Personal Access Token:"
+              es: "Por favor, ingresa tu Token de Acceso Personal de GitHub:"
+              fr: "Veuillez entrer votre jeton d'accès personnel GitHub :"
+            headerTemplate: "Bearer {value}"
+      toolAccess:
+        default: admin
+        public:
+          - search_repositories
+          - search_code
+          - search_issues
+          - list_pull_requests
+          - get_file_contents
+          - get_me
 ```
 
-Response:
+### Access modes
 
-```json
-{
-  "answer": "Hologram is an advanced platform for ..."
-}
+- **`admin-controlled`** — the server token comes from an environment variable. All users share the same connection.
+- **`user-controlled`** — each user provides their own token via an in-chat configuration flow. Tokens are encrypted with AES-256-GCM and stored in PostgreSQL.
+
+### Tool access control
+
+- **`default: admin`** — only admin avatars (listed in `flows.authentication.adminAvatars`) see all tools
+- **`public: [...]`** — non-admin users only see the listed tools
+
+### Per-user MCP configuration flow
+
+When a user clicks "MCP Server Config" in the contextual menu:
+
+1. A list of user-controlled servers is shown (✅ = configured, ⚠️ = not yet configured)
+2. The user selects a server and is prompted for each required field (e.g. token)
+3. Credentials are encrypted and stored in PostgreSQL
+4. The agent tests the connection immediately — ✅ success or ⚠️ invalid credentials
+5. On success, the MCP tools become available to the user's LLM agent
+6. On failure, the stored config is deleted so the user can retry
+
+### Lazy tool discovery
+
+If no admin token is configured for a user-controlled server, the shared connection is skipped at startup. Tool definitions are discovered on the first successful per-user connection and cached. The LLM agent is rebuilt dynamically when new tools appear.
+
+### Environment variables for MCP
+
+| Variable | Description |
+|----------|-------------|
+| `GITHUB_MCP_URL` | URL of the GitHub MCP server |
+| `GITHUB_PERSONAL_ACCESS_TOKEN` | (Optional) Admin token for shared connection |
+| `MCP_CONFIG_ENCRYPTION_KEY` | 32-byte hex key for encrypting per-user MCP credentials |
+
+---
+
+## 🚦 Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `APP_PORT` | Application port | `3000` |
+| `LOG_LEVEL` | Log level (1=error, 2=warn, 3=info, 4=debug) | `3` |
+| `AGENT_PACK_PATH` | Path to agent pack directory | `./agent-packs/hologram-welcome` |
+| `LLM_PROVIDER` | LLM backend: `openai`, `ollama`, `anthropic` | `ollama` |
+| `OPENAI_API_KEY` | OpenAI API key | |
+| `OPENAI_MODEL` | OpenAI model | `gpt-4o-mini` |
+| `OPENAI_TEMPERATURE` | Temperature (0–1) | `0.3` |
+| `OPENAI_MAX_TOKENS` | Max tokens per completion | `512` |
+| `OLLAMA_ENDPOINT` | Ollama endpoint | `http://ollama:11435` |
+| `OLLAMA_MODEL` | Ollama model | `llama3` |
+| `ANTHROPIC_API_KEY` | Anthropic API key | |
+| `RAG_PROVIDER` | RAG backend: `vectorstore` or `langchain` | `vectorstore` |
+| `RAG_DOCS_PATH` | RAG documents directory | `/app/rag/docs` |
+| `RAG_CHUNK_SIZE` | Max chars per chunk | `1000` |
+| `RAG_CHUNK_OVERLAP` | Overlap between chunks | `200` |
+| `RAG_REMOTE_URLS` | Remote document URLs (CSV or JSON array) | |
+| `VECTOR_STORE` | Vector store: `pinecone` or `redis` | `redis` |
+| `VECTOR_INDEX_NAME` | Vector index name | `hologram-ia` |
+| `PINECONE_API_KEY` | Pinecone API key | |
+| `REDIS_URL` | Redis connection URL | `redis://localhost:6379` |
+| `AGENT_MEMORY_BACKEND` | Memory backend: `memory` or `redis` | `redis` |
+| `AGENT_MEMORY_WINDOW` | Chat memory window size | `8` |
+| `POSTGRES_HOST` | PostgreSQL host | `postgres` |
+| `POSTGRES_USER` | PostgreSQL user | `2060demo` |
+| `POSTGRES_PASSWORD` | PostgreSQL password | `2060demo` |
+| `POSTGRES_DB_NAME` | PostgreSQL database name | `test-service-agent` |
+| `CREDENTIAL_DEFINITION_ID` | VC definition ID (omit to hide auth menu) | |
+| `VS_AGENT_ADMIN_URL` | VS Agent admin API URL | |
+| `LLM_TOOLS_CONFIG` | External HTTP tools (JSON array) | `[]` |
+| `STATISTICS_API_URL` | Statistics API URL | |
+| `STATISTICS_REQUIRE_AUTH` | Require auth for statistics | `false` |
+| `MCP_CONFIG_ENCRYPTION_KEY` | AES-256-GCM key for per-user MCP config (64 hex chars) | |
+
+---
+
+## 📝 Bot Conversation Flow
+
+The `CoreService` manages the conversation state machine with four states:
+
+- **`START`** — initial state, sends welcome message
+- **`AUTH`** — waiting for credential presentation
+- **`CHAT`** — normal conversation with LLM
+- **`MCP_CONFIG`** — collecting MCP server credentials from the user
+
+Contextual menu items adapt dynamically based on authentication status, MCP configuration state, and the agent pack configuration.
+
+![Hologram IA Agent flow](./docs/assets/hologram-ia-flow.png)
+
+---
+
+## 🐳 Docker Compose (infrastructure only)
+
+For local development, infrastructure services run in Docker while the chatbot runs natively with hot-reload:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-- The agent will respond in the detected language (English, Spanish, or French) automatically.
-- Session memory ensures that the context of the conversation is maintained.
+Services started:
+- **VS Agent** — DIDComm agent (ports 3002/3003)
+- **Redis** — vector store + memory backend (port 6379)
+- **PostgreSQL** — sessions + MCP user config (port 5432)
 
-## 📚 RAG (Retrieval Augmented Generation) Service Configuration
+The chatbot itself runs via `pnpm start:dev` or `./scripts/start.sh`.
 
-Full setup and usage instructions for the modular RAG service—including how to configure vector stores (Pinecone, Redis) and RAG providers—are provided in  
-[How to use RAG Service](./docs/how-to-use-rag-service.md).
+---
 
-### Chunking options
+## 📚 Additional Documentation
 
-- `RAG_CHUNK_SIZE` controls the maximum characters per chunk (default `1000`).
-- `RAG_CHUNK_OVERLAP` controls the overlap between consecutive chunks (default `200`).
-- Both `vectorstore` and `langchain` backends honor these settings through the shared document loader.
+- [Agent Pack Schema](./docs/agent-pack-schema.md) — full manifest reference
+- [RAG Service](./docs/how-to-use-rag-service.md) — vector store and RAG provider setup
+- [Memory Module](./docs/how-to-use-memory-service.md) — in-memory and Redis backends
+- [Ollama Setup](./docs/how-to-use-ollama.md) — local LLM with Ollama + Llama3
+- [JMS Integration](./docs/hologram-generic-jms-integration.md) — statistics module with Artemis
 
-### Remote documents (optional)
+## 🛠️ HTTP Tools (LLM_TOOLS_CONFIG)
 
-- `RAG_DOCS_PATH` is both the base folder for local files and the cache root for remote downloads. Cached files live under `<RAG_DOCS_PATH>/docs`.
-- Provide additional sources through `RAG_REMOTE_URLS`:
-  - CSV list: `RAG_REMOTE_URLS=https://host/file1.pdf,https://host/file2.csv`
-  - JSON array: `RAG_REMOTE_URLS='["https://host/file1.pdf","https://host/file2.csv"]'`
-- On first run each URL is downloaded (max 50MB, 30s timeout) and reused from cache afterwards.
-- Supported formats: `.txt`, `.md`, `.pdf`, `.csv`. Others are ignored.
-- Both `vectorstore` and `langchain` providers use these settings under the hood via the shared loader.
+External HTTP APIs can be exposed as LangChain tools via the `LLM_TOOLS_CONFIG` environment variable or the `tools.dynamicConfig` agent-pack field.
 
-## 🧠 Memory Module Setup
-
-For a full guide on configuring and using the memory module (supporting both in-memory and Redis backends), see  
-[How to use the Memory Module](./docs/how-to-use-memory-service.md).
-
-## 📥 Ollama & Llama3 Installation
-
-Full setup instructions for local LLMs (Ollama + Llama3) are provided in [How to use Ollama](./docs/how-to-use-ollama.md).
-
-## 📊 Hologram-Generic JMS integration
-
-For detailed instructions on configuring and using the JMS statistics (stats) module for real-time agent metrics with Artemis or other JMS brokers, see  
-[How to use the JMS Connection Module](./docs/hologram-generic-jms-integration.md).
-
-## 🛠️ How to Use langchain Tools
-
-Tools allow your AI agent to interact with external APIs and services at inference time. Once defined in `LLM_TOOLS_CONFIG`, the agent can:
-
-- Fetch live data (statistics, user info, documents, etc.)
-- Trigger actions (notifications, webhooks, etc.)
-
-You can connect external APIs as langchain "tools" to the AI agent via the `LLM_TOOLS_CONFIG` environment variable.
-
-Each tool allows the agent to query external data sources, fetch statistics, access documentation, or trigger actions through HTTP APIs.  
-**Tools are defined as a JSON array** in your `.env`, with each entry describing one tool and its options.
-
-> **Note:** This feature is only available when using **OpenAI** or **Anthropic** as LLM provider.
-
-**Example:**
-
-```env
-LLM_TOOLS_CONFIG=[
+```json
+[
   {
     "name": "getLocation",
-    "description": "Query location statistics by US zipcode.",
+    "description": "Query location by US zipcode.",
     "endpoint": "https://api.zippopotam.us/us/{query}",
     "method": "GET",
     "requiresAuth": false
-  },
-  {
-    "name": "getStats",
-    "description": "Access advanced statistics for the current user.",
-    "endpoint": "https://mydomain.com/api/stats?user={query}",
-    "method": "GET",
-    "requiresAuth": true
   }
 ]
 ```
 
-### Properties
+- **`requiresAuth: true`** — tool requires the user to be authenticated first
+- **`authHeader` / `authToken`** — optional HTTP auth for the external API
 
-- `name`: Unique tool name (no spaces).
-- `description`: Clear, human-readable summary. The LLM will use this to decide when to invoke the tool.
-- `endpoint`: API URL. Use `{query}` as a placeholder for the user's input.
-- `method`: HTTP method, e.g. `"GET"` or `"POST"`.
-- `authHeader` and `authToken`: (optional) For APIs that require authentication, specify the HTTP header and token.
-- `requiresAuth`: (**new**, `true` or `false`) If set to `true`, the agent will require that the user is authenticated before invoking this tool.  
-  If the user is not authenticated, the agent will respond with an appropriate message.
-
-### How authentication works
-
-- If a tool has `"requiresAuth": true` and the current user session is not authenticated,  
-  the agent will _not_ call the tool and will reply with:  
-  _"Authentication is required to access this feature. Please authenticate and try again."_
-- If `"requiresAuth": false` (or omitted), the tool can be used by any user.
-
-> **Supported LLMs:**  
-> Currently, tools with dynamic HTTP integration are only available for the OpenAI and Anthropic providers.
+> HTTP tools are available with OpenAI and Anthropic providers only.
