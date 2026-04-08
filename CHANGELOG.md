@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.10.0...v1.10.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* **chart:** update vs agent and enable extern secrets ([#58](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/58)) ([7805f0b](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/7805f0b58f00b98f743289aa120a971394d37320))
+
 ## [1.10.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.9.1...v1.10.0) (2026-02-28)
 
 
