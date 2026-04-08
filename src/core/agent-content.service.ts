@@ -4,6 +4,7 @@ import { DEFAULT_CHATBOT_PROMPT_TEMPLATES } from '../common/prompts/chatbot.prom
 import { DEFAULT_CHATBOT_WELCOME_TEMPLATES } from '../common/prompts/chatbot.welcome'
 import { DEFAULT_TRANSLATIONS } from './common/i18n/i18n'
 import { Cmd } from './common'
+import type { McpServerDef } from '../config/agent-pack.loader'
 
 type LanguageBlock = {
   greetingMessage?: string
@@ -124,11 +125,23 @@ export class AgentContentService {
 
   getAuthFlowConfig() {
     const authConfig = this.agentPack?.flows?.authentication ?? {}
+    const credentialDefinitionId =
+      authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId')
+    const adminAvatars: string[] = this.configService.get('appConfig.adminAvatars') ?? []
     return {
       enabled: this.toBoolean(authConfig.enabled, true),
-      credentialDefinitionId:
-        authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId'),
+      credentialDefinitionId,
+      adminAvatars,
     }
+  }
+
+  getUserControlledServers(): McpServerDef[] {
+    const servers = this.configService.get<McpServerDef[]>('appConfig.mcpServers') ?? []
+    return servers.filter((s) => s.accessMode === 'user-controlled' && s.userConfig?.fields?.length)
+  }
+
+  getUserControlledServer(name: string): McpServerDef | undefined {
+    return this.getUserControlledServers().find((s) => s.name === name)
   }
 
   private toBoolean(value: unknown, fallback: boolean) {

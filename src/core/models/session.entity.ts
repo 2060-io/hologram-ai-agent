@@ -30,4 +30,10 @@ export class SessionEntity {
 
   @Column({ nullable: true })
   userName?: string
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  mcpConfigServer?: string
+
+  @Column({ type: 'int', nullable: true })
+  mcpConfigFieldIndex?: number
 }

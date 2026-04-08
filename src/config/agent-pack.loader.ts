@@ -81,6 +81,7 @@ const AgentPackSchema = z
           .object({
             enabled: z.union([z.boolean(), z.string()]).optional(),
             credentialDefinitionId: z.string().optional(),
+            adminAvatars: z.array(z.string()).optional(),
           })
           .optional(),
         menu: z
@@ -91,7 +92,7 @@ const AgentPackSchema = z
                   id: z.string(),
                   labelKey: z.string(),
                   action: z.string().optional(),
-                  visibleWhen: z.enum(['always', 'authenticated', 'unauthenticated']).optional(),
+                  visibleWhen: z.enum(['always', 'authenticated', 'unauthenticated', 'configuring', 'notConfiguring']).optional(),
                 }),
               )
               .optional(),
@@ -103,6 +104,46 @@ const AgentPackSchema = z
       .object({
         dynamicConfig: z.any().optional(),
         bundled: z.record(z.any()).optional(),
+      })
+      .optional(),
+    mcp: z
+      .object({
+        servers: z
+          .array(
+            z.object({
+              name: z.string(),
+              transport: z.enum(['stdio', 'sse', 'streamable-http']),
+              url: z.string().optional(),
+              command: z.string().optional(),
+              args: z.union([z.array(z.string()), z.string()]).optional(),
+              env: z.record(z.string()).optional(),
+              headers: z.record(z.string()).optional(),
+              reconnect: z.union([z.boolean(), z.string()]).optional(),
+              accessMode: z.enum(['admin-controlled', 'user-controlled']).optional(),
+              userConfig: z
+                .object({
+                  fields: z
+                    .array(
+                      z.object({
+                        name: z.string(),
+                        type: z.enum(['secret', 'text']).optional(),
+                        label: z.union([z.string(), z.record(z.string())]).optional(),
+                        headerTemplate: z.string().optional(),
+                        headerName: z.string().optional(),
+                      }),
+                    )
+                    .optional(),
+                })
+                .optional(),
+              toolAccess: z
+                .object({
+                  default: z.enum(['public', 'admin']).optional(),
+                  public: z.array(z.string()).optional(),
+                })
+                .optional(),
+            }),
+          )
+          .optional(),
       })
       .optional(),
     integrations: z
@@ -309,10 +350,76 @@ export function resolveRagRemoteUrls(envRemote: string | undefined, packRemote: 
 }
 
 /**
- *
- * @param param0
- * @returns
+ * MCP server definition used at runtime.
  */
+export interface McpToolAccess {
+  /** 'admin' = all tools require admin by default; 'public' = all tools are public by default */
+  default: 'admin' | 'public'
+  /** Tools explicitly available to all users (only relevant when default is 'admin') */
+  public?: string[]
+  /** Tools restricted to admin users (only relevant when default is 'public') */
+  adminOnly?: string[]
+}
+
+export interface McpUserConfigField {
+  /** Internal field name (e.g. "token") */
+  name: string
+  /** Localized display label shown to the user */
+  label: Record<string, string>
+  /** Field type: 'secret' fields are never echoed or logged */
+  type: 'text' | 'secret'
+  /** Maps the field value into a request header. e.g. "Bearer {value}" → Authorization header */
+  headerTemplate?: string
+  /** HTTP header name to set. Defaults to 'Authorization' if omitted. */
+  headerName?: string
+}
+
+export interface McpServerDef {
+  name: string
+  transport: 'stdio' | 'sse' | 'streamable-http'
+  url?: string
+  command?: string
+  args?: string[]
+  env?: Record<string, string>
+  headers?: Record<string, string>
+  reconnect?: boolean
+  toolAccess?: McpToolAccess
+  /** 'admin-controlled' = shared token from env; 'user-controlled' = each user provides their own token */
+  accessMode?: 'admin-controlled' | 'user-controlled'
+  /** Configuration fields to collect from the user (only when accessMode is 'user-controlled') */
+  userConfig?: { fields: McpUserConfigField[] }
+}
+
+/**
+ * Resolves MCP server configuration from env var (MCP_SERVERS_CONFIG) or agent-pack mcp.servers.
+ * Env var takes precedence. Accepts a JSON array string.
+ */
+export function resolveMcpServers(envRaw: string | undefined, packServers: unknown): McpServerDef[] {
+  const parse = (raw: string): McpServerDef[] => {
+    try {
+      const parsed = JSON.parse(raw)
+      if (!Array.isArray(parsed)) return []
+      return parsed as McpServerDef[]
+    } catch {
+      return []
+    }
+  }
+
+  if (envRaw && envRaw.trim().length > 0) {
+    return parse(envRaw)
+  }
+
+  if (Array.isArray(packServers)) {
+    return packServers.map((s) => ({
+      ...s,
+      args: typeof s.args === 'string' ? JSON.parse(s.args) : s.args,
+      reconnect: pickBoolean('', s.reconnect, false),
+    })) as McpServerDef[]
+  }
+
+  return []
+}
+
 export function resolveToolsConfig({
   envLlmTools,
   packDynamicTools,
@@ -323,7 +430,11 @@ export function resolveToolsConfig({
   packBundledTools?: Record<string, unknown>
 }) {
   const normalizeDynamic = (raw: unknown): string => {
-    if (typeof raw === 'string') return raw.trim().length > 0 ? raw : '[]'
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim()
+      if (trimmed.length === 0 || /^\$\{.+\}$/.test(trimmed)) return '[]'
+      return trimmed
+    }
     if (raw && typeof raw === 'object') {
       try {
         return JSON.stringify(raw)

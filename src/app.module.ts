@@ -9,6 +9,7 @@ import appConfig from './config/app.config'
 import { CoreService } from './core/core.service'
 import { CoreModule } from './core/core.module'
 import { MemoryModule } from './memory/memory.module'
+import { McpModule } from './mcp/mcp.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MemoryModule } from './memory/memory.module'
       isGlobal: true,
     }),
     CoreModule,
+    McpModule,
     LlmModule,
     RagModule,
     IntegrationsModule,

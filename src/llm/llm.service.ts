@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { z as zod } from 'zod'
 import { ChatOpenAI } from '@langchain/openai'
@@ -17,6 +17,7 @@ import { statisticsFetcherTool, authCheckerTool, createRagRetrieverTool } from '
 import { MemoryService } from 'src/memory/memory.service'
 import { LangchainSessionMemory } from 'src/memory/langchain-session-memory'
 import { RagService } from '../rag/rag.service'
+import { McpService } from '../mcp/mcp.service'
 
 /**
  * LlmService
@@ -26,17 +27,27 @@ import { RagService } from '../rag/rag.service'
  * This service is agnostic to the frontend and can be used from different orchestrators (chatbot, API, etc).
  */
 @Injectable()
-export class LlmService {
+export class LlmService implements OnModuleInit {
   /** Logger for LlmService operations */
   private readonly logger = new Logger(LlmService.name)
   /** The current LLM instance (OpenAI, Anthropic, or Ollama) */
   private llm: ChatOpenAI | ChatAnthropic | ChatOllama
-  /** Tool-calling agent (without executor) */
-  private agent: Runnable | null = null
-  /** Tools available for the agent */
-  private tools: DynamicStructuredTool[] = []
+  /** Tool-calling agent for non-admin users (public tools only) */
+  private publicAgent: Runnable | null = null
+  /** Tool-calling agent for admin users (all tools) */
+  private adminAgent: Runnable | null = null
+  /** Tools available for non-admin users */
+  private publicTools: DynamicStructuredTool[] = []
+  /** Tools available for admin users (superset of publicTools) */
+  private adminTools: DynamicStructuredTool[] = []
+  /** Base (non-MCP) tools — kept separate so MCP tools can be rebuilt independently */
+  private baseTools: DynamicStructuredTool[] = []
+  /** Last known McpService.toolsVersion — used to detect lazy tool discoveries */
+  private lastToolsVersion = -1
   /** The agent's system prompt (loaded from environment) */
   private readonly agentPrompt: string
+  /** LLM provider name */
+  private readonly provider: SupportedProviders
 
   /**
    * Initializes the LlmService, selects the LLM provider, builds tools if defined,
@@ -44,28 +55,79 @@ export class LlmService {
    *
    * @param config - The NestJS ConfigService instance.
    * @param memoryService - Backend-agnostic chat memory service (in-memory / Redis).
+   * @param mcpService - MCP client service for connecting to external MCP servers.
    */
   constructor(
     private readonly config: ConfigService,
     private readonly memoryService: MemoryService,
     private readonly ragService: RagService,
+    private readonly mcpService: McpService,
   ) {
     this.agentPrompt = this.config.get<string>('appConfig.agentPrompt') ?? 'You are a helpful AI agent called Hologram.'
 
-    const provider = (this.config.get<string>('LLM_PROVIDER') ?? 'openai') as SupportedProviders
-    this.llm = this.instantiateLlm(provider)
-    const tools: DynamicStructuredTool[] = this.buildTools()
-    this.tools = tools
-    this.logger.debug(`*** TOOLS: ${JSON.stringify(tools, null, 2)}`)
+    this.provider = (this.config.get<string>('LLM_PROVIDER') ?? 'openai') as SupportedProviders
+    this.llm = this.instantiateLlm(this.provider)
+    const baseTools: DynamicStructuredTool[] = this.buildTools()
+    this.baseTools = baseTools
+    this.publicTools = [...baseTools]
+    this.adminTools = [...baseTools]
+    this.logger.debug(`*** BASE TOOLS (sync): ${JSON.stringify(baseTools.map((t) => t.name))}`)
 
-    if (tools.length && (provider === 'openai' || provider === 'anthropic')) {
-      this.setupToolAgent(tools)
-        .then(() => this.logger.log(`Tool-enabled agent initialised with ${tools.length} tools.`))
+    if (baseTools.length && (this.provider === 'openai' || this.provider === 'anthropic')) {
+      this.setupToolAgent(baseTools)
+        .then(({ publicAgent, adminAgent }) => {
+          this.publicAgent = publicAgent
+          this.adminAgent = adminAgent
+          this.logger.log(`Tool-enabled agents initialised with ${baseTools.length} base tools.`)
+        })
         .catch((err) => this.logger.error(`Failed to build Tool agent: ${err}`))
-    } else if (provider === 'ollama') {
+    } else if (this.provider === 'ollama') {
       this.logger.warn('Ollama does not support tools. Only plain prompts will be used.')
     } else {
       this.logger.log('Initializing without tools.')
+    }
+  }
+
+  /**
+   * After all modules are initialized, discover MCP tools asynchronously
+   * and rebuild the agent if new tools are found.
+   */
+  async onModuleInit() {
+    // Attempt initial MCP tool discovery (may be empty if all servers are lazy)
+    await this.refreshMcpTools()
+  }
+
+  /**
+   * Rebuilds MCP tools and agents if McpService.toolsVersion has changed.
+   * Safe to call repeatedly — no-ops when tools haven't changed.
+   */
+  private async refreshMcpTools(): Promise<void> {
+    const currentVersion = this.mcpService.toolsVersion
+    if (currentVersion === this.lastToolsVersion) return
+
+    try {
+      const { publicMcpTools, allMcpTools } = await this.buildMcpTools()
+      this.lastToolsVersion = currentVersion
+
+      // Rebuild tool arrays: base tools + MCP tools
+      this.publicTools = [...this.baseTools, ...publicMcpTools]
+      this.adminTools = [...this.baseTools, ...allMcpTools]
+
+      if (allMcpTools.length > 0) {
+        const pubNames = publicMcpTools.map((t) => t.name)
+        const adminOnlyNames = allMcpTools.filter((t) => !pubNames.includes(t.name)).map((t) => t.name)
+        this.logger.log(`MCP tools refreshed: ${allMcpTools.length} total (${pubNames.length} public, ${adminOnlyNames.length} admin-only). toolsVersion=${currentVersion}`)
+      }
+
+      // Rebuild agents with updated tool sets
+      if ((this.provider === 'openai' || this.provider === 'anthropic') && this.publicTools.length > 0) {
+        const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
+        this.publicAgent = publicAgent
+        this.adminAgent = adminAgent
+        this.logger.log(`Tool agents rebuilt: public=${this.publicTools.length} tools, admin=${this.adminTools.length} tools.`)
+      }
+    } catch (err) {
+      this.logger.error(`Failed to refresh MCP tools: ${err}`)
     }
   }
 
@@ -81,17 +143,24 @@ export class LlmService {
     userMessage: string,
     options?: {
       session?: SessionEntity
-      // history?: { role: 'user' | 'assistant' | 'system'; content: string }[] // legacy, ya no utilizado
+      isAdmin?: boolean
     },
   ): Promise<string> {
     const session = options?.session
-    this.logger.debug(`[generate] Initialize: ${JSON.stringify(session)}`)
+    const isAdmin = options?.isAdmin ?? false
+    this.logger.debug(`[generate] Initialize: ${JSON.stringify(session)}, isAdmin=${isAdmin}`)
 
     this.logger.log(`Generating response for user message: ${userMessage}`)
     try {
       const today = new Date().toISOString().split('T')[0]
 
-      if (this.agent && this.tools.length && session?.connectionId) {
+      // Check if MCP tools have been lazily discovered since last call
+      await this.refreshMcpTools()
+
+      const agent = isAdmin ? this.adminAgent : this.publicAgent
+      const tools = isAdmin ? this.adminTools : this.publicTools
+
+      if (agent && tools.length && session?.connectionId) {
         this.logger.debug('Using tool-enabled agent with LangChain Memory.')
 
         const { AgentExecutor } = await import('langchain/agents')
@@ -99,22 +168,24 @@ export class LlmService {
         const memory = new LangchainSessionMemory(this.memoryService, session.connectionId)
 
         const agentExecutor = new AgentExecutor({
-          agent: this.agent,
-          tools: this.tools,
+          agent,
+          tools,
           memory,
           verbose: this.config.get<boolean>('appConfig.agentVerbose') ?? false,
         }) as any as AgentExecutor
 
-        const result = await agentExecutor.invoke(
-          {
-            input: userMessage,
-            today,
-          },
-          {
-            configurable: {
-              isAuthenticated: session?.isAuthenticated ?? false,
+        const result = await this.mcpService.runWithCaller(session.userName ?? undefined, () =>
+          agentExecutor.invoke(
+            {
+              input: userMessage,
+              today,
             },
-          },
+            {
+              configurable: {
+                isAuthenticated: session?.isAuthenticated ?? false,
+              },
+            },
+          ),
         )
 
         this.logger.debug(`Agent executor result: ${JSON.stringify(result)}`)
@@ -183,12 +254,16 @@ export class LlmService {
         })
       case 'openai':
       default:
+      {
+        const maxTokens = this.config.get<number>('appConfig.openaiMaxTokens')
         return new ChatOpenAI({
           openAIApiKey: this.getOrThrow('OPENAI_API_KEY'),
           model: this.config.get<string>('appConfig.openaiModel') ?? 'gpt-4o',
           temperature: this.config.get<number>('appConfig.openaiTemperature'),
-          maxTokens: this.config.get<number>('appConfig.openaiMaxTokens'),
+          maxTokens: -1,
+          modelKwargs: maxTokens ? { max_completion_tokens: maxTokens } : undefined,
         })
+      }
     }
   }
 
@@ -276,12 +351,93 @@ export class LlmService {
   }
 
   /**
+   * Discovers tools from connected MCP servers and wraps each as a LangChain DynamicStructuredTool.
+   * Returns both the full set (for admin) and the public-only set (for non-admin).
+   */
+  private async buildMcpTools(): Promise<{ publicMcpTools: DynamicStructuredTool[]; allMcpTools: DynamicStructuredTool[] }> {
+    const allInfos = await this.mcpService.listTools(true) // get ALL tools with isPublic metadata
+    if (allInfos.length === 0) return { publicMcpTools: [], allMcpTools: [] }
+
+    const wrapTool = (info: (typeof allInfos)[0]) => {
+      const zodSchema = this.jsonSchemaToZod(info.inputSchema)
+
+      return new LlmService.toolCtor({
+        name: `mcp_${info.serverName}_${info.name}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
+        description: info.description || `MCP tool "${info.name}" from server "${info.serverName}"`,
+        schema: zodSchema,
+        func: async (args: Record<string, unknown>) => {
+          this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Called with args: ${JSON.stringify(args)}`)
+          try {
+            // isAdmin=true here because access was already checked at tool-selection time;
+            // the execution guard in McpService is a safety net.
+            const result = await this.mcpService.callTool(info.serverName, info.name, args, !info.isPublic)
+            this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Result: ${result.slice(0, 300)}`)
+            return result
+          } catch (err) {
+            this.logger.error(`[MCP Tool:${info.serverName}/${info.name}] Error: ${err}`)
+            return `Error calling MCP tool "${info.name}": ${err}`
+          }
+        },
+        returnDirect: false,
+      })
+    }
+
+    const allMcpTools = allInfos.map(wrapTool)
+    const publicMcpTools = allInfos.filter((i) => i.isPublic).map(wrapTool)
+
+    return { publicMcpTools, allMcpTools }
+  }
+
+  /**
+   * Converts a JSON Schema "properties" object into a Zod object schema.
+   * Handles string, number, integer, boolean, and array types.
+   * Falls back to a single { input: z.string() } if the schema is empty or unparseable.
+   */
+  private jsonSchemaToZod(schema: Record<string, unknown>): zod.ZodTypeAny {
+    const properties = (schema.properties ?? {}) as Record<string, { type?: string; description?: string; items?: { type?: string } }>
+    const required = (schema.required ?? []) as string[]
+
+    if (Object.keys(properties).length === 0) {
+      return zod.object({ input: zod.string().optional().describe('Input for the tool') })
+    }
+
+    const shape: Record<string, zod.ZodTypeAny> = {}
+    for (const [key, prop] of Object.entries(properties)) {
+      let field: zod.ZodTypeAny
+      switch (prop.type) {
+        case 'number':
+        case 'integer':
+          field = zod.number()
+          break
+        case 'boolean':
+          field = zod.boolean()
+          break
+        case 'array':
+          field = zod.array(prop.items?.type === 'number' ? zod.number() : zod.string())
+          break
+        case 'string':
+        default:
+          field = zod.string()
+          break
+      }
+      if (prop.description) field = field.describe(prop.description)
+      if (!required.includes(key)) field = field.optional()
+      shape[key] = field
+    }
+
+    return zod.object(shape) as zod.ZodTypeAny
+  }
+
+  /**
    * Sets up the tool-enabled agent using LangChain's agent API.
    * This enables dynamic tool-calling with prompt injection and logging.
    *
    * @param tools - Array of DynamicStructuredTool instances.
    */
-  private async setupToolAgent(tools: DynamicStructuredTool[]) {
+  private async setupToolAgent(
+    publicTools: DynamicStructuredTool[],
+    adminToolsOverride?: DynamicStructuredTool[],
+  ): Promise<{ publicAgent: Runnable; adminAgent: Runnable }> {
     const systemPrompt = `Today's date is: {today}.\n${this.agentPrompt}`
 
     this.logger.debug(`***Agent prompt: ${systemPrompt}***`)
@@ -293,13 +449,22 @@ export class LlmService {
       new MessagesPlaceholder('agent_scratchpad'),
     ])
 
-    const agent = createToolCallingAgent({
+    const publicAgent = createToolCallingAgent({
       llm: this.llm as ChatOpenAI | ChatAnthropic,
-      tools,
+      tools: publicTools,
       prompt,
     })
 
-    this.agent = agent
+    const adminTools = adminToolsOverride ?? publicTools
+    const adminAgent = adminTools === publicTools
+      ? publicAgent
+      : createToolCallingAgent({
+          llm: this.llm as ChatOpenAI | ChatAnthropic,
+          tools: adminTools,
+          prompt,
+        })
+
+    return { publicAgent, adminAgent }
   }
 
   /**
