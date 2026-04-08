@@ -32,10 +32,18 @@ export class LlmService implements OnModuleInit {
   private readonly logger = new Logger(LlmService.name)
   /** The current LLM instance (OpenAI, Anthropic, or Ollama) */
   private llm: ChatOpenAI | ChatAnthropic | ChatOllama
-  /** Tool-calling agent (without executor) */
-  private agent: Runnable | null = null
-  /** Tools available for the agent */
-  private tools: DynamicStructuredTool[] = []
+  /** Tool-calling agent for non-admin users (public tools only) */
+  private publicAgent: Runnable | null = null
+  /** Tool-calling agent for admin users (all tools) */
+  private adminAgent: Runnable | null = null
+  /** Tools available for non-admin users */
+  private publicTools: DynamicStructuredTool[] = []
+  /** Tools available for admin users (superset of publicTools) */
+  private adminTools: DynamicStructuredTool[] = []
+  /** Base (non-MCP) tools — kept separate so MCP tools can be rebuilt independently */
+  private baseTools: DynamicStructuredTool[] = []
+  /** Last known McpService.toolsVersion — used to detect lazy tool discoveries */
+  private lastToolsVersion = -1
   /** The agent's system prompt (loaded from environment) */
   private readonly agentPrompt: string
   /** LLM provider name */
@@ -59,13 +67,19 @@ export class LlmService implements OnModuleInit {
 
     this.provider = (this.config.get<string>('LLM_PROVIDER') ?? 'openai') as SupportedProviders
     this.llm = this.instantiateLlm(this.provider)
-    const tools: DynamicStructuredTool[] = this.buildTools()
-    this.tools = tools
-    this.logger.debug(`*** TOOLS (sync): ${JSON.stringify(tools.map((t) => t.name))}`)
+    const baseTools: DynamicStructuredTool[] = this.buildTools()
+    this.baseTools = baseTools
+    this.publicTools = [...baseTools]
+    this.adminTools = [...baseTools]
+    this.logger.debug(`*** BASE TOOLS (sync): ${JSON.stringify(baseTools.map((t) => t.name))}`)
 
-    if (tools.length && (this.provider === 'openai' || this.provider === 'anthropic')) {
-      this.setupToolAgent(tools)
-        .then(() => this.logger.log(`Tool-enabled agent initialised with ${tools.length} tools.`))
+    if (baseTools.length && (this.provider === 'openai' || this.provider === 'anthropic')) {
+      this.setupToolAgent(baseTools)
+        .then(({ publicAgent, adminAgent }) => {
+          this.publicAgent = publicAgent
+          this.adminAgent = adminAgent
+          this.logger.log(`Tool-enabled agents initialised with ${baseTools.length} base tools.`)
+        })
         .catch((err) => this.logger.error(`Failed to build Tool agent: ${err}`))
     } else if (this.provider === 'ollama') {
       this.logger.warn('Ollama does not support tools. Only plain prompts will be used.')
@@ -79,22 +93,41 @@ export class LlmService implements OnModuleInit {
    * and rebuild the agent if new tools are found.
    */
   async onModuleInit() {
-    if (!this.mcpService.isConnected) return
+    // Attempt initial MCP tool discovery (may be empty if all servers are lazy)
+    await this.refreshMcpTools()
+  }
+
+  /**
+   * Rebuilds MCP tools and agents if McpService.toolsVersion has changed.
+   * Safe to call repeatedly — no-ops when tools haven't changed.
+   */
+  private async refreshMcpTools(): Promise<void> {
+    const currentVersion = this.mcpService.toolsVersion
+    if (currentVersion === this.lastToolsVersion) return
 
     try {
-      const mcpTools = await this.buildMcpTools()
-      if (mcpTools.length === 0) return
+      const { publicMcpTools, allMcpTools } = await this.buildMcpTools()
+      this.lastToolsVersion = currentVersion
 
-      this.logger.log(`Discovered ${mcpTools.length} MCP tool(s): ${mcpTools.map((t) => t.name).join(', ')}`)
-      this.tools = [...this.tools, ...mcpTools]
+      // Rebuild tool arrays: base tools + MCP tools
+      this.publicTools = [...this.baseTools, ...publicMcpTools]
+      this.adminTools = [...this.baseTools, ...allMcpTools]
 
-      // Rebuild the tool-calling agent with the expanded tool set
-      if (this.provider === 'openai' || this.provider === 'anthropic') {
-        await this.setupToolAgent(this.tools)
-        this.logger.log(`Tool agent rebuilt with ${this.tools.length} total tools (including MCP).`)
+      if (allMcpTools.length > 0) {
+        const pubNames = publicMcpTools.map((t) => t.name)
+        const adminOnlyNames = allMcpTools.filter((t) => !pubNames.includes(t.name)).map((t) => t.name)
+        this.logger.log(`MCP tools refreshed: ${allMcpTools.length} total (${pubNames.length} public, ${adminOnlyNames.length} admin-only). toolsVersion=${currentVersion}`)
+      }
+
+      // Rebuild agents with updated tool sets
+      if ((this.provider === 'openai' || this.provider === 'anthropic') && this.publicTools.length > 0) {
+        const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
+        this.publicAgent = publicAgent
+        this.adminAgent = adminAgent
+        this.logger.log(`Tool agents rebuilt: public=${this.publicTools.length} tools, admin=${this.adminTools.length} tools.`)
       }
     } catch (err) {
-      this.logger.error(`Failed to discover MCP tools: ${err}`)
+      this.logger.error(`Failed to refresh MCP tools: ${err}`)
     }
   }
 
@@ -110,17 +143,24 @@ export class LlmService implements OnModuleInit {
     userMessage: string,
     options?: {
       session?: SessionEntity
-      // history?: { role: 'user' | 'assistant' | 'system'; content: string }[] // legacy, ya no utilizado
+      isAdmin?: boolean
     },
   ): Promise<string> {
     const session = options?.session
-    this.logger.debug(`[generate] Initialize: ${JSON.stringify(session)}`)
+    const isAdmin = options?.isAdmin ?? false
+    this.logger.debug(`[generate] Initialize: ${JSON.stringify(session)}, isAdmin=${isAdmin}`)
 
     this.logger.log(`Generating response for user message: ${userMessage}`)
     try {
       const today = new Date().toISOString().split('T')[0]
 
-      if (this.agent && this.tools.length && session?.connectionId) {
+      // Check if MCP tools have been lazily discovered since last call
+      await this.refreshMcpTools()
+
+      const agent = isAdmin ? this.adminAgent : this.publicAgent
+      const tools = isAdmin ? this.adminTools : this.publicTools
+
+      if (agent && tools.length && session?.connectionId) {
         this.logger.debug('Using tool-enabled agent with LangChain Memory.')
 
         const { AgentExecutor } = await import('langchain/agents')
@@ -128,22 +168,24 @@ export class LlmService implements OnModuleInit {
         const memory = new LangchainSessionMemory(this.memoryService, session.connectionId)
 
         const agentExecutor = new AgentExecutor({
-          agent: this.agent,
-          tools: this.tools,
+          agent,
+          tools,
           memory,
           verbose: this.config.get<boolean>('appConfig.agentVerbose') ?? false,
         }) as any as AgentExecutor
 
-        const result = await agentExecutor.invoke(
-          {
-            input: userMessage,
-            today,
-          },
-          {
-            configurable: {
-              isAuthenticated: session?.isAuthenticated ?? false,
+        const result = await this.mcpService.runWithCaller(session.userName ?? undefined, () =>
+          agentExecutor.invoke(
+            {
+              input: userMessage,
+              today,
             },
-          },
+            {
+              configurable: {
+                isAuthenticated: session?.isAuthenticated ?? false,
+              },
+            },
+          ),
         )
 
         this.logger.debug(`Agent executor result: ${JSON.stringify(result)}`)
@@ -310,13 +352,13 @@ export class LlmService implements OnModuleInit {
 
   /**
    * Discovers tools from connected MCP servers and wraps each as a LangChain DynamicStructuredTool.
-   * Each MCP tool's JSON Schema input is converted to a Zod schema for LangChain compatibility.
+   * Returns both the full set (for admin) and the public-only set (for non-admin).
    */
-  private async buildMcpTools(): Promise<DynamicStructuredTool[]> {
-    const mcpToolInfos = await this.mcpService.listTools()
-    if (mcpToolInfos.length === 0) return []
+  private async buildMcpTools(): Promise<{ publicMcpTools: DynamicStructuredTool[]; allMcpTools: DynamicStructuredTool[] }> {
+    const allInfos = await this.mcpService.listTools(true) // get ALL tools with isPublic metadata
+    if (allInfos.length === 0) return { publicMcpTools: [], allMcpTools: [] }
 
-    return mcpToolInfos.map((info) => {
+    const wrapTool = (info: (typeof allInfos)[0]) => {
       const zodSchema = this.jsonSchemaToZod(info.inputSchema)
 
       return new LlmService.toolCtor({
@@ -326,7 +368,9 @@ export class LlmService implements OnModuleInit {
         func: async (args: Record<string, unknown>) => {
           this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Called with args: ${JSON.stringify(args)}`)
           try {
-            const result = await this.mcpService.callTool(info.serverName, info.name, args)
+            // isAdmin=true here because access was already checked at tool-selection time;
+            // the execution guard in McpService is a safety net.
+            const result = await this.mcpService.callTool(info.serverName, info.name, args, !info.isPublic)
             this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Result: ${result.slice(0, 300)}`)
             return result
           } catch (err) {
@@ -336,7 +380,12 @@ export class LlmService implements OnModuleInit {
         },
         returnDirect: false,
       })
-    })
+    }
+
+    const allMcpTools = allInfos.map(wrapTool)
+    const publicMcpTools = allInfos.filter((i) => i.isPublic).map(wrapTool)
+
+    return { publicMcpTools, allMcpTools }
   }
 
   /**
@@ -385,7 +434,10 @@ export class LlmService implements OnModuleInit {
    *
    * @param tools - Array of DynamicStructuredTool instances.
    */
-  private async setupToolAgent(tools: DynamicStructuredTool[]) {
+  private async setupToolAgent(
+    publicTools: DynamicStructuredTool[],
+    adminToolsOverride?: DynamicStructuredTool[],
+  ): Promise<{ publicAgent: Runnable; adminAgent: Runnable }> {
     const systemPrompt = `Today's date is: {today}.\n${this.agentPrompt}`
 
     this.logger.debug(`***Agent prompt: ${systemPrompt}***`)
@@ -397,13 +449,22 @@ export class LlmService implements OnModuleInit {
       new MessagesPlaceholder('agent_scratchpad'),
     ])
 
-    const agent = createToolCallingAgent({
+    const publicAgent = createToolCallingAgent({
       llm: this.llm as ChatOpenAI | ChatAnthropic,
-      tools,
+      tools: publicTools,
       prompt,
     })
 
-    this.agent = agent
+    const adminTools = adminToolsOverride ?? publicTools
+    const adminAgent = adminTools === publicTools
+      ? publicAgent
+      : createToolCallingAgent({
+          llm: this.llm as ChatOpenAI | ChatAnthropic,
+          tools: adminTools,
+          prompt,
+        })
+
+    return { publicAgent, adminAgent }
   }
 
   /**

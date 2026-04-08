@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ChatbotModule } from 'src/chatbot/chatbot.module'
 import { MemoryModule } from 'src/memory/memory.module'
 import { AgentContentService } from './agent-content.service'
+import { McpConfigEntity } from '../mcp/mcp-config.entity'
 
 @Global()
 @Module({
@@ -21,7 +22,7 @@ import { AgentContentService } from './agent-content.service'
         username: configService.get<string>('appConfig.postgresUser'),
         password: configService.get<string>('appConfig.postgresPassword'),
         database: configService.get<string>('appConfig.postgresDbName'),
-        entities: [ConnectionEntity, SessionEntity],
+        entities: [ConnectionEntity, SessionEntity, McpConfigEntity],
         synchronize: true,
         ssl: false,
         logging: false,

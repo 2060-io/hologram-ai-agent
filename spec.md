@@ -232,8 +232,8 @@ flows:
     enabled: true
     # Avatar names that have admin rights
     adminAvatars:
-      - "alice.hologram.zone"
-      - "bob.hologram.zone"
+      - "@fafa"
+      - "@mj"
     # Granular permissions (all true by default)
     permissions:
       managePrompt: true

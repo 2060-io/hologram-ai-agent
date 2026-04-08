@@ -9,7 +9,7 @@ on:
 env:
   DH_USERNAME: ${{secrets.DOCKER_HUB_LOGIN}}
   DH_TOKEN: ${{secrets.DOCKER_HUB_PWD}}
-  IMAGE_NAME: hologram-generic-ai-agent-app
+  IMAGE_NAME: hologram-generic-ai-agent-mcp-app
   IMAGE_TAG: ${{ github.ref == 'refs/heads/main' && 'dev' || github.ref }}
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout hologram-generic-ai-agent-vs
+      - name: Checkout hologram-generic-ai-agent-mcp-vs
         uses: actions/checkout@v4
 
       - name: Setup Helm

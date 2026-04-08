@@ -1,6 +1,6 @@
-# 🤖 hologram-generic-ai-agent-vs
+# 🤖 hologram-generic-ai-agent-mcp-vs
 
-Welcome to **hologram-generic-ai-agent-vs** – a modular, multi-language AI agent built with NestJS, designed for welcoming users, providing personalized information, and integrating with any LLM, Retrieval Augmented Generation (RAG), and external APIs.
+Welcome to **hologram-generic-ai-agent-mcp-vs** – a modular, multi-language AI agent built with NestJS, designed for welcoming users, providing personalized information, and integrating with any LLM, Retrieval Augmented Generation (RAG), and external APIs.
 
 ---
 
@@ -55,7 +55,7 @@ You are an AI agent called Karen. You welcome users and provide information abou
 
 ## 🚀 Overview
 
-**hologram-generic-ai-agent-vs** is a backend conversational AI agent that serves as the intelligent welcoming agent for Hologram and related ecosystems. The system is designed to:
+**hologram-generic-ai-agent-mcp-vs** is a backend conversational AI agent that serves as the intelligent welcoming agent for Hologram and related ecosystems. The system is designed to:
 
 - **Send a personalized, AI-generated welcome message** when a new user connects.
 - **Provide information about Hologram, Verana, and more** via natural conversation.

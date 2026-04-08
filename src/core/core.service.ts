@@ -10,6 +10,8 @@ import {
   IdentityProofRequestMessage,
   IdentityProofSubmitMessage,
   MediaMessage,
+  MenuDisplayMessage,
+  MenuSelectMessage,
   ProfileMessage,
   StatEnum,
   TextMessage,
@@ -27,6 +29,8 @@ import { StateStep } from './common/enums/state-step.enum'
 import { ChatbotService } from '../chatbot/chatbot.service'
 import { MemoryService } from '../memory/memory.service'
 import { AgentContentService } from './agent-content.service'
+import { McpConfigService } from '../mcp/mcp-config.service'
+import { McpService } from '../mcp/mcp.service'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -41,6 +45,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly memoryService: MemoryService,
     @Optional() private readonly statProducer: StatProducerService,
     private readonly agentContent: AgentContentService,
+    private readonly mcpConfigService: McpConfigService,
+    private readonly mcpService: McpService,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -98,9 +104,19 @@ export class CoreService implements EventHandler, OnModuleInit {
           const action = selectionId ? this.menuActions[selectionId] : undefined
           if (selectionId && action) {
             this.logger.debug(`ContextualMenuSelectMessage with selectionId: ${selectionId} and action: ${action}`)
-            await this.handleContextualAction(selectionId, session)
+            await this.handleContextualAction(action, session)
           } else {
             this.logger.warn(`Invalid or missing selectionId: ${selectionId}`)
+          }
+          break
+        }
+        case MenuSelectMessage.type: {
+          const rawItems = (message as any).menuItems as Array<{ id: string }> | undefined
+          if (session.state === StateStep.MCP_CONFIG && !session.mcpConfigServer && rawItems?.length) {
+            const selectedId = rawItems[0]?.id
+            if (selectedId) {
+              await this.startMcpConfigForServer(selectedId, session)
+            }
           }
           break
         }
@@ -213,15 +229,15 @@ export class CoreService implements EventHandler, OnModuleInit {
    * Processes actions related to `ContextualMenuSelectMessage` messages.
    * Updates the session based on the selected option.
    *
-   * @param selectionId - Identifier of the user's selection.
+   * @param action - The resolved action name (e.g. 'authenticate', 'logout', 'mcp-config').
    * @param session - The current session associated with the message.
    */
-  private async handleContextualAction(selectionId: string, session: SessionEntity): Promise<SessionEntity> {
+  private async handleContextualAction(action: string, session: SessionEntity): Promise<SessionEntity> {
     const { connectionId, lang } = session
     switch (session.state) {
       case StateStep.CHAT: {
         this.logger.debug(`this.authFlowConfig.enabled: ${this.authFlowConfig.enabled}`)
-        if (selectionId === 'authenticate' && this.authFlowConfig.enabled) {
+        if (action === 'authenticate' && this.authFlowConfig.enabled) {
           const credentialDefinitionId = this.credentialDefinitionId
           this.logger.debug(`credentialDefinition: ${credentialDefinitionId}`)
           if (!credentialDefinitionId) {
@@ -246,13 +262,23 @@ export class CoreService implements EventHandler, OnModuleInit {
           await this.sendText(connectionId, this.getText('AUTH_PROCESS_STARTED', lang), lang)
         }
 
-        if (selectionId === 'logout') {
+        if (action === 'logout') {
           await this.sendText(connectionId, this.getText('LOGOUT_CONFIRMATION', lang), lang)
           session.isAuthenticated = false
           session.userName = ''
           await this.sessionRepository.save(session)
           await this.closeConnection(connectionId)
           await this.memoryService.clear(connectionId)
+        }
+
+        if (action === 'mcp-config') {
+          await this.beginMcpConfigFlow(session)
+        }
+        break
+      }
+      case StateStep.MCP_CONFIG: {
+        if (action === 'abort-config') {
+          await this.abortMcpConfigFlow(session)
         }
         break
       }
@@ -287,6 +313,7 @@ export class CoreService implements EventHandler, OnModuleInit {
               const answer = await this.chatBotService.chat({
                 userInput: textContent,
                 session,
+                isAdmin: this.isAdmin(session),
               })
               await this.sendText(connectionId, answer, userLang)
             }
@@ -339,6 +366,19 @@ export class CoreService implements EventHandler, OnModuleInit {
             }
           } else {
             await this.sendText(connectionId, this.getText('WAITING_CREDENTIAL', userLang), userLang)
+          }
+          break
+        case StateStep.MCP_CONFIG:
+          if (
+            typeof content === 'object' &&
+            content !== null &&
+            'content' in content &&
+            typeof (content as Record<string, unknown>).content === 'string'
+          ) {
+            const textContent = (content as { content: string }).content.trim()
+            if (textContent.length > 0) {
+              await this.handleMcpConfigInput(textContent, session)
+            }
           }
           break
         default:
@@ -395,15 +435,17 @@ export class CoreService implements EventHandler, OnModuleInit {
    */
   private async purgeUserData(session: SessionEntity): Promise<SessionEntity> {
     session.state = StateStep.START
-    // Additional sensitive data can be reset here if needed.
+    session.mcpConfigServer = undefined
+    session.mcpConfigFieldIndex = undefined
     return await this.sessionRepository.save(session)
   }
 
   private async sendContextualMenu(session: SessionEntity): Promise<SessionEntity> {
+    const isConfiguring = session.state === StateStep.MCP_CONFIG
     const options: ContextualMenuItem[] = this.menuItems
       .filter(
         (item) =>
-          this.isMenuItemVisible(item.visibleWhen, session.isAuthenticated ?? false) &&
+          this.isMenuItemVisible(item.visibleWhen, session.isAuthenticated ?? false, isConfiguring) &&
           this.isMenuActionEnabled(item.action),
       )
       .map(
@@ -447,12 +489,16 @@ export class CoreService implements EventHandler, OnModuleInit {
     if (session !== null && this.statProducer) await this.statProducer.spool(stats, session.connectionId, [new StatEnum(0, 'string')])
   }
 
-  private isMenuItemVisible(visibleWhen: string | undefined, isAuthenticated: boolean) {
+  private isMenuItemVisible(visibleWhen: string | undefined, isAuthenticated: boolean, isConfiguring = false) {
     switch (visibleWhen) {
       case 'authenticated':
         return !!isAuthenticated
       case 'unauthenticated':
         return !isAuthenticated
+      case 'configuring':
+        return isConfiguring
+      case 'notConfiguring':
+        return !!isAuthenticated && !isConfiguring
       default:
         return true
     }
@@ -462,6 +508,163 @@ export class CoreService implements EventHandler, OnModuleInit {
     if (!action) return true
     if (action === 'authenticate')
       return this.authFlowConfig.enabled && !!this.authFlowConfig.credentialDefinitionId?.trim()
+    if (action === 'mcp-config')
+      return this.mcpConfigService.isAvailable && this.agentContent.getUserControlledServers().length > 0
     return true
+  }
+
+  // ── MCP Config Flow ──────────────────────────────────────────────
+
+  /** Transient in-memory store for config fields being collected (connectionId → field values) */
+  private readonly mcpConfigCollected = new Map<string, Record<string, string>>()
+
+  /**
+   * Step 1: User clicked "MCP Server Config" → show server selection menu.
+   */
+  private async beginMcpConfigFlow(session: SessionEntity): Promise<void> {
+    const servers = this.agentContent.getUserControlledServers()
+    if (servers.length === 0) {
+      await this.sendText(session.connectionId, 'No configurable MCP servers available.', session.lang)
+      return
+    }
+
+    session.state = StateStep.MCP_CONFIG
+    session.mcpConfigServer = undefined
+    session.mcpConfigFieldIndex = undefined
+    await this.sessionRepository.save(session)
+
+    const menuItems = await Promise.all(
+      servers.map(async (s) => {
+        const configured = session.userName
+          ? await this.mcpConfigService.hasConfig(session.userName, s.name)
+          : false
+        const status = configured ? '✅' : '⚠️'
+        return { id: s.name, text: `${status} ${s.name}`, action: s.name }
+      }),
+    )
+
+    await this.apiClient.messages.send(
+      new MenuDisplayMessage({
+        connectionId: session.connectionId,
+        prompt: this.getText('MCP_CONFIG_SELECT_SERVER', session.lang),
+        menuItems,
+      }),
+    )
+
+    this.logger.log(`[MCP_CONFIG] Server selection menu sent to ${session.connectionId}`)
+  }
+
+  /**
+   * Step 2: User selected a server from the menu → start asking config fields.
+   */
+  private async startMcpConfigForServer(serverName: string, session: SessionEntity): Promise<void> {
+    const serverDef = this.agentContent.getUserControlledServer(serverName)
+    if (!serverDef?.userConfig?.fields?.length) {
+      await this.sendText(session.connectionId, `Server "${serverName}" has no configurable fields.`, session.lang)
+      await this.abortMcpConfigFlow(session)
+      return
+    }
+
+    session.mcpConfigServer = serverName
+    session.mcpConfigFieldIndex = 0
+    await this.sessionRepository.save(session)
+    this.mcpConfigCollected.set(session.connectionId, {})
+
+    this.logger.log(`[MCP_CONFIG] Starting config for server "${serverName}" (${serverDef.userConfig.fields.length} field(s))`)
+    await this.askCurrentConfigField(session, serverDef)
+  }
+
+  /**
+   * Step 3: User sent a text message while in MCP_CONFIG state → store field value and advance.
+   */
+  private async handleMcpConfigInput(text: string, session: SessionEntity): Promise<void> {
+    const { connectionId, lang, mcpConfigServer, mcpConfigFieldIndex } = session
+    if (!mcpConfigServer || mcpConfigFieldIndex == null) {
+      await this.abortMcpConfigFlow(session)
+      return
+    }
+
+    const serverDef = this.agentContent.getUserControlledServer(mcpConfigServer)
+    if (!serverDef?.userConfig?.fields?.length) {
+      await this.abortMcpConfigFlow(session)
+      return
+    }
+
+    const fields = serverDef.userConfig.fields
+    const currentField = fields[mcpConfigFieldIndex]
+    if (!currentField) {
+      await this.abortMcpConfigFlow(session)
+      return
+    }
+
+    // Store the value in transient map
+    const collected = this.mcpConfigCollected.get(connectionId) ?? {}
+    collected[currentField.name] = text
+    this.mcpConfigCollected.set(connectionId, collected)
+
+    const nextIndex = mcpConfigFieldIndex + 1
+    if (nextIndex < fields.length) {
+      // More fields to collect
+      session.mcpConfigFieldIndex = nextIndex
+      await this.sessionRepository.save(session)
+      await this.askCurrentConfigField(session, serverDef)
+    } else {
+      // All fields collected → encrypt and save, then validate
+      try {
+        await this.mcpConfigService.saveConfig(session.userName!, mcpConfigServer, collected)
+        this.logger.log(`[MCP_CONFIG] Config saved for avatar="${session.userName}" server="${mcpConfigServer}"`)
+
+        // Validate: attempt a real connection with the provided credentials
+        const valid = await this.mcpService.testUserConnection(session.userName!, mcpConfigServer)
+        if (valid) {
+          const msg = this.getText('MCP_CONFIG_SAVED', lang).replace('{server}', mcpConfigServer)
+          await this.sendText(connectionId, msg, lang)
+        } else {
+          // Credentials are invalid → remove saved config so user can retry
+          await this.mcpConfigService.deleteConfig(session.userName!, mcpConfigServer)
+          const msg = this.getText('MCP_CONFIG_INVALID', lang).replace('{server}', mcpConfigServer)
+          await this.sendText(connectionId, msg, lang)
+        }
+      } catch (err) {
+        this.logger.error(`[MCP_CONFIG] Failed to save/validate config: ${err}`)
+        await this.sendText(connectionId, this.getText('MCP_CONFIG_ERROR', lang), lang)
+      }
+
+      // Clean up and return to CHAT state
+      this.mcpConfigCollected.delete(connectionId)
+      session.state = StateStep.CHAT
+      session.mcpConfigServer = undefined
+      session.mcpConfigFieldIndex = undefined
+      await this.sessionRepository.save(session)
+    }
+  }
+
+  /**
+   * Abort: User clicked "Abort Configuration" or something went wrong → reset to CHAT.
+   */
+  private async abortMcpConfigFlow(session: SessionEntity): Promise<void> {
+    this.mcpConfigCollected.delete(session.connectionId)
+    session.state = StateStep.CHAT
+    session.mcpConfigServer = undefined
+    session.mcpConfigFieldIndex = undefined
+    await this.sessionRepository.save(session)
+
+    await this.sendText(session.connectionId, this.getText('MCP_CONFIG_ABORTED', session.lang), session.lang)
+    this.logger.log(`[MCP_CONFIG] Config flow aborted for ${session.connectionId}`)
+  }
+
+  /**
+   * Sends the prompt for the current config field to the user.
+   */
+  private async askCurrentConfigField(
+    session: SessionEntity,
+    serverDef: { userConfig?: { fields: { name: string; label: Record<string, string>; type: string }[] } },
+  ): Promise<void> {
+    const field = serverDef.userConfig?.fields[session.mcpConfigFieldIndex ?? 0]
+    if (!field) return
+
+    const langKey = session.lang?.split('-')[0] ?? 'en'
+    const label = field.label[langKey] ?? field.label['en'] ?? field.name
+    await this.sendText(session.connectionId, label, session.lang)
   }
 }

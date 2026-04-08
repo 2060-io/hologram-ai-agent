@@ -1,8 +1,8 @@
-# hologram-generic-ai-agent-vs Helm Chart
+# hologram-generic-ai-agent-mcp-vs Helm Chart
 
 ## Overview
 
-This Helm chart deploys the `hologram-generic-ai-agent-vs` application and all required Kubernetes components: `chatbot`, `vs-agent`, `postgres`, `redis`, `stats`, and (optional) `artemis`.
+This Helm chart deploys the `hologram-generic-ai-agent-mcp-vs` application and all required Kubernetes components: `chatbot`, `vs-agent`, `postgres`, `redis`, `stats`, and (optional) `artemis`.
 
 - The `vs-agent` component is deployed as a Helm dependency (`vs-agent-chart`) and configured entirely via `values.yaml`.
 

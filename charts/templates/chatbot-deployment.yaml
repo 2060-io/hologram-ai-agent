@@ -92,7 +92,7 @@ spec:
     spec:
       containers:
         - name: chatbot
-          image: {{ .Values.image.repository | default "io2060/hologram-generic-ai-agent-app" }}:{{ .Values.image.tag | default .Chart.Version }}
+          image: {{ .Values.image.repository | default "io2060/hologram-generic-ai-agent-mcp-app" }}:{{ .Values.image.tag | default .Chart.Version }}
           imagePullPolicy: {{ .Values.chatbot.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.chatbot.service.port }}

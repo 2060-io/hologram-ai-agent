@@ -1,7 +1,7 @@
 name: Continuous Deployment (Stable Release)
 
 env:
-  IMAGE_NAME: hologram-generic-ai-agent-app
+  IMAGE_NAME: hologram-generic-ai-agent-mcp-app
 
 on:
   push:

@@ -1,10 +1,12 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { AsyncLocalStorage } from 'async_hooks'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import type { McpServerDef } from '../config/agent-pack.loader'
+import type { McpServerDef, McpToolAccess } from '../config/agent-pack.loader'
+import { McpConfigService } from './mcp-config.service'
 
 interface McpConnection {
   name: string
@@ -17,6 +19,8 @@ export interface McpToolInfo {
   name: string
   description: string
   inputSchema: Record<string, unknown>
+  /** Whether this tool is accessible to non-admin users */
+  isPublic: boolean
 }
 
 /**
@@ -32,7 +36,28 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
   private readonly connections: McpConnection[] = []
   private readonly serverDefs: McpServerDef[]
 
-  constructor(private readonly config: ConfigService) {
+  /** AsyncLocalStorage carries the current caller's avatarName through tool invocations */
+  private readonly callerCtx = new AsyncLocalStorage<{ avatarName?: string }>()
+
+  /** Per-user MCP connections keyed by "avatarName:serverName" */
+  private readonly userConnections = new Map<string, McpConnection>()
+
+  /** Maps server name → accessMode */
+  private readonly accessModeMap = new Map<string, string>()
+
+  /** Cached tool definitions per server (populated at startup or lazily on first per-user connect) */
+  private readonly serverToolCache = new Map<string, McpToolInfo[]>()
+
+  /** Incremented when new tools are discovered — allows consumers to detect changes */
+  private _toolsVersion = 0
+  get toolsVersion(): number {
+    return this._toolsVersion
+  }
+
+  constructor(
+    private readonly config: ConfigService,
+    private readonly mcpConfigService: McpConfigService,
+  ) {
     this.serverDefs = this.config.get<McpServerDef[]>('appConfig.mcpServers') ?? []
   }
 
@@ -45,6 +70,16 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     this.logger.log(`Connecting to ${this.serverDefs.length} MCP server(s)...`)
 
     for (const def of this.serverDefs) {
+      // Always register metadata regardless of connection
+      if (def.toolAccess) this.toolAccessMap.set(def.name, def.toolAccess)
+      if (def.accessMode) this.accessModeMap.set(def.name, def.accessMode)
+
+      // Skip shared connection for user-controlled servers without valid admin headers
+      if (def.accessMode === 'user-controlled' && this.hasUnresolvedHeaders(def)) {
+        this.logger.log(`Skipping shared connection for user-controlled server "${def.name}" (no admin token). Tools will be discovered on first user connection.`)
+        continue
+      }
+
       try {
         await this.connectServer(def)
       } catch (err) {
@@ -65,25 +100,52 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
       }
     }
     this.connections.length = 0
+
+    // Close per-user connections
+    for (const [key, conn] of this.userConnections) {
+      try {
+        await conn.client.close()
+      } catch (err) {
+        this.logger.warn(`Error closing user connection "${key}": ${err}`)
+      }
+    }
+    this.userConnections.clear()
   }
 
   /**
-   * Returns all tools discovered from all connected MCP servers.
+   * Runs a function with the caller's avatarName in async context.
+   * MCP tool invocations within `fn` will use per-user credentials for user-controlled servers.
    */
-  async listTools(): Promise<McpToolInfo[]> {
-    const allTools: McpToolInfo[] = []
+  async runWithCaller<T>(avatarName: string | undefined, fn: () => Promise<T>): Promise<T> {
+    return this.callerCtx.run({ avatarName }, fn)
+  }
 
+  /**
+   * Returns tools discovered from all connected MCP servers,
+   * filtered by the caller's admin status.
+   *
+   * @param isAdmin - If true, returns all tools; if false, returns only public tools.
+   */
+  async listTools(isAdmin = false): Promise<McpToolInfo[]> {
+    const allTools: McpToolInfo[] = []
+    const discoveredServers = new Set<string>()
+
+    // Tools from shared (admin) connections
     for (const conn of this.connections) {
+      discoveredServers.add(conn.name)
+      const access = this.toolAccessMap.get(conn.name)
       try {
         let cursor: string | undefined
         do {
           const result = await conn.client.listTools({ cursor })
           for (const tool of result.tools) {
+            const pub = this.isToolPublic(tool.name, access)
             allTools.push({
               serverName: conn.name,
               name: tool.name,
               description: tool.description ?? '',
               inputSchema: (tool.inputSchema as Record<string, unknown>) ?? {},
+              isPublic: pub,
             })
           }
           cursor = result.nextCursor
@@ -93,16 +155,45 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    return allTools
+    // Include lazily-discovered tools from servers without a shared connection
+    for (const [serverName, tools] of this.serverToolCache) {
+      if (!discoveredServers.has(serverName)) {
+        allTools.push(...tools)
+      }
+    }
+
+    if (isAdmin) return allTools
+    return allTools.filter((t) => t.isPublic)
   }
 
   /**
    * Calls a tool on the appropriate MCP server.
+   * Enforces access control: non-admin callers can only invoke public tools.
+   *
+   * @param isAdmin - Whether the caller has admin privileges.
    */
-  async callTool(serverName: string, toolName: string, args: Record<string, unknown>): Promise<string> {
-    const conn = this.connections.find((c) => c.name === serverName)
-    if (!conn) {
+  async callTool(serverName: string, toolName: string, args: Record<string, unknown>, isAdmin = false): Promise<string> {
+    const sharedConn = this.connections.find((c) => c.name === serverName) ?? null
+    const accessMode = this.accessModeMap.get(serverName)
+
+    // For admin-controlled servers, a shared connection is required
+    if (!sharedConn && accessMode !== 'user-controlled') {
       throw new Error(`MCP server "${serverName}" not connected.`)
+    }
+
+    // Execution guard: reject admin-only tools for non-admin callers
+    if (!isAdmin) {
+      const access = this.toolAccessMap.get(serverName)
+      if (!this.isToolPublic(toolName, access)) {
+        this.logger.warn(`[ACCESS] Non-admin caller attempted to call admin-only tool "${toolName}" on server "${serverName}".`)
+        return 'This tool requires administrator privileges. Please contact an admin.'
+      }
+    }
+
+    // For user-controlled servers, resolve the per-user connection
+    const conn = await this.resolveConnection(serverName, sharedConn)
+    if (!conn) {
+      return 'You need to configure your credentials for this service first. Use the "MCP Server Config" menu option.'
     }
 
     const result = await conn.client.callTool({ name: toolName, arguments: args })
@@ -136,10 +227,33 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Returns whether any MCP servers are connected.
+   * Returns whether any MCP servers are connected or have lazily-discovered tools.
    */
   get isConnected(): boolean {
-    return this.connections.length > 0
+    return this.connections.length > 0 || this.serverToolCache.size > 0
+  }
+
+  /**
+   * Returns whether any MCP server definitions exist (even if not yet connected).
+   */
+  get hasServerDefs(): boolean {
+    return this.serverDefs.length > 0
+  }
+
+  /** Per-server tool access configuration, keyed by server name */
+  private readonly toolAccessMap = new Map<string, McpToolAccess | undefined>()
+
+  /**
+   * Determines if a specific tool is public (accessible to non-admin users).
+   */
+  private isToolPublic(toolName: string, access?: McpToolAccess): boolean {
+    if (!access) return true // no access config → all public
+    if (access.default === 'admin') {
+      // Default admin: only explicitly listed public tools are accessible
+      return (access.public ?? []).includes(toolName)
+    }
+    // Default public: all tools public unless explicitly listed as adminOnly
+    return !(access.adminOnly ?? []).includes(toolName)
   }
 
   private async connectServer(def: McpServerDef): Promise<void> {
@@ -183,6 +297,201 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
 
     await client.connect(transport)
     this.connections.push({ name: def.name, client, transport })
-    this.logger.log(`Connected to MCP server "${def.name}" via ${def.transport}.`)
+    // Metadata may already have been registered in onModuleInit; set here as fallback for direct calls
+    if (!this.toolAccessMap.has(def.name)) this.toolAccessMap.set(def.name, def.toolAccess)
+    if (def.accessMode && !this.accessModeMap.has(def.name)) this.accessModeMap.set(def.name, def.accessMode)
+    this.logger.log(`Connected to MCP server "${def.name}" via ${def.transport}. accessMode=${def.accessMode ?? 'admin-controlled'}, toolAccess: ${def.toolAccess ? `default=${def.toolAccess.default}` : 'none (all public)'}`)
+  }
+
+  /**
+   * Checks whether a server definition has unresolved ${...} placeholders in its headers.
+   */
+  private hasUnresolvedHeaders(def: McpServerDef): boolean {
+    if (!def.headers) return false
+    return Object.values(def.headers).some((v) => /\$\{[^}]+\}/.test(v))
+  }
+
+  /**
+   * Resolves the MCP connection to use for a tool call.
+   * For user-controlled servers, returns a per-user connection with the user's decrypted headers.
+   * Returns null if the server is user-controlled but the user hasn't configured credentials.
+   */
+  private async resolveConnection(serverName: string, sharedConn: McpConnection | null): Promise<McpConnection | null> {
+    const accessMode = this.accessModeMap.get(serverName)
+    if (accessMode !== 'user-controlled') {
+      return sharedConn // admin-controlled: use shared connection
+    }
+
+    const ctx = this.callerCtx.getStore()
+    const avatarName = ctx?.avatarName
+    if (!avatarName) {
+      this.logger.warn(`[ACCESS] User-controlled server "${serverName}" called without caller context.`)
+      return null
+    }
+
+    // Check cache
+    const cacheKey = `${avatarName}:${serverName}`
+    const cached = this.userConnections.get(cacheKey)
+    if (cached) return cached
+
+    // Decrypt user config
+    const userConfig = await this.mcpConfigService.getConfig(avatarName, serverName)
+    if (!userConfig) {
+      this.logger.debug(`[ACCESS] No config found for avatar="${avatarName}" server="${serverName}".`)
+      return null
+    }
+
+    // Build per-user headers
+    const serverDef = this.serverDefs.find((d) => d.name === serverName)
+    if (!serverDef?.url || !serverDef.userConfig?.fields) return null
+
+    const headers = this.buildUserHeaders(serverDef, userConfig)
+
+    // Create per-user connection
+    try {
+      const client = new Client({ name: `hologram-agent/${serverName}/${avatarName}`, version: '1.0.0' })
+      const transport = new StreamableHTTPClientTransport(new URL(serverDef.url), {
+        requestInit: { headers },
+      })
+      await client.connect(transport)
+      const conn: McpConnection = { name: serverName, client, transport }
+      this.userConnections.set(cacheKey, conn)
+      this.logger.log(`[MCP_USER] Created per-user connection for avatar="${avatarName}" server="${serverName}".`)
+
+      // Lazy tool discovery: cache tool definitions on first per-user connection
+      if (!this.serverToolCache.has(serverName)) {
+        await this.discoverAndCacheTools(conn, serverName)
+      }
+
+      return conn
+    } catch (err) {
+      this.logger.error(`[MCP_USER] Failed to create per-user connection for avatar="${avatarName}" server="${serverName}": ${err}`)
+      return null
+    }
+  }
+
+  /**
+   * Discovers tools from a connection and caches them at the server level.
+   * Increments toolsVersion so consumers (e.g. LlmService) know to rebuild agents.
+   */
+  private async discoverAndCacheTools(conn: McpConnection, serverName: string): Promise<void> {
+    const access = this.toolAccessMap.get(serverName)
+    const tools: McpToolInfo[] = []
+    try {
+      let cursor: string | undefined
+      do {
+        const result = await conn.client.listTools({ cursor })
+        for (const tool of result.tools) {
+          tools.push({
+            serverName,
+            name: tool.name,
+            description: tool.description ?? '',
+            inputSchema: (tool.inputSchema as Record<string, unknown>) ?? {},
+            isPublic: this.isToolPublic(tool.name, access),
+          })
+        }
+        cursor = result.nextCursor
+      } while (cursor)
+    } catch (err) {
+      this.logger.error(`[MCP] Failed to discover tools for server "${serverName}": ${err}`)
+      return
+    }
+    this.serverToolCache.set(serverName, tools)
+    this._toolsVersion++
+    this.logger.log(`[MCP] Lazily discovered ${tools.length} tool(s) for server "${serverName}" (toolsVersion=${this._toolsVersion})`)
+  }
+
+  /**
+   * Tests a per-user connection after config is saved.
+   * Attempts to connect and list tools to validate the credentials.
+   * On success, caches the connection and discovers tools.
+   * On failure, cleans up and returns false.
+   */
+  async testUserConnection(avatarName: string, serverName: string): Promise<boolean> {
+    // Clear any stale cached connection
+    await this.invalidateUserConnection(avatarName, serverName)
+
+    const userConfig = await this.mcpConfigService.getConfig(avatarName, serverName)
+    if (!userConfig) return false
+
+    const serverDef = this.serverDefs.find((d) => d.name === serverName)
+    if (!serverDef?.url || !serverDef.userConfig?.fields) return false
+
+    const headers = this.buildUserHeaders(serverDef, userConfig)
+
+    let client: Client | undefined
+    let transport: StreamableHTTPClientTransport | undefined
+    try {
+      client = new Client({ name: `hologram-agent/${serverName}/${avatarName}`, version: '1.0.0' })
+      transport = new StreamableHTTPClientTransport(new URL(serverDef.url), {
+        requestInit: { headers },
+      })
+      await client.connect(transport)
+
+      // Validate: attempt to list tools (will fail with bad credentials)
+      await client.listTools()
+
+      // Success → cache the connection
+      const cacheKey = `${avatarName}:${serverName}`
+      const conn: McpConnection = { name: serverName, client, transport }
+      this.userConnections.set(cacheKey, conn)
+      this.logger.log(`[MCP_USER] Connection test passed for avatar="${avatarName}" server="${serverName}"`)
+
+      // Lazy tool discovery
+      if (!this.serverToolCache.has(serverName)) {
+        await this.discoverAndCacheTools(conn, serverName)
+      }
+
+      return true
+    } catch (err) {
+      this.logger.warn(`[MCP_USER] Connection test failed for avatar="${avatarName}" server="${serverName}": ${err}`)
+      if (client) {
+        try { await client.close() } catch { /* ignore */ }
+      }
+      return false
+    }
+  }
+
+  /**
+   * Builds per-user headers by merging base headers (stripping unresolved placeholders)
+   * with user-provided values via headerTemplate.
+   */
+  private buildUserHeaders(serverDef: McpServerDef, userConfig: Record<string, string>): Record<string, string> {
+    const headers: Record<string, string> = {}
+
+    // Copy base headers, skipping any with unresolved ${...} placeholders
+    if (serverDef.headers) {
+      for (const [k, v] of Object.entries(serverDef.headers)) {
+        if (!/\$\{[^}]+\}/.test(v)) {
+          headers[k] = v
+        }
+      }
+    }
+
+    // Apply user-provided values via headerTemplate
+    for (const field of serverDef.userConfig?.fields ?? []) {
+      if (field.headerTemplate && userConfig[field.name]) {
+        const headerName = field.headerName ?? 'Authorization'
+        headers[headerName] = field.headerTemplate.replace('{value}', userConfig[field.name])
+      }
+    }
+
+    return headers
+  }
+
+  /**
+   * Invalidates cached per-user connections for a specific avatar + server.
+   * Call this when the user updates their credentials.
+   */
+  async invalidateUserConnection(avatarName: string, serverName: string): Promise<void> {
+    const key = `${avatarName}:${serverName}`
+    const conn = this.userConnections.get(key)
+    if (conn) {
+      try {
+        await conn.client.close()
+      } catch { /* ignore */ }
+      this.userConnections.delete(key)
+      this.logger.debug(`[MCP_USER] Invalidated connection for avatar="${avatarName}" server="${serverName}".`)
+    }
   }
 }

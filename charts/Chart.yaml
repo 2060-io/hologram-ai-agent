@@ -1,5 +1,5 @@
 apiVersion: v2
-name: hologram-generic-ai-agent-chart
+name: hologram-generic-ai-agent-mcp-chart
 version: 1.3.2
 appVersion: '1.3.2'
 description: Helm chart to deploy Hologram Generic AI Agent Verifiable Service

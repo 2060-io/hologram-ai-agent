@@ -92,7 +92,7 @@ const AgentPackSchema = z
                   id: z.string(),
                   labelKey: z.string(),
                   action: z.string().optional(),
-                  visibleWhen: z.enum(['always', 'authenticated', 'unauthenticated']).optional(),
+                  visibleWhen: z.enum(['always', 'authenticated', 'unauthenticated', 'configuring', 'notConfiguring']).optional(),
                 }),
               )
               .optional(),
@@ -119,6 +119,28 @@ const AgentPackSchema = z
               env: z.record(z.string()).optional(),
               headers: z.record(z.string()).optional(),
               reconnect: z.union([z.boolean(), z.string()]).optional(),
+              accessMode: z.enum(['admin-controlled', 'user-controlled']).optional(),
+              userConfig: z
+                .object({
+                  fields: z
+                    .array(
+                      z.object({
+                        name: z.string(),
+                        type: z.enum(['secret', 'text']).optional(),
+                        label: z.union([z.string(), z.record(z.string())]).optional(),
+                        headerTemplate: z.string().optional(),
+                        headerName: z.string().optional(),
+                      }),
+                    )
+                    .optional(),
+                })
+                .optional(),
+              toolAccess: z
+                .object({
+                  default: z.enum(['public', 'admin']).optional(),
+                  public: z.array(z.string()).optional(),
+                })
+                .optional(),
             }),
           )
           .optional(),
@@ -330,6 +352,28 @@ export function resolveRagRemoteUrls(envRemote: string | undefined, packRemote: 
 /**
  * MCP server definition used at runtime.
  */
+export interface McpToolAccess {
+  /** 'admin' = all tools require admin by default; 'public' = all tools are public by default */
+  default: 'admin' | 'public'
+  /** Tools explicitly available to all users (only relevant when default is 'admin') */
+  public?: string[]
+  /** Tools restricted to admin users (only relevant when default is 'public') */
+  adminOnly?: string[]
+}
+
+export interface McpUserConfigField {
+  /** Internal field name (e.g. "token") */
+  name: string
+  /** Localized display label shown to the user */
+  label: Record<string, string>
+  /** Field type: 'secret' fields are never echoed or logged */
+  type: 'text' | 'secret'
+  /** Maps the field value into a request header. e.g. "Bearer {value}" → Authorization header */
+  headerTemplate?: string
+  /** HTTP header name to set. Defaults to 'Authorization' if omitted. */
+  headerName?: string
+}
+
 export interface McpServerDef {
   name: string
   transport: 'stdio' | 'sse' | 'streamable-http'
@@ -339,6 +383,11 @@ export interface McpServerDef {
   env?: Record<string, string>
   headers?: Record<string, string>
   reconnect?: boolean
+  toolAccess?: McpToolAccess
+  /** 'admin-controlled' = shared token from env; 'user-controlled' = each user provides their own token */
+  accessMode?: 'admin-controlled' | 'user-controlled'
+  /** Configuration fields to collect from the user (only when accessMode is 'user-controlled') */
+  userConfig?: { fields: McpUserConfigField[] }
 }
 
 /**
