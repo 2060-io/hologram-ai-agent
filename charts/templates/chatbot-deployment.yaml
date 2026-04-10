@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: chatbot-secret
+  name: {{ include "chatbot.fullname" . }}-chatbot-secret
   namespace: {{ .Release.Namespace }}
 type: Opaque
 stringData:
@@ -118,7 +118,7 @@ spec:
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: chatbot-secret
+                  name: {{ include "chatbot.fullname" . }}-chatbot-secret
                   key: {{ $key }}
             {{- end }}
           volumeMounts:

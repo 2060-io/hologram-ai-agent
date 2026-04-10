@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: stats-secret
+  name: {{ include "chatbot.fullname" . }}-stats-secret
   namespace: {{ .Release.Namespace }}
 type: Opaque
 stringData:
@@ -96,7 +96,7 @@ spec:
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: stats-secret
+                  name: {{ include "chatbot.fullname" . }}-stats-secret
                   key: {{ $key }}
             {{- end }}
 {{- end }}

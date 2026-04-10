@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: artemis-secret
+  name: {{ include "chatbot.fullname" . }}-artemis-secret
   namespace: {{ .Release.Namespace }}
 type: Opaque
 stringData:
@@ -80,7 +80,7 @@ spec:
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:
-                  name: artemis-secret
+                  name: {{ include "chatbot.fullname" . }}-artemis-secret
                   key: {{ .name }}
             {{- end }}
           volumeMounts:
