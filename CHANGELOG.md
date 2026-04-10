@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.11.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.10.1...v1.11.0) (2026-04-10)
+
+
+### Features
+
+* MCP support, admin mode, and more ([#60](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/60)) ([2c4add6](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/2c4add6a92529843b69046395149e0cfbc798185))
+
+
+### Bug Fixes
+
+* prefix secret names with release fullname to avoid namespace collisions ([#63](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/63)) ([c197f7e](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/c197f7e336485834709964aafc6e940de418cdf5))
+* wrap stats deployment in enabled condition ([#62](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/62)) ([a0cfa12](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/a0cfa12da96562b546f4bcb7138536d768b0104d))
+
 ## [1.10.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.10.0...v1.10.1) (2026-04-07)
 
 
