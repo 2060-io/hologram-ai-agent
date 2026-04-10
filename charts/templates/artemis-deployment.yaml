@@ -80,7 +80,7 @@ spec:
             - name: {{ .name }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "chatbot.fullname" . }}-artemis-secret
+                  name: {{ include "chatbot.fullname" $ }}-artemis-secret
                   key: {{ .name }}
             {{- end }}
           volumeMounts:

@@ -96,7 +96,7 @@ spec:
             - name: {{ $key }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "chatbot.fullname" . }}-stats-secret
+                  name: {{ include "chatbot.fullname" $ }}-stats-secret
                   key: {{ $key }}
             {{- end }}
 {{- end }}
