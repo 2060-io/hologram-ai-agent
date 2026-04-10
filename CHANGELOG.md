@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.11.0...v1.11.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* use root context ($) for include calls inside range loops ([#64](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/64)) ([779ae69](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/779ae698fdf8e878d98073a00bdd620bb799add3))
+
 ## [1.11.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.10.1...v1.11.0) (2026-04-10)
 
 
