@@ -480,6 +480,44 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * Proactively establishes per-user connections for all user-controlled servers
+   * where the user has saved config. This ensures lazy tool discovery happens
+   * before the LLM agent runs, breaking the chicken-and-egg problem where tools
+   * can't be called because they haven't been discovered yet.
+   */
+  async ensureUserConnections(avatarName: string): Promise<void> {
+    for (const def of this.serverDefs) {
+      if (def.accessMode !== 'user-controlled') continue
+
+      const cacheKey = `${avatarName}:${def.name}`
+      if (this.userConnections.has(cacheKey)) continue
+
+      const userConfig = await this.mcpConfigService.getConfig(avatarName, def.name)
+      if (!userConfig) continue
+
+      if (!def.url || !def.userConfig?.fields) continue
+
+      const headers = this.buildUserHeaders(def, userConfig)
+      try {
+        const client = new Client({ name: `hologram-agent/${def.name}/${avatarName}`, version: '1.0.0' })
+        const transport = new StreamableHTTPClientTransport(new URL(def.url), {
+          requestInit: { headers },
+        })
+        await client.connect(transport)
+        const conn: McpConnection = { name: def.name, client, transport }
+        this.userConnections.set(cacheKey, conn)
+        this.logger.log(`[MCP_USER] Proactively connected avatar="${avatarName}" server="${def.name}".`)
+
+        if (!this.serverToolCache.has(def.name)) {
+          await this.discoverAndCacheTools(conn, def.name)
+        }
+      } catch (err) {
+        this.logger.warn(`[MCP_USER] Proactive connection failed for avatar="${avatarName}" server="${def.name}": ${err}`)
+      }
+    }
+  }
+
+  /**
    * Invalidates cached per-user connections for a specific avatar + server.
    * Call this when the user updates their credentials.
    */

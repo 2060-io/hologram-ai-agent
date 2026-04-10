@@ -154,6 +154,12 @@ export class LlmService implements OnModuleInit {
     try {
       const today = new Date().toISOString().split('T')[0]
 
+      // Proactively connect user-controlled MCP servers so tools are discovered
+      // before the agent runs (breaks chicken-and-egg after pod restart)
+      if (session?.userName) {
+        await this.mcpService.ensureUserConnections(session.userName)
+      }
+
       // Check if MCP tools have been lazily discovered since last call
       await this.refreshMcpTools()
 
