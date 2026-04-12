@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config'
 import { config as dotenvConfig } from 'dotenv'
-import { loadAgentPack, pickNumber, pickString, resolveRagRemoteUrls, resolveToolsConfig, resolveMcpServers } from './agent-pack.loader'
+import { loadAgentPack, pickBoolean, pickNumber, pickString, resolveRagRemoteUrls, resolveToolsConfig, resolveMcpServers } from './agent-pack.loader'
 
 // Load .env early so resolvePlaceholders() in loadAgentPack() can resolve ${VAR} refs.
 // override: true ensures .env values win over stale shell env vars.
@@ -192,7 +192,38 @@ export default registerAs('appConfig', () => ({
   credentialDefinitionId: process.env.CREDENTIAL_DEFINITION_ID,
 
   /**
-   * Comma-separated list of avatar names that have admin privileges.
+   * When true, unauthenticated users cannot send messages to the agent.
+   */
+  authRequired: pickBoolean('AUTH_REQUIRED', agentPack?.flows?.authentication?.required, false),
+
+  /**
+   * Credential attribute that uniquely identifies the user (e.g., 'name', 'email', 'employeeLogin').
+   * Default: 'name' (for avatar credentials)
+   */
+  userIdentityAttribute: pickString('USER_IDENTITY_ATTRIBUTE', agentPack?.flows?.authentication?.userIdentityAttribute, 'name'),
+
+  /**
+   * Credential attribute containing the user's role(s).
+   * Accepts a single string, comma-separated list, or JSON array.
+   */
+  rolesAttribute: pickString('ROLES_ATTRIBUTE', agentPack?.flows?.authentication?.rolesAttribute, ''),
+
+  /**
+   * Role assigned to authenticated users whose credential lacks the rolesAttribute.
+   * Default: 'user'
+   */
+  defaultRole: pickString('DEFAULT_ROLE', agentPack?.flows?.authentication?.defaultRole, 'user'),
+
+  /**
+   * Users granted all-tool access by identity (bootstrap mechanism).
+   * Comma-separated list of identity values matched against userIdentityAttribute.
+   */
+  adminUsers: process.env.ADMIN_USERS
+    ? process.env.ADMIN_USERS.split(',').map((s: string) => s.trim()).filter(Boolean)
+    : (agentPack?.flows?.authentication?.adminUsers ?? []),
+
+  /**
+   * Legacy: comma-separated list of avatar names that have admin privileges.
    */
   adminAvatars: process.env.ADMIN_AVATARS
     ? process.env.ADMIN_AVATARS.split(',').map((s: string) => s.trim()).filter(Boolean)

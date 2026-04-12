@@ -4,7 +4,7 @@ import { DEFAULT_CHATBOT_PROMPT_TEMPLATES } from '../common/prompts/chatbot.prom
 import { DEFAULT_CHATBOT_WELCOME_TEMPLATES } from '../common/prompts/chatbot.welcome'
 import { DEFAULT_TRANSLATIONS } from './common/i18n/i18n'
 import { Cmd } from './common'
-import type { McpServerDef } from '../config/agent-pack.loader'
+import type { McpServerDef, AuthFlowConfig } from '../config/agent-pack.loader'
 
 type LanguageBlock = {
   greetingMessage?: string
@@ -104,7 +104,7 @@ export class AgentContentService {
     return this.agentPack?.metadata?.defaultLanguage ?? 'en'
   }
 
-  getMenuItems(): { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string }[] {
+  getMenuItems(): { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string; badge?: string }[] {
     const menuItems = this.agentPack?.flows?.menu?.items
     if (Array.isArray(menuItems) && menuItems.length > 0) return menuItems
     return [
@@ -123,14 +123,19 @@ export class AgentContentService {
     }
   }
 
-  getAuthFlowConfig() {
+  getAuthFlowConfig(): AuthFlowConfig {
     const authConfig = this.agentPack?.flows?.authentication ?? {}
     const credentialDefinitionId =
       authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId')
     const adminAvatars: string[] = this.configService.get('appConfig.adminAvatars') ?? []
     return {
       enabled: this.toBoolean(authConfig.enabled, true),
+      required: this.configService.get<boolean>('appConfig.authRequired') ?? false,
       credentialDefinitionId,
+      userIdentityAttribute: this.configService.get<string>('appConfig.userIdentityAttribute') ?? 'name',
+      rolesAttribute: this.configService.get<string>('appConfig.rolesAttribute') || undefined,
+      defaultRole: this.configService.get<string>('appConfig.defaultRole') ?? 'user',
+      adminUsers: this.configService.get<string[]>('appConfig.adminUsers') ?? [],
       adminAvatars,
     }
   }

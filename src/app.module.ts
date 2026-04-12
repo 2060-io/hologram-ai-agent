@@ -10,6 +10,7 @@ import { CoreService } from './core/core.service'
 import { CoreModule } from './core/core.module'
 import { MemoryModule } from './memory/memory.module'
 import { McpModule } from './mcp/mcp.module'
+import { RbacModule } from './rbac/rbac.module'
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { McpModule } from './mcp/mcp.module'
     }),
     CoreModule,
     McpModule,
+    RbacModule,
     LlmModule,
     RagModule,
     IntegrationsModule,

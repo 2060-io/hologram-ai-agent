@@ -8,6 +8,7 @@ import { ChatbotModule } from 'src/chatbot/chatbot.module'
 import { MemoryModule } from 'src/memory/memory.module'
 import { AgentContentService } from './agent-content.service'
 import { McpConfigEntity } from '../mcp/mcp-config.entity'
+import { ApprovalRequestEntity } from '../rbac/approval-request.entity'
 
 @Global()
 @Module({
@@ -22,7 +23,7 @@ import { McpConfigEntity } from '../mcp/mcp-config.entity'
         username: configService.get<string>('appConfig.postgresUser'),
         password: configService.get<string>('appConfig.postgresPassword'),
         database: configService.get<string>('appConfig.postgresDbName'),
-        entities: [ConnectionEntity, SessionEntity, McpConfigEntity],
+        entities: [ConnectionEntity, SessionEntity, McpConfigEntity, ApprovalRequestEntity],
         synchronize: true,
         ssl: false,
         logging: false,

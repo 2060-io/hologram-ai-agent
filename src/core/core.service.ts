@@ -25,12 +25,16 @@ import { STAT_KPI } from './common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ConfigService } from '@nestjs/config'
+import { OnEvent } from '@nestjs/event-emitter'
 import { StateStep } from './common/enums/state-step.enum'
 import { ChatbotService } from '../chatbot/chatbot.service'
 import { MemoryService } from '../memory/memory.service'
 import { AgentContentService } from './agent-content.service'
 import { McpConfigService } from '../mcp/mcp-config.service'
 import { McpService } from '../mcp/mcp.service'
+import { RbacService } from '../rbac/rbac.service'
+import { ApprovalService } from '../rbac/approval.service'
+import type { AuthFlowConfig } from '../config/agent-pack.loader'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -47,6 +51,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly agentContent: AgentContentService,
     private readonly mcpConfigService: McpConfigService,
     private readonly mcpService: McpService,
+    @Optional() private readonly rbacService: RbacService,
+    @Optional() private readonly approvalService: ApprovalService,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -62,13 +68,18 @@ export class CoreService implements EventHandler, OnModuleInit {
     this.logger.log(`[INIT] menuItems: ${JSON.stringify(this.menuItems.map(i => i.id))}`)
   }
 
-  private readonly menuItems: { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string }[]
+  private readonly menuItems: { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string; badge?: string }[]
   private readonly menuActions: Record<string, string | undefined>
   private readonly welcomeFlowConfig: { enabled: boolean; sendOnProfile: boolean; templateKey: string }
-  private readonly authFlowConfig: { enabled: boolean; credentialDefinitionId?: string; adminAvatars: string[] }
+  private readonly authFlowConfig: AuthFlowConfig
   private readonly credentialDefinitionId?: string
 
   private isAdmin(session: SessionEntity): boolean {
+    // New RBAC: check adminUsers by identity
+    if (session.userIdentity && this.rbacService?.isAdminUser(session.userIdentity)) {
+      return true
+    }
+    // Legacy: check adminAvatars by userName
     if (!session.userName) return false
     const normalize = (s: string) => s.replace(/^@/, '').toLowerCase()
     const name = normalize(session.userName)
@@ -274,6 +285,14 @@ export class CoreService implements EventHandler, OnModuleInit {
         if (action === 'mcp-config') {
           await this.beginMcpConfigFlow(session)
         }
+
+        if (action === 'my-approval-requests') {
+          await this.handleMyApprovalRequests(session)
+        }
+
+        if (action === 'pending-approvals') {
+          await this.handlePendingApprovals(session)
+        }
         break
       }
       case StateStep.MCP_CONFIG: {
@@ -309,6 +328,13 @@ export class CoreService implements EventHandler, OnModuleInit {
           ) {
             const textContent = (content as { content: string }).content.trim()
 
+            // Guest access check: when auth is required, block unauthenticated messages
+            if (textContent.length > 0 && !session.isAuthenticated && this.authFlowConfig.required) {
+              this.logger.log(`[GUEST] Blocked message from unauthenticated user ${connectionId}`)
+              await this.sendText(connectionId, this.getText('AUTH_REQUIRED', userLang), userLang)
+              break
+            }
+
             if (textContent.length > 0) {
               const answer = await this.chatBotService.chat({
                 userInput: textContent,
@@ -342,6 +368,17 @@ export class CoreService implements EventHandler, OnModuleInit {
                 const lastName = claims.find((c) => c.name === 'lastName')?.value
                 const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
                 session.userName = fullName || claims.find((c) => c.name === 'name')?.value || ''
+
+                // RBAC: extract identity and roles from credential attributes
+                if (this.rbacService) {
+                  const claimsMap: Record<string, string> = {}
+                  for (const c of claims) {
+                    claimsMap[c.name] = c.value
+                  }
+                  session.userIdentity = this.rbacService.resolveIdentity(claimsMap)
+                  session.userRoles = this.rbacService.resolveRoles(claimsMap)
+                  this.logger.log(`[AUTH] RBAC: identity="${session.userIdentity}", roles=${JSON.stringify(session.userRoles)}`)
+                }
               }
 
               session.state = StateStep.CHAT
@@ -437,24 +474,31 @@ export class CoreService implements EventHandler, OnModuleInit {
     session.state = StateStep.START
     session.mcpConfigServer = undefined
     session.mcpConfigFieldIndex = undefined
+    session.userIdentity = undefined
+    session.userRoles = undefined
     return await this.sessionRepository.save(session)
   }
 
   private async sendContextualMenu(session: SessionEntity): Promise<SessionEntity> {
     const isConfiguring = session.state === StateStep.MCP_CONFIG
+
+    // Resolve dynamic badge counts for approval menu items
+    const badgeCounts = await this.resolveBadgeCounts(session)
+
     const options: ContextualMenuItem[] = this.menuItems
       .filter(
         (item) =>
-          this.isMenuItemVisible(item.visibleWhen, session.isAuthenticated ?? false, isConfiguring) &&
+          this.isMenuItemVisible(item.visibleWhen, session, isConfiguring, badgeCounts) &&
           this.isMenuActionEnabled(item.action),
       )
-      .map(
-        (item) =>
-          new ContextualMenuItem({
-            id: item.id,
-            title: item.label ?? this.getText(item.labelKey ?? item.id, session.lang),
-          }),
-      )
+      .map((item) => {
+        let title = item.label ?? this.getText(item.labelKey ?? item.id, session.lang)
+        // Prepend badge count if configured
+        if (item.badge && badgeCounts[item.badge] > 0) {
+          title = `(${badgeCounts[item.badge]}) ${title}`
+        }
+        return new ContextualMenuItem({ id: item.id, title })
+      })
 
     this.logger.log(`[MENU] options=${options.length}, isAuth=${session.isAuthenticated}, items=${this.menuItems.length}`)
     if (options.length === 0) {
@@ -483,13 +527,41 @@ export class CoreService implements EventHandler, OnModuleInit {
     return await this.sessionRepository.save(session)
   }
 
+  /**
+   * Resolve dynamic badge counts for approval-related menu items.
+   */
+  private async resolveBadgeCounts(session: SessionEntity): Promise<Record<string, number>> {
+    const counts: Record<string, number> = {
+      approvalRequestCount: 0,
+      pendingApprovalCount: 0,
+    }
+
+    if (!this.approvalService || !session.isAuthenticated) return counts
+
+    if (session.userIdentity) {
+      counts.approvalRequestCount = await this.approvalService.countByRequester(session.userIdentity)
+    }
+
+    if (session.userRoles?.length) {
+      counts.pendingApprovalCount = await this.approvalService.countPendingForApprover(session.userRoles)
+    }
+
+    return counts
+  }
+
   async sendStats(kpi: STAT_KPI, session: SessionEntity) {
     this.logger.debug(`***send stats***`)
     const stats = [STAT_KPI[kpi]]
     if (session !== null && this.statProducer) await this.statProducer.spool(stats, session.connectionId, [new StatEnum(0, 'string')])
   }
 
-  private isMenuItemVisible(visibleWhen: string | undefined, isAuthenticated: boolean, isConfiguring = false) {
+  private isMenuItemVisible(
+    visibleWhen: string | undefined,
+    session: SessionEntity,
+    isConfiguring = false,
+    badgeCounts: Record<string, number> = {},
+  ) {
+    const isAuthenticated = session.isAuthenticated ?? false
     switch (visibleWhen) {
       case 'authenticated':
         return !!isAuthenticated
@@ -499,6 +571,10 @@ export class CoreService implements EventHandler, OnModuleInit {
         return isConfiguring
       case 'notConfiguring':
         return !!isAuthenticated && !isConfiguring
+      case 'hasApprovalRequests':
+        return !!isAuthenticated && (badgeCounts.approvalRequestCount ?? 0) > 0
+      case 'hasPendingApprovals':
+        return !!isAuthenticated && (badgeCounts.pendingApprovalCount ?? 0) > 0
       default:
         return true
     }
@@ -511,6 +587,78 @@ export class CoreService implements EventHandler, OnModuleInit {
     if (action === 'mcp-config')
       return this.mcpConfigService.isAvailable && this.agentContent.getUserControlledServers().length > 0
     return true
+  }
+
+  // ── Approval Menu Handlers ─────────────────────────────────────
+
+  /**
+   * Show the user's own pending approval requests. They can cancel them.
+   */
+  private async handleMyApprovalRequests(session: SessionEntity): Promise<void> {
+    if (!this.approvalService || !session.userIdentity) return
+    const requests = await this.approvalService.getByRequester(session.userIdentity)
+    if (requests.length === 0) {
+      await this.sendText(session.connectionId, this.getText('NO_APPROVAL_REQUESTS', session.lang), session.lang)
+      return
+    }
+
+    const menuItems = requests.map((r, i) => ({
+      id: `cancel-approval:${r.id}`,
+      text: `${r.toolName} (${r.serverName}) - ${r.createdAt.toISOString().split('T')[0]}`,
+      action: `cancel-approval:${r.id}`,
+    }))
+
+    await this.apiClient.messages.send(
+      new MenuDisplayMessage({
+        connectionId: session.connectionId,
+        prompt: this.getText('MY_APPROVAL_REQUESTS_PROMPT', session.lang),
+        menuItems,
+      }),
+    )
+  }
+
+  /**
+   * Show pending approval requests the user can approve/reject.
+   */
+  private async handlePendingApprovals(session: SessionEntity): Promise<void> {
+    if (!this.approvalService || !session.userRoles?.length) return
+    const requests = await this.approvalService.getPendingForApprover(session.userRoles)
+    if (requests.length === 0) {
+      await this.sendText(session.connectionId, this.getText('NO_PENDING_APPROVALS', session.lang), session.lang)
+      return
+    }
+
+    const menuItems = requests.map((r) => ({
+      id: `review-approval:${r.id}`,
+      text: `${r.requesterIdentity}: ${r.toolName} (${r.serverName})`,
+      action: `review-approval:${r.id}`,
+    }))
+
+    await this.apiClient.messages.send(
+      new MenuDisplayMessage({
+        connectionId: session.connectionId,
+        prompt: this.getText('PENDING_APPROVALS_PROMPT', session.lang),
+        menuItems,
+      }),
+    )
+  }
+
+  /**
+   * Handle menu.refresh events emitted by ApprovalEventHandler.
+   */
+  @OnEvent('menu.refresh')
+  async onMenuRefresh(payload: { connectionId: string }): Promise<void> {
+    this.logger.debug(`[EVENT] menu.refresh for ${payload.connectionId}`)
+    try {
+      const session = await this.sessionRepository.findOne({
+        where: { connectionId: payload.connectionId },
+      })
+      if (session) {
+        await this.sendContextualMenu(session)
+      }
+    } catch (err) {
+      this.logger.error(`[EVENT] Error refreshing menu for ${payload.connectionId}: ${err}`)
+    }
   }
 
   // ── MCP Config Flow ──────────────────────────────────────────────

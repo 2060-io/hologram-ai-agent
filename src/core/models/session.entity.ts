@@ -32,6 +32,12 @@ export class SessionEntity {
   userName?: string
 
   @Column({ type: 'varchar', length: 255, nullable: true })
+  userIdentity?: string
+
+  @Column({ type: 'simple-json', nullable: true })
+  userRoles?: string[]
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
   mcpConfigServer?: string
 
   @Column({ type: 'int', nullable: true })

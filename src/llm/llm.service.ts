@@ -18,6 +18,8 @@ import { MemoryService } from 'src/memory/memory.service'
 import { LangchainSessionMemory } from 'src/memory/langchain-session-memory'
 import { RagService } from '../rag/rag.service'
 import { McpService } from '../mcp/mcp.service'
+import { ToolCallInterceptorService } from '../rbac/tool-call-interceptor.service'
+import { RbacService, UserContext } from '../rbac/rbac.service'
 
 /**
  * LlmService
@@ -62,6 +64,8 @@ export class LlmService implements OnModuleInit {
     private readonly memoryService: MemoryService,
     private readonly ragService: RagService,
     private readonly mcpService: McpService,
+    private readonly toolCallInterceptor: ToolCallInterceptorService,
+    private readonly rbacService: RbacService,
   ) {
     this.agentPrompt = this.config.get<string>('appConfig.agentPrompt') ?? 'You are a helpful AI agent called Hologram.'
 
@@ -180,17 +184,28 @@ export class LlmService implements OnModuleInit {
           verbose: this.config.get<boolean>('appConfig.agentVerbose') ?? false,
         }) as any as AgentExecutor
 
-        const result = await this.mcpService.runWithCaller(session.userName ?? undefined, () =>
-          agentExecutor.invoke(
-            {
-              input: userMessage,
-              today,
-            },
-            {
-              configurable: {
-                isAuthenticated: session?.isAuthenticated ?? false,
+        // Build RBAC user context for ToolCallInterceptor
+        const userContext: UserContext = {
+          identity: session.userIdentity ?? session.userName ?? '',
+          connectionId: session.connectionId,
+          roles: session.userRoles ?? [],
+          isAuthenticated: session.isAuthenticated ?? false,
+        }
+
+        // Wrap in both RBAC context and MCP caller context
+        const result = await this.toolCallInterceptor.runWithContext(userContext, () =>
+          this.mcpService.runWithCaller(session.userName ?? undefined, () =>
+            agentExecutor.invoke(
+              {
+                input: userMessage,
+                today,
               },
-            },
+              {
+                configurable: {
+                  isAuthenticated: session?.isAuthenticated ?? false,
+                },
+              },
+            ),
           ),
         )
 
@@ -374,9 +389,26 @@ export class LlmService implements OnModuleInit {
         func: async (args: Record<string, unknown>) => {
           this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Called with args: ${JSON.stringify(args)}`)
           try {
-            // isAdmin=true here because access was already checked at tool-selection time;
-            // the execution guard in McpService is a safety net.
-            const result = await this.mcpService.callTool(info.serverName, info.name, args, !info.isPublic)
+            // Route through ToolCallInterceptor for RBAC checks
+            const ctx = this.toolCallInterceptor.getCurrentContext()
+            if (ctx && this.rbacService.isRbacActive()) {
+              const interceptResult = await this.toolCallInterceptor.execute(
+                info.serverName, info.name, args, ctx, info.description,
+              )
+              switch (interceptResult.type) {
+                case 'result':
+                  this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Result: ${interceptResult.data.slice(0, 300)}`)
+                  return interceptResult.data
+                case 'denied':
+                  this.logger.warn(`[MCP Tool:${info.serverName}/${info.name}] DENIED: ${interceptResult.message}`)
+                  return interceptResult.message
+                case 'pending_approval':
+                  this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] PENDING APPROVAL: ${interceptResult.requestId}`)
+                  return interceptResult.message
+              }
+            }
+            // Fallback: no RBAC context or RBAC not active → direct call
+            const result = await this.mcpService.callTool(info.serverName, info.name, args, true)
             this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Result: ${result.slice(0, 300)}`)
             return result
           } catch (err) {

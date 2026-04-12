@@ -80,7 +80,12 @@ const AgentPackSchema = z
         authentication: z
           .object({
             enabled: z.union([z.boolean(), z.string()]).optional(),
+            required: z.union([z.boolean(), z.string()]).optional(),
             credentialDefinitionId: z.string().optional(),
+            userIdentityAttribute: z.string().optional(),
+            rolesAttribute: z.string().optional(),
+            defaultRole: z.string().optional(),
+            adminUsers: z.array(z.string()).optional(),
             adminAvatars: z.array(z.string()).optional(),
           })
           .optional(),
@@ -137,8 +142,18 @@ const AgentPackSchema = z
                 .optional(),
               toolAccess: z
                 .object({
-                  default: z.enum(['public', 'admin']).optional(),
+                  default: z.enum(['public', 'admin', 'none', 'all']).optional(),
                   public: z.array(z.string()).optional(),
+                  roles: z.record(z.array(z.string())).optional(),
+                  approval: z
+                    .array(
+                      z.object({
+                        tools: z.array(z.string()),
+                        approvers: z.array(z.string()),
+                        timeoutMinutes: z.number().optional(),
+                      }),
+                    )
+                    .optional(),
                 })
                 .optional(),
             }),
@@ -353,12 +368,25 @@ export function resolveRagRemoteUrls(envRemote: string | undefined, packRemote: 
  * MCP server definition used at runtime.
  */
 export interface McpToolAccess {
-  /** 'admin' = all tools require admin by default; 'public' = all tools are public by default */
-  default: 'admin' | 'public'
-  /** Tools explicitly available to all users (only relevant when default is 'admin') */
+  /** Legacy: 'admin' | 'public'; New RBAC: 'none' | 'all' */
+  default?: 'admin' | 'public' | 'none' | 'all'
+  /** Legacy: tools explicitly available to all users (only relevant when default is 'admin') */
   public?: string[]
-  /** Tools restricted to admin users (only relevant when default is 'public') */
+  /** Legacy: tools restricted to admin users (only relevant when default is 'public') */
   adminOnly?: string[]
+  /** RBAC: map of role name → list of tool names. Special key 'guest' for unauthenticated users. */
+  roles?: Record<string, string[]>
+  /** RBAC: approval policies — tools that require approval from designated approver roles */
+  approval?: McpApprovalPolicy[]
+}
+
+export interface McpApprovalPolicy {
+  /** Tools covered by this approval policy */
+  tools: string[]
+  /** Roles that can approve requests for these tools */
+  approvers: string[]
+  /** Time in minutes before a pending request expires (default: 60) */
+  timeoutMinutes?: number
 }
 
 export interface McpUserConfigField {
@@ -388,6 +416,24 @@ export interface McpServerDef {
   accessMode?: 'admin-controlled' | 'user-controlled'
   /** Configuration fields to collect from the user (only when accessMode is 'user-controlled') */
   userConfig?: { fields: McpUserConfigField[] }
+}
+
+/** Authentication flow configuration with RBAC support */
+export interface AuthFlowConfig {
+  enabled: boolean
+  /** When true, unauthenticated users cannot send messages */
+  required: boolean
+  credentialDefinitionId?: string
+  /** Credential attribute that uniquely identifies the user (e.g., 'name', 'email') */
+  userIdentityAttribute: string
+  /** Credential attribute containing the user's role(s) */
+  rolesAttribute?: string
+  /** Role assigned when rolesAttribute is absent or empty */
+  defaultRole: string
+  /** Users granted all-tool access by identity (bootstrap mechanism) */
+  adminUsers: string[]
+  /** Legacy: avatar names with admin privileges */
+  adminAvatars: string[]
 }
 
 /**
