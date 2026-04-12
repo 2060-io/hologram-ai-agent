@@ -7,7 +7,7 @@ A modular, multi-language AI agent built with NestJS for the Hologram + Verana e
 ## 🚀 Overview
 
 - **Personalized AI welcome** — sends a greeting message when a user connects via Hologram
-- **Multi-LLM support** — OpenAI, Ollama, Anthropic with configurable model, temperature, and tokens
+- **Multi-LLM support** — OpenAI, Ollama, Anthropic + any OpenAI-compatible API (Kimi, DeepSeek, Groq, Together AI, etc.)
 - **RAG** — Retrieval Augmented Generation with Pinecone or Redis vector stores
 - **MCP integration** — connect to remote MCP servers (e.g. GitHub Copilot MCP) and expose their tools to the LLM agent
 - **Per-user MCP credentials** — users configure their own tokens via an in-chat flow; stored with AES-256-GCM encryption
@@ -394,7 +394,8 @@ Full design specification: [`docs/rbac-approval-spec.md`](./docs/rbac-approval-s
 | `OPENAI_MODEL` | OpenAI model | `gpt-4o-mini` |
 | `OPENAI_TEMPERATURE` | Temperature (0–1) | `0.3` |
 | `OPENAI_MAX_TOKENS` | Max tokens per completion | `512` |
-| `OLLAMA_ENDPOINT` | Ollama endpoint | `http://ollama:11435` |
+| `OPENAI_BASE_URL` | Base URL for OpenAI-compatible APIs (Kimi, DeepSeek, Groq, etc.) | |
+| `OLLAMA_ENDPOINT` | Ollama endpoint | `http://ollama:11434` |
 | `OLLAMA_MODEL` | Ollama model | `llama3` |
 | `ANTHROPIC_API_KEY` | Anthropic API key | |
 | `RAG_PROVIDER` | RAG backend: `vectorstore` or `langchain` | `vectorstore` |

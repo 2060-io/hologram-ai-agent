@@ -94,10 +94,11 @@ languages:
 
 | Field          | Type           | Env override          | Default      | Description                          |
 | -------------- | -------------- | --------------------- | ------------ | ------------------------------------ |
-| `provider`     | string         | `LLM_PROVIDER`        | `openai`     | LLM provider (`openai`, `ollama`, `anthropic`). |
+| `provider`     | string         | `LLM_PROVIDER`        | `openai`     | LLM provider (`openai`, `ollama`, `anthropic`). Use `openai` for any OpenAI-compatible API. |
 | `model`        | string         | `OPENAI_MODEL`        | `gpt-4o-mini`| Model name.                          |
 | `temperature`  | number/string  | `OPENAI_TEMPERATURE`  | `0.3`        | Sampling temperature (0–1).          |
 | `maxTokens`    | number/string  | `OPENAI_MAX_TOKENS`   | `512`        | Max tokens per completion.           |
+| `baseUrl`      | string         | `OPENAI_BASE_URL`     | —            | Base URL for OpenAI-compatible APIs (e.g., Kimi, DeepSeek, Groq, Together AI). |
 | `agentPrompt`  | string         | `AGENT_PROMPT`        | —            | Default agent prompt / persona.      |
 | `verbose`      | boolean/string | —                     | —            | Enable verbose LLM logging.          |
 
@@ -110,6 +111,38 @@ llm:
   agentPrompt: |
     You are an AI financial assistant...
 ```
+
+#### Using OpenAI-compatible providers
+
+Any API that follows the OpenAI chat completions format can be used by setting `provider: openai` and providing a `baseUrl`:
+
+```yaml
+# Kimi (Moonshot AI)
+llm:
+  provider: openai
+  model: moonshot-v1-8k
+  baseUrl: https://api.moonshot.cn/v1
+
+# DeepSeek
+llm:
+  provider: openai
+  model: deepseek-chat
+  baseUrl: https://api.deepseek.com
+
+# Groq
+llm:
+  provider: openai
+  model: llama-3.3-70b-versatile
+  baseUrl: https://api.groq.com/openai/v1
+
+# Together AI
+llm:
+  provider: openai
+  model: meta-llama/Llama-3-70b-chat-hf
+  baseUrl: https://api.together.xyz/v1
+```
+
+Set the corresponding API key via `OPENAI_API_KEY` (or the agent pack's environment variable resolution).
 
 ---
 

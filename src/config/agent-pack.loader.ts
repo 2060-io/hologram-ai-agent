@@ -38,6 +38,7 @@ const AgentPackSchema = z
         temperature: z.union([z.number(), z.string()]).optional(),
         maxTokens: z.union([z.number(), z.string()]).optional(),
         agentPrompt: z.string().optional(),
+        baseUrl: z.string().optional(),
         verbose: z.union([z.boolean(), z.string()]).optional(),
       })
       .optional(),
@@ -98,15 +99,17 @@ const AgentPackSchema = z
                   labelKey: z.string().optional(),
                   label: z.string().optional(),
                   action: z.string().optional(),
-                  visibleWhen: z.enum([
-                    'always',
-                    'authenticated',
-                    'unauthenticated',
-                    'configuring',
-                    'notConfiguring',
-                    'hasApprovalRequests',
-                    'hasPendingApprovals',
-                  ]).optional(),
+                  visibleWhen: z
+                    .enum([
+                      'always',
+                      'authenticated',
+                      'unauthenticated',
+                      'configuring',
+                      'notConfiguring',
+                      'hasApprovalRequests',
+                      'hasPendingApprovals',
+                    ])
+                    .optional(),
                   badge: z.string().optional(),
                 }),
               )

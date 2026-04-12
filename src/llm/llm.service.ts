@@ -47,7 +47,13 @@ export class LlmService implements OnModuleInit {
   /** Last known McpService.toolsVersion — used to detect lazy tool discoveries */
   private lastToolsVersion = -1
   /** Raw MCP tool metadata — retained for per-user RBAC filtering */
-  private allMcpToolInfos: { serverName: string; name: string; description?: string; inputSchema: Record<string, unknown>; isPublic: boolean }[] = []
+  private allMcpToolInfos: {
+    serverName: string
+    name: string
+    description?: string
+    inputSchema: Record<string, unknown>
+    isPublic: boolean
+  }[] = []
   /** Wrapped MCP tools indexed by "serverName/toolName" for efficient per-role reuse */
   private mcpToolMap = new Map<string, DynamicStructuredTool>()
   /** Cached RBAC-filtered agents keyed by sorted role-set string */
@@ -126,7 +132,9 @@ export class LlmService implements OnModuleInit {
       if (allMcpTools.length > 0) {
         const pubNames = publicMcpTools.map((t) => t.name)
         const adminOnlyNames = allMcpTools.filter((t) => !pubNames.includes(t.name)).map((t) => t.name)
-        this.logger.log(`MCP tools refreshed: ${allMcpTools.length} total (${pubNames.length} public, ${adminOnlyNames.length} admin-only). toolsVersion=${currentVersion}`)
+        this.logger.log(
+          `MCP tools refreshed: ${allMcpTools.length} total (${pubNames.length} public, ${adminOnlyNames.length} admin-only). toolsVersion=${currentVersion}`,
+        )
       }
 
       // Clear RBAC agent cache since tools have changed
@@ -137,7 +145,9 @@ export class LlmService implements OnModuleInit {
         const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
         this.publicAgent = publicAgent
         this.adminAgent = adminAgent
-        this.logger.log(`Tool agents rebuilt: public=${this.publicTools.length} tools, admin=${this.adminTools.length} tools.`)
+        this.logger.log(
+          `Tool agents rebuilt: public=${this.publicTools.length} tools, admin=${this.adminTools.length} tools.`,
+        )
       }
     } catch (err) {
       this.logger.error(`Failed to refresh MCP tools: ${err}`)
@@ -296,15 +306,16 @@ export class LlmService implements OnModuleInit {
           model: this.config.get<string>('appConfig.ollamaModel') ?? 'llama3',
         })
       case 'openai':
-      default:
-      {
+      default: {
         const maxTokens = this.config.get<number>('appConfig.openaiMaxTokens')
+        const baseUrl = this.config.get<string>('appConfig.openaiBaseUrl')
         return new ChatOpenAI({
           openAIApiKey: this.getOrThrow('OPENAI_API_KEY'),
           model: this.config.get<string>('appConfig.openaiModel') ?? 'gpt-4o',
           temperature: this.config.get<number>('appConfig.openaiTemperature'),
           maxTokens: -1,
           modelKwargs: maxTokens ? { max_completion_tokens: maxTokens } : undefined,
+          ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
         })
       }
     }
@@ -397,7 +408,10 @@ export class LlmService implements OnModuleInit {
    * Discovers tools from connected MCP servers and wraps each as a LangChain DynamicStructuredTool.
    * Returns both the full set (for admin) and the public-only set (for non-admin).
    */
-  private async buildMcpTools(): Promise<{ publicMcpTools: DynamicStructuredTool[]; allMcpTools: DynamicStructuredTool[] }> {
+  private async buildMcpTools(): Promise<{
+    publicMcpTools: DynamicStructuredTool[]
+    allMcpTools: DynamicStructuredTool[]
+  }> {
     const allInfos = await this.mcpService.listTools(true) // get ALL tools with isPublic metadata
     if (allInfos.length === 0) return { publicMcpTools: [], allMcpTools: [] }
 
@@ -415,17 +429,25 @@ export class LlmService implements OnModuleInit {
             const ctx = this.toolCallInterceptor.getCurrentContext()
             if (ctx && this.rbacService.isRbacActive()) {
               const interceptResult = await this.toolCallInterceptor.execute(
-                info.serverName, info.name, args, ctx, info.description,
+                info.serverName,
+                info.name,
+                args,
+                ctx,
+                info.description,
               )
               switch (interceptResult.type) {
                 case 'result':
-                  this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] Result: ${interceptResult.data.slice(0, 300)}`)
+                  this.logger.log(
+                    `[MCP Tool:${info.serverName}/${info.name}] Result: ${interceptResult.data.slice(0, 300)}`,
+                  )
                   return interceptResult.data
                 case 'denied':
                   this.logger.warn(`[MCP Tool:${info.serverName}/${info.name}] DENIED: ${interceptResult.message}`)
                   return interceptResult.message
                 case 'pending_approval':
-                  this.logger.log(`[MCP Tool:${info.serverName}/${info.name}] PENDING APPROVAL: ${interceptResult.requestId}`)
+                  this.logger.log(
+                    `[MCP Tool:${info.serverName}/${info.name}] PENDING APPROVAL: ${interceptResult.requestId}`,
+                  )
                   return interceptResult.message
               }
             }
@@ -450,7 +472,9 @@ export class LlmService implements OnModuleInit {
     }
 
     const allMcpTools = allInfos.map((i) => this.mcpToolMap.get(`${i.serverName}/${i.name}`)!)
-    const publicMcpTools = allInfos.filter((i) => i.isPublic).map((i) => this.mcpToolMap.get(`${i.serverName}/${i.name}`)!)
+    const publicMcpTools = allInfos
+      .filter((i) => i.isPublic)
+      .map((i) => this.mcpToolMap.get(`${i.serverName}/${i.name}`)!)
 
     return { publicMcpTools, allMcpTools }
   }
@@ -461,7 +485,10 @@ export class LlmService implements OnModuleInit {
    * Falls back to a single { input: z.string() } if the schema is empty or unparseable.
    */
   private jsonSchemaToZod(schema: Record<string, unknown>): zod.ZodTypeAny {
-    const properties = (schema.properties ?? {}) as Record<string, { type?: string; description?: string; items?: { type?: string } }>
+    const properties = (schema.properties ?? {}) as Record<
+      string,
+      { type?: string; description?: string; items?: { type?: string } }
+    >
     const required = (schema.required ?? []) as string[]
 
     if (Object.keys(properties).length === 0) {
@@ -567,13 +594,14 @@ export class LlmService implements OnModuleInit {
     })
 
     const adminTools = adminToolsOverride ?? publicTools
-    const adminAgent = adminTools === publicTools
-      ? publicAgent
-      : createToolCallingAgent({
-          llm: this.llm as ChatOpenAI | ChatAnthropic,
-          tools: adminTools,
-          prompt,
-        })
+    const adminAgent =
+      adminTools === publicTools
+        ? publicAgent
+        : createToolCallingAgent({
+            llm: this.llm as ChatOpenAI | ChatAnthropic,
+            tools: adminTools,
+            prompt,
+          })
 
     return { publicAgent, adminAgent }
   }

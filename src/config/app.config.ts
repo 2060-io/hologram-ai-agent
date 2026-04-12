@@ -1,6 +1,14 @@
 import { registerAs } from '@nestjs/config'
 import { config as dotenvConfig } from 'dotenv'
-import { loadAgentPack, pickBoolean, pickNumber, pickString, resolveRagRemoteUrls, resolveToolsConfig, resolveMcpServers } from './agent-pack.loader'
+import {
+  loadAgentPack,
+  pickBoolean,
+  pickNumber,
+  pickString,
+  resolveRagRemoteUrls,
+  resolveToolsConfig,
+  resolveMcpServers,
+} from './agent-pack.loader'
 
 // Load .env early so resolvePlaceholders() in loadAgentPack() can resolve ${VAR} refs.
 // override: true ensures .env values win over stale shell env vars.
@@ -91,6 +99,13 @@ export default registerAs('appConfig', () => ({
    * OpenAI max tokens per completion.
    */
   openaiMaxTokens: pickNumber('OPENAI_MAX_TOKENS', agentPack?.llm?.maxTokens, 512),
+
+  /**
+   * Base URL for OpenAI-compatible APIs (e.g., Kimi, DeepSeek, Groq, Together AI).
+   * When set, the OpenAI provider will use this URL instead of the default OpenAI endpoint.
+   * Example: https://api.moonshot.cn/v1
+   */
+  openaiBaseUrl: pickString('OPENAI_BASE_URL', agentPack?.llm?.baseUrl, ''),
 
   /**
    * Anthropic API key (required if using Anthropic provider, e.g., Claude).
@@ -200,7 +215,11 @@ export default registerAs('appConfig', () => ({
    * Credential attribute that uniquely identifies the user (e.g., 'name', 'email', 'employeeLogin').
    * Default: 'name' (for avatar credentials)
    */
-  userIdentityAttribute: pickString('USER_IDENTITY_ATTRIBUTE', agentPack?.flows?.authentication?.userIdentityAttribute, 'name'),
+  userIdentityAttribute: pickString(
+    'USER_IDENTITY_ATTRIBUTE',
+    agentPack?.flows?.authentication?.userIdentityAttribute,
+    'name',
+  ),
 
   /**
    * Credential attribute containing the user's role(s).
@@ -219,14 +238,18 @@ export default registerAs('appConfig', () => ({
    * Comma-separated list of identity values matched against userIdentityAttribute.
    */
   adminUsers: process.env.ADMIN_USERS
-    ? process.env.ADMIN_USERS.split(',').map((s: string) => s.trim()).filter(Boolean)
+    ? process.env.ADMIN_USERS.split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean)
     : (agentPack?.flows?.authentication?.adminUsers ?? []),
 
   /**
    * Legacy: comma-separated list of avatar names that have admin privileges.
    */
   adminAvatars: process.env.ADMIN_AVATARS
-    ? process.env.ADMIN_AVATARS.split(',').map((s: string) => s.trim()).filter(Boolean)
+    ? process.env.ADMIN_AVATARS.split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean)
     : (agentPack?.flows?.authentication?.adminAvatars ?? []),
 
   /**
