@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, In } from 'typeorm'
+import { Repository } from 'typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { ApprovalRequestEntity, ApprovalStatus } from './approval-request.entity'
 import { RbacService } from './rbac.service'
@@ -85,7 +85,10 @@ export class ApprovalService {
   /**
    * Cancel a request (by the requester).
    */
-  async cancel(requestId: string, requesterIdentity: string): Promise<{ applied: boolean; request: ApprovalRequestEntity }> {
+  async cancel(
+    requestId: string,
+    requesterIdentity: string,
+  ): Promise<{ applied: boolean; request: ApprovalRequestEntity }> {
     const request = await this.repo.findOne({ where: { id: requestId } })
     if (!request) {
       throw new Error(`Approval request ${requestId} not found`)
@@ -143,9 +146,7 @@ export class ApprovalService {
       order: { createdAt: 'DESC' },
     })
 
-    return allPending.filter((req) =>
-      req.approverRoles.some((role) => approverRoles.includes(role)),
-    )
+    return allPending.filter((req) => req.approverRoles.some((role) => approverRoles.includes(role)))
   }
 
   /**

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { AsyncLocalStorage } from 'async_hooks'
-import { RbacService, AccessDecision, UserContext } from './rbac.service'
+import { RbacService, UserContext } from './rbac.service'
 import { ApprovalService } from './approval.service'
 import { McpService } from '../mcp/mcp.service'
 
@@ -53,12 +53,7 @@ export class ToolCallInterceptorService {
       return { type: 'result', data }
     }
 
-    const decision = this.rbacService.checkAccess(
-      userContext.roles,
-      userContext.identity,
-      serverName,
-      toolName,
-    )
+    const decision = this.rbacService.checkAccess(userContext.roles, userContext.identity, serverName, toolName)
 
     this.logger.debug(
       `[INTERCEPT] ${userContext.identity} → ${serverName}/${toolName}: ${decision} (roles=${userContext.roles.join(',')})`,

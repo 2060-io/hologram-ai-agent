@@ -64,11 +64,20 @@ export class CoreService implements EventHandler, OnModuleInit {
     this.welcomeFlowConfig = this.agentContent.getWelcomeFlowConfig()
     this.authFlowConfig = this.agentContent.getAuthFlowConfig()
     this.credentialDefinitionId = this.authFlowConfig.credentialDefinitionId
-    this.logger.log(`[INIT] authFlowConfig: enabled=${this.authFlowConfig.enabled}, credDefId=${this.credentialDefinitionId?.substring(0, 40)}..., adminAvatars=${JSON.stringify(this.authFlowConfig.adminAvatars)}`)
-    this.logger.log(`[INIT] menuItems: ${JSON.stringify(this.menuItems.map(i => i.id))}`)
+    this.logger.log(
+      `[INIT] authFlowConfig: enabled=${this.authFlowConfig.enabled}, credDefId=${this.credentialDefinitionId?.substring(0, 40)}..., adminAvatars=${JSON.stringify(this.authFlowConfig.adminAvatars)}`,
+    )
+    this.logger.log(`[INIT] menuItems: ${JSON.stringify(this.menuItems.map((i) => i.id))}`)
   }
 
-  private readonly menuItems: { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string; badge?: string }[]
+  private readonly menuItems: {
+    id: string
+    labelKey?: string
+    label?: string
+    action?: string
+    visibleWhen?: string
+    badge?: string
+  }[]
   private readonly menuActions: Record<string, string | undefined>
   private readonly welcomeFlowConfig: { enabled: boolean; sendOnProfile: boolean; templateKey: string }
   private readonly authFlowConfig: AuthFlowConfig
@@ -377,7 +386,9 @@ export class CoreService implements EventHandler, OnModuleInit {
                   }
                   session.userIdentity = this.rbacService.resolveIdentity(claimsMap)
                   session.userRoles = this.rbacService.resolveRoles(claimsMap)
-                  this.logger.log(`[AUTH] RBAC: identity="${session.userIdentity}", roles=${JSON.stringify(session.userRoles)}`)
+                  this.logger.log(
+                    `[AUTH] RBAC: identity="${session.userIdentity}", roles=${JSON.stringify(session.userRoles)}`,
+                  )
                 }
               }
 
@@ -500,7 +511,9 @@ export class CoreService implements EventHandler, OnModuleInit {
         return new ContextualMenuItem({ id: item.id, title })
       })
 
-    this.logger.log(`[MENU] options=${options.length}, isAuth=${session.isAuthenticated}, items=${this.menuItems.length}`)
+    this.logger.log(
+      `[MENU] options=${options.length}, isAuth=${session.isAuthenticated}, items=${this.menuItems.length}`,
+    )
     if (options.length === 0) {
       this.logger.log('[MENU] Skipping contextual menu: no visible options.')
       return await this.sessionRepository.save(session)
@@ -513,7 +526,9 @@ export class CoreService implements EventHandler, OnModuleInit {
         : 'Authenticated'
       : 'Not Authenticated'
 
-    this.logger.log(`[MENU] Sending ContextualMenuUpdate: title="${title}", desc="${description}", options=${JSON.stringify(options.map(o => o.id))}`)
+    this.logger.log(
+      `[MENU] Sending ContextualMenuUpdate: title="${title}", desc="${description}", options=${JSON.stringify(options.map((o) => o.id))}`,
+    )
     await this.apiClient.messages.send(
       new ContextualMenuUpdateMessage({
         title,
@@ -552,7 +567,8 @@ export class CoreService implements EventHandler, OnModuleInit {
   async sendStats(kpi: STAT_KPI, session: SessionEntity) {
     this.logger.debug(`***send stats***`)
     const stats = [STAT_KPI[kpi]]
-    if (session !== null && this.statProducer) await this.statProducer.spool(stats, session.connectionId, [new StatEnum(0, 'string')])
+    if (session !== null && this.statProducer)
+      await this.statProducer.spool(stats, session.connectionId, [new StatEnum(0, 'string')])
   }
 
   private isMenuItemVisible(
@@ -602,7 +618,7 @@ export class CoreService implements EventHandler, OnModuleInit {
       return
     }
 
-    const menuItems = requests.map((r, i) => ({
+    const menuItems = requests.map((r) => ({
       id: `cancel-approval:${r.id}`,
       text: `${r.toolName} (${r.serverName}) - ${r.createdAt.toISOString().split('T')[0]}`,
       action: `cancel-approval:${r.id}`,
@@ -683,9 +699,7 @@ export class CoreService implements EventHandler, OnModuleInit {
 
     const menuItems = await Promise.all(
       servers.map(async (s) => {
-        const configured = session.userName
-          ? await this.mcpConfigService.hasConfig(session.userName, s.name)
-          : false
+        const configured = session.userName ? await this.mcpConfigService.hasConfig(session.userName, s.name) : false
         const status = configured ? '✅' : '⚠️'
         return { id: s.name, text: `${status} ${s.name}`, action: s.name }
       }),
@@ -718,7 +732,9 @@ export class CoreService implements EventHandler, OnModuleInit {
     await this.sessionRepository.save(session)
     this.mcpConfigCollected.set(session.connectionId, {})
 
-    this.logger.log(`[MCP_CONFIG] Starting config for server "${serverName}" (${serverDef.userConfig.fields.length} field(s))`)
+    this.logger.log(
+      `[MCP_CONFIG] Starting config for server "${serverName}" (${serverDef.userConfig.fields.length} field(s))`,
+    )
     await this.askCurrentConfigField(session, serverDef)
   }
 
