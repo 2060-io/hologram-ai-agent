@@ -32,7 +32,7 @@ export class SttService implements OnModuleInit {
       this.provider = createSttProvider(providerConfig)
       this.logger.log(
         `STT provider "${providerConfig.name}" (${providerConfig.type}) initialized. ` +
-        `requireAuth=${this.requireAuth}`,
+          `requireAuth=${this.requireAuth}`,
       )
     } catch (err) {
       this.logger.error(`Failed to initialize STT provider "${providerConfig.name}": ${err}`)
@@ -89,7 +89,7 @@ export class SttService implements OnModuleInit {
 
     this.logger.log(
       `Transcription complete: "${result.text.slice(0, 100)}${result.text.length > 100 ? '...' : ''}" ` +
-      `(lang=${result.language ?? 'unknown'}, duration=${result.duration ?? '?'}s)`,
+        `(lang=${result.language ?? 'unknown'}, duration=${result.duration ?? '?'}s)`,
     )
 
     return result
@@ -103,11 +103,7 @@ export class SttService implements OnModuleInit {
       throw new Error(`Missing key or iv in ciphering parameters`)
     }
 
-    const decipher = createDecipheriv(
-      ciphering.algorithm,
-      Buffer.from(key, 'hex'),
-      Buffer.from(iv, 'hex'),
-    )
+    const decipher = createDecipheriv(ciphering.algorithm, Buffer.from(key, 'hex'), Buffer.from(iv, 'hex'))
     return Buffer.from(Buffer.concat([decipher.update(encrypted), decipher.final()]))
   }
 }

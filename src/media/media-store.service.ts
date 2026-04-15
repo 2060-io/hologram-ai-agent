@@ -40,9 +40,7 @@ export class MediaStoreService implements OnModuleInit {
 
       // Public client for presigned URL generation (HMAC signature includes the host)
       const pub = new URL(publicUrl)
-      const pubPort = pub.port
-        ? parseInt(pub.port, 10)
-        : pub.protocol === 'https:' ? 443 : 80
+      const pubPort = pub.port ? parseInt(pub.port, 10) : pub.protocol === 'https:' ? 443 : 80
       this.publicClient = new Minio.Client({
         endPoint: pub.hostname,
         port: pubPort,

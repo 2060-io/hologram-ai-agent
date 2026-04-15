@@ -58,11 +58,16 @@ export class ImageConverterService {
       while (buffer.length > maxSizeKb * 1024 && quality > 20) {
         quality -= 10
         this.logger.debug(`Image too large (${Math.round(buffer.length / 1024)}KB), reducing quality to ${quality}`)
-        const reducedPipeline = sharp(input)
-          .resize({ width: maxWidth, height: maxHeight, fit: 'inside', withoutEnlargement: true })
-        buffer = format === 'jpeg'
-          ? await reducedPipeline.jpeg({ quality }).toBuffer()
-          : await reducedPipeline.webp({ quality }).toBuffer()
+        const reducedPipeline = sharp(input).resize({
+          width: maxWidth,
+          height: maxHeight,
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        buffer =
+          format === 'jpeg'
+            ? await reducedPipeline.jpeg({ quality }).toBuffer()
+            : await reducedPipeline.webp({ quality }).toBuffer()
       }
     }
 

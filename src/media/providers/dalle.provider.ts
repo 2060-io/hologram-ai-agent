@@ -1,5 +1,10 @@
 import OpenAI from 'openai'
-import type { ImageProvider, ImageProviderConfig, ImageGenerationOptions, GeneratedImage } from './image-provider.interface'
+import type {
+  ImageProvider,
+  ImageProviderConfig,
+  ImageGenerationOptions,
+  GeneratedImage,
+} from './image-provider.interface'
 
 export class DalleProvider implements ImageProvider {
   readonly name: string
@@ -12,14 +17,12 @@ export class DalleProvider implements ImageProvider {
     this.model = config.model ?? 'dall-e-3'
     this.defaultSize = config.defaultSize ?? '1024x1024'
 
-    const apiKey = config.apiKeyEnv
-      ? process.env[config.apiKeyEnv]
-      : process.env.OPENAI_API_KEY
+    const apiKey = config.apiKeyEnv ? process.env[config.apiKeyEnv] : process.env.OPENAI_API_KEY
 
     if (!apiKey) {
       throw new Error(
         `DalleProvider "${config.name}": missing API key. ` +
-        `Set ${config.apiKeyEnv ?? 'OPENAI_API_KEY'} in the environment.`,
+          `Set ${config.apiKeyEnv ?? 'OPENAI_API_KEY'} in the environment.`,
       )
     }
 

@@ -8,8 +8,8 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "check-types": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "check-format": "pnpm format --list-different",
+    "check-types": "tsc --noEmit",
+    "check-format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

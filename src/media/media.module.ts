@@ -5,17 +5,7 @@ import { ImageRefStore } from './image-ref.store'
 import { ImageGenerationService } from './image-generation.service'
 
 @Module({
-  providers: [
-    MediaStoreService,
-    ImageConverterService,
-    ImageRefStore,
-    ImageGenerationService,
-  ],
-  exports: [
-    MediaStoreService,
-    ImageConverterService,
-    ImageRefStore,
-    ImageGenerationService,
-  ],
+  providers: [MediaStoreService, ImageConverterService, ImageRefStore, ImageGenerationService],
+  exports: [MediaStoreService, ImageConverterService, ImageRefStore, ImageGenerationService],
 })
 export class MediaModule {}

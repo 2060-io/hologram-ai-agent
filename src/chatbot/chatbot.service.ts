@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { LlmService } from '../llm/llm.service'
 import { CHATBOT_PROMPT_TEMPLATES } from '../common/prompts/chatbot.prompts'
-import { SessionEntity } from 'src/core/models'
+import { SessionEntity } from '../core/models'
 
 /**
  * ChatbotService

@@ -10,9 +10,7 @@ const ToolCtor = DynamicStructuredTool as unknown as new (fields: any) => Dynami
  * Creates a LangChain DynamicStructuredTool for image generation.
  * The LLM decides which provider and target specs to use based on context.
  */
-export function createGenerateImageTool(
-  imageGenService: ImageGenerationService,
-): DynamicStructuredTool {
+export function createGenerateImageTool(imageGenService: ImageGenerationService): DynamicStructuredTool {
   const providerNames = imageGenService.getProviderNames()
 
   return new ToolCtor({
@@ -28,7 +26,10 @@ export function createGenerateImageTool(
       prompt: z.string().describe('Text prompt describing the image to generate'),
       n: z.number().int().min(1).max(4).optional().describe('Number of images to generate (1-4, default 1)'),
       size: z.string().optional().describe('Size hint for the provider (e.g. "1024x1024"). Provider-specific.'),
-      target_format: z.enum(['jpeg', 'png', 'webp']).optional().describe('Target image format after conversion (default: jpeg)'),
+      target_format: z
+        .enum(['jpeg', 'png', 'webp'])
+        .optional()
+        .describe('Target image format after conversion (default: jpeg)'),
       target_max_width: z.number().int().optional().describe('Max width in pixels after conversion'),
       target_max_height: z.number().int().optional().describe('Max height in pixels after conversion'),
       target_max_size_kb: z.number().int().optional().describe('Max file size in KB after conversion (default: 5120)'),
@@ -53,7 +54,8 @@ export function createGenerateImageTool(
           images: results.map((r) => ({
             refId: r.refId,
           })),
-          message: `Done. ${results.length} image(s) have already been delivered to the user — do NOT call generate_image again for this request. ` +
+          message:
+            `Done. ${results.length} image(s) have already been delivered to the user — do NOT call generate_image again for this request. ` +
             `If the user wants to upload an image to an external service, use upload_media_to_mcp with the refId.`,
         }
 

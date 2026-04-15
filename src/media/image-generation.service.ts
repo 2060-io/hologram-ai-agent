@@ -80,7 +80,9 @@ export class ImageGenerationService implements OnModuleInit {
   async generate(request: GenerateImageRequest): Promise<GeneratedImageResult[]> {
     const provider = this.providers.get(request.provider)
     if (!provider) {
-      throw new Error(`Image provider "${request.provider}" not found. Available: ${this.getProviderNames().join(', ')}`)
+      throw new Error(
+        `Image provider "${request.provider}" not found. Available: ${this.getProviderNames().join(', ')}`,
+      )
     }
 
     if (!this.mediaStore.isEnabled) {
