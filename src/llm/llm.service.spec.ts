@@ -6,6 +6,8 @@ import { RagService } from '../rag/rag.service'
 import { McpService } from '../mcp/mcp.service'
 import { ToolCallInterceptorService } from '../rbac/tool-call-interceptor.service'
 import { RbacService } from '../rbac/rbac.service'
+import { ImageGenerationService } from '../media/image-generation.service'
+import { ImageRefStore } from '../media/image-ref.store'
 
 describe('LlmService', () => {
   let service: LlmService
@@ -32,6 +34,8 @@ describe('LlmService', () => {
         { provide: McpService, useValue: { toolsVersion: 0, listTools: jest.fn().mockResolvedValue([]) } },
         { provide: ToolCallInterceptorService, useValue: {} },
         { provide: RbacService, useValue: { isRbacActive: jest.fn().mockReturnValue(false) } },
+        { provide: ImageGenerationService, useValue: {} },
+        { provide: ImageRefStore, useValue: {} },
       ],
     }).compile()
 
