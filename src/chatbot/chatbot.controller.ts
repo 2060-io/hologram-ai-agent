@@ -2,7 +2,7 @@ import { Controller, Post, Body } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger'
 import { ChatbotService } from './chatbot.service'
 import { AskDto } from './dto/chatbot.dts'
-import { SessionEntity } from 'src/core/models'
+import { SessionEntity } from '../core/models'
 
 @ApiTags('chatbot')
 @Controller('chatbot')

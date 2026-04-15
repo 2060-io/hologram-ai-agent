@@ -1,7 +1,7 @@
 import { DynamicStructuredTool } from '@langchain/core/tools'
 import { z } from 'zod'
 import { Logger } from '@nestjs/common'
-import { RagService } from 'src/rag/rag.service'
+import { RagService } from '../../rag/rag.service'
 const toolCtor = DynamicStructuredTool as unknown as new (fields: any) => DynamicStructuredTool
 const logger = new Logger('ragRetrieverTool')
 
