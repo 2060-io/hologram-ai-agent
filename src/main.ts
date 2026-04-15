@@ -50,6 +50,17 @@ async function bootstrap() {
   const appName = packageJson.name
   const appVersion = packageJson.version
 
+  // Log agent-pack info
+  const packMeta = configService.get('appConfig.agentPackMeta')
+  if (packMeta?.manifestPath) {
+    logger.log(`Agent pack loaded: ${packMeta.manifestPath}`)
+  } else {
+    logger.warn(`No agent pack loaded. Warnings: ${packMeta?.warnings?.join('; ') ?? 'none'}`)
+  }
+  if (packMeta?.warnings?.length) {
+    packMeta.warnings.forEach((w: string) => logger.warn(`Agent pack warning: ${w}`))
+  }
+
   // Log the URL where the application is running
   logger.log(`Application (${appName} v${appVersion}) running on: ${await app.getUrl()} `)
 }

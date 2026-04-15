@@ -115,6 +115,11 @@ export default registerAs('appConfig', () => ({
   // RAG (Retrieval Augmented Generation) Settings
 
   /**
+   * Whether RAG is enabled. Automatically true when rag section is present in agent-pack.
+   */
+  ragEnabled: !!agentPack?.rag,
+
+  /**
    * Directory path from which RAG loads .txt and .pdf documents for context retrieval.
    */
   ragDocsPath: pickString('RAG_DOCS_PATH', agentPack?.rag?.docsPath, './docs'),
@@ -306,4 +311,26 @@ export default registerAs('appConfig', () => ({
    * Configurable via MCP_SERVERS_CONFIG env var (JSON array) or agent-pack mcp.servers.
    */
   mcpServers: resolveMcpServers(process.env.MCP_SERVERS_CONFIG, agentPack?.mcp?.servers),
+
+  // Image Generation Providers
+  imageGenerationProviders: (agentPack?.imageGeneration?.providers ?? []) as {
+    name: string
+    type: string
+    model?: string
+    apiKeyEnv?: string
+    defaultSize?: string
+  }[],
+
+  // Speech-to-Text Configuration
+  sttProvider: agentPack?.speechToText?.provider
+    ? (agentPack.speechToText.provider as {
+        name: string
+        type: string
+        model?: string
+        apiKeyEnv?: string
+        baseUrl?: string
+        language?: string
+      })
+    : undefined,
+  sttRequireAuth: agentPack?.speechToText?.requireAuth === true || agentPack?.speechToText?.requireAuth === 'true',
 }))

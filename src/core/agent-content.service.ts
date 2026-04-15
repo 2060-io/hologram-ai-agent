@@ -104,7 +104,14 @@ export class AgentContentService {
     return this.agentPack?.metadata?.defaultLanguage ?? 'en'
   }
 
-  getMenuItems(): { id: string; labelKey?: string; label?: string; action?: string; visibleWhen?: string; badge?: string }[] {
+  getMenuItems(): {
+    id: string
+    labelKey?: string
+    label?: string
+    action?: string
+    visibleWhen?: string
+    badge?: string
+  }[] {
     const menuItems = this.agentPack?.flows?.menu?.items
     if (Array.isArray(menuItems) && menuItems.length > 0) return menuItems
     return [

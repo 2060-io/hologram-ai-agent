@@ -12,14 +12,18 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { AgentExecutor } from 'langchain/agents'
 
 import { ExternalToolDef, SupportedProviders } from './interfaces/llm-provider.interface'
-import { SessionEntity } from 'src/core/models'
+import { SessionEntity } from '../core/models'
 import { statisticsFetcherTool, authCheckerTool, createRagRetrieverTool } from './tools/'
-import { MemoryService } from 'src/memory/memory.service'
-import { LangchainSessionMemory } from 'src/memory/langchain-session-memory'
+import { MemoryService } from '../memory/memory.service'
+import { LangchainSessionMemory } from '../memory/langchain-session-memory'
 import { RagService } from '../rag/rag.service'
 import { McpService } from '../mcp/mcp.service'
 import { ToolCallInterceptorService } from '../rbac/tool-call-interceptor.service'
 import { RbacService, UserContext } from '../rbac/rbac.service'
+import { ImageGenerationService } from '../media/image-generation.service'
+import { ImageRefStore } from '../media/image-ref.store'
+import { createGenerateImageTool } from '../media/tools/generate-image.tool'
+import { createUploadMediaBridgeTool } from '../media/tools/upload-media-bridge.tool'
 
 /**
  * LlmService
@@ -78,6 +82,8 @@ export class LlmService implements OnModuleInit {
     private readonly mcpService: McpService,
     private readonly toolCallInterceptor: ToolCallInterceptorService,
     private readonly rbacService: RbacService,
+    private readonly imageGenService: ImageGenerationService,
+    private readonly imageRefStore: ImageRefStore,
   ) {
     this.agentPrompt = this.config.get<string>('appConfig.agentPrompt') ?? 'You are a helpful AI agent called Hologram.'
 
@@ -109,6 +115,23 @@ export class LlmService implements OnModuleInit {
    * and rebuild the agent if new tools are found.
    */
   async onModuleInit() {
+    // Register image generation built-in tools if enabled
+    if (this.imageGenService.isEnabled) {
+      const genTool = createGenerateImageTool(this.imageGenService)
+      const bridgeTool = createUploadMediaBridgeTool(this.imageRefStore, this.mcpService)
+      this.baseTools.push(genTool, bridgeTool)
+      this.publicTools = [...this.baseTools]
+      this.adminTools = [...this.baseTools]
+      this.logger.log(`Image generation tools registered: [${genTool.name}, ${bridgeTool.name}]`)
+
+      // Rebuild agents with updated base tools
+      if (this.provider === 'openai' || this.provider === 'anthropic') {
+        const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
+        this.publicAgent = publicAgent
+        this.adminAgent = adminAgent
+      }
+    }
+
     // Attempt initial MCP tool discovery (may be empty if all servers are lazy)
     await this.refreshMcpTools()
   }
@@ -141,7 +164,10 @@ export class LlmService implements OnModuleInit {
       this.rbacAgentCache.clear()
 
       // Rebuild agents with updated tool sets
-      if ((this.provider === 'openai' || this.provider === 'anthropic') && (this.publicTools.length > 0 || this.adminTools.length > 0)) {
+      if (
+        (this.provider === 'openai' || this.provider === 'anthropic') &&
+        (this.publicTools.length > 0 || this.adminTools.length > 0)
+      ) {
         const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
         this.publicAgent = publicAgent
         this.adminAgent = adminAgent
@@ -224,20 +250,25 @@ export class LlmService implements OnModuleInit {
           isAuthenticated: session.isAuthenticated ?? false,
         }
 
-        // Wrap in both RBAC context and MCP caller context
+        // Wrap in RBAC context, MCP caller context, and image gen caller context
+        const invokeAgent = () =>
+          agentExecutor.invoke(
+            {
+              input: userMessage,
+              today,
+            },
+            {
+              configurable: {
+                isAuthenticated: session?.isAuthenticated ?? false,
+              },
+            },
+          )
+
         const result = await this.toolCallInterceptor.runWithContext(userContext, () =>
           this.mcpService.runWithCaller(session.userName ?? undefined, () =>
-            agentExecutor.invoke(
-              {
-                input: userMessage,
-                today,
-              },
-              {
-                configurable: {
-                  isAuthenticated: session?.isAuthenticated ?? false,
-                },
-              },
-            ),
+            session.connectionId
+              ? this.imageGenService.runWithCaller(session.connectionId, invokeAgent)
+              : invokeAgent(),
           ),
         )
 

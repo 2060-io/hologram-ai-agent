@@ -30,8 +30,10 @@ The service reads the path provided via `AGENT_PACK_PATH`. If not set, it defaul
 | `memory`       | object | no       | Memory backend and session window config.                   |
 | `flows`        | object | no       | Welcome, authentication, and menu behavior.                 |
 | `tools`        | object | no       | Dynamic tool JSON and bundled tool settings.                |
-| `mcp`          | object | no       | MCP (Model Context Protocol) server connections.            |
-| `integrations` | object | no       | External service configuration (VS Agent, DB, etc.).        |
+| `mcp`             | object | no       | MCP (Model Context Protocol) server connections.            |
+| `imageGeneration` | object | no       | Image generation providers and MinIO storage.               |
+| `speechToText`    | object | no       | Speech-to-text (voice note transcription) configuration.    |
+| `integrations`    | object | no       | External service configuration (VS Agent, DB, etc.).        |
 
 All top-level fields are optional.
 
@@ -469,6 +471,152 @@ mcp:
       toolAccess:
         default: public
 ```
+
+---
+
+### imageGeneration
+
+Configures AI image generation. The agent exposes two built-in LangChain tools (`generate_image` and `upload_media_to_mcp`) when at least one provider is configured and MinIO storage is available.
+
+**Architecture:**
+
+1. The LLM calls `generate_image` with a prompt and optional target specs.
+2. The provider generates the raw image (e.g. DALL-E API).
+3. The image is converted (resized, format, quality) via `sharp`.
+4. A 128×128 thumbnail preview is generated for the chat UI.
+5. The converted image is uploaded to MinIO and a presigned URL is returned.
+6. A `MediaMessage` with `preview`, `width`, and `height` is sent to the user.
+7. The image ref is stored in-memory (1h TTL) for optional MCP bridging via `upload_media_to_mcp`.
+
+| Field       | Type   | Description                                     |
+| ----------- | ------ | ----------------------------------------------- |
+| `providers` | array  | List of image generation provider configurations. |
+
+#### imageGeneration.providers[]
+
+| Field         | Type   | Default          | Description                                                                    |
+| ------------- | ------ | ---------------- | ------------------------------------------------------------------------------ |
+| `name`        | string | —                | Unique provider name, referenced by the LLM in `generate_image` tool calls.   |
+| `type`        | string | —                | Provider type. Currently supported: `openai-dalle`.                            |
+| `model`       | string | `dall-e-3`       | Model name (e.g. `dall-e-3`, `dall-e-2`).                                     |
+| `apiKeyEnv`   | string | `OPENAI_API_KEY` | Environment variable name holding the API key.                                 |
+| `defaultSize` | string | `1024x1024`      | Default image size (e.g. `1024x1024`, `1792x1024`). Provider interprets this. |
+
+```yaml
+imageGeneration:
+  providers:
+    - name: dalle
+      type: openai-dalle
+      model: dall-e-3
+      # apiKeyEnv: OPENAI_API_KEY  # default, reuses the LLM key
+      defaultSize: 1024x1024
+```
+
+#### MinIO storage (environment variables)
+
+Image generation requires MinIO for storing generated images and serving presigned URLs. Configure via environment variables:
+
+| Variable           | Default       | Description                                                                    |
+| ------------------ | ------------- | ------------------------------------------------------------------------------ |
+| `MINIO_ENDPOINT`   | —             | MinIO server hostname (e.g. `minio`). **Required** to enable image generation. |
+| `MINIO_PORT`       | `9000`        | MinIO server port.                                                             |
+| `MINIO_ACCESS_KEY` | `minioadmin`  | MinIO access key.                                                              |
+| `MINIO_SECRET_KEY` | `minioadmin`  | MinIO secret key.                                                              |
+| `MINIO_USE_SSL`    | `false`       | Use HTTPS for MinIO connection.                                                |
+| `MINIO_PUBLIC_URL` | auto-derived  | Public base URL for presigned URLs (e.g. `https://minio.example.com:9000`).    |
+| `MINIO_BUCKET`     | `image-gen`   | Bucket name for storing generated images.                                      |
+
+If `MINIO_ENDPOINT` is not set, the media store is disabled and image generation tools will not be registered.
+
+#### Built-in tools
+
+When image generation is enabled, two tools are automatically registered with the LLM:
+
+**`generate_image`** — Generates images via the configured provider, converts them, uploads to MinIO, and sends a preview to the user.
+
+| Parameter            | Type   | Required | Description                                              |
+| -------------------- | ------ | -------- | -------------------------------------------------------- |
+| `provider`           | string | yes      | Provider name (from `imageGeneration.providers[].name`). |
+| `prompt`             | string | yes      | Text prompt describing the desired image.                |
+| `n`                  | number | no       | Number of images to generate (default: 1).               |
+| `target_format`      | string | no       | Output format: `jpeg`, `png`, or `webp`.                 |
+| `target_max_width`   | number | no       | Max width in pixels.                                     |
+| `target_max_height`  | number | no       | Max height in pixels.                                    |
+| `target_max_size_kb` | number | no       | Max file size in KB (quality is reduced to fit).         |
+
+**`upload_media_to_mcp`** — Bridges a generated image to an MCP server by sending it as base64 via an internal MCP tool call, bypassing LLM context.
+
+| Parameter | Type   | Required | Description                                    |
+| --------- | ------ | -------- | ---------------------------------------------- |
+| `ref_id`  | string | yes      | Image reference ID returned by `generate_image`. |
+| `server`  | string | yes      | MCP server name.                               |
+| `tool`    | string | yes      | MCP tool name to invoke with the image data.   |
+
+---
+
+### speechToText
+
+Configures voice note transcription (speech-to-text). When enabled, incoming audio `MediaMessage` items are transcribed and fed to the LLM as text input.
+
+| Field         | Type           | Default | Description                                                             |
+| ------------- | -------------- | ------- | ----------------------------------------------------------------------- |
+| `requireAuth` | boolean/string | `false` | When `true`, voice notes from unauthenticated users are rejected.       |
+| `provider`    | object         | —       | STT provider configuration (see below). If omitted, STT is disabled.   |
+
+#### speechToText.provider
+
+| Field       | Type   | Default        | Description                                                                                    |
+| ----------- | ------ | -------------- | ---------------------------------------------------------------------------------------------- |
+| `name`      | string | —              | Unique provider name (for logging).                                                            |
+| `type`      | string | —              | Provider type: `openai-whisper` (OpenAI cloud) or `whisper-compatible` (self-hosted endpoint). |
+| `model`     | string | `whisper-1`    | Whisper model name. Use `whisper-1` for OpenAI, or e.g. `large-v3` for self-hosted.           |
+| `apiKeyEnv` | string | `OPENAI_API_KEY` | Environment variable name containing the API key.                                            |
+| `baseUrl`   | string | —              | Base URL for self-hosted Whisper-compatible endpoints (e.g. `https://my-whisper.example.com/v1`). |
+| `language`  | string | —              | Optional language hint (ISO 639-1 code, e.g. `en`, `es`).                                     |
+
+Both `openai-whisper` and `whisper-compatible` use the same OpenAI-compatible `/v1/audio/transcriptions` API. The difference is that `whisper-compatible` is intended for self-hosted endpoints where `baseUrl` is required and `apiKeyEnv` may not be needed.
+
+```yaml
+# Example: OpenAI cloud Whisper
+speechToText:
+  requireAuth: true
+  provider:
+    name: whisper
+    type: openai-whisper
+    model: whisper-1
+    # apiKeyEnv: OPENAI_API_KEY  # default
+
+# Example: Self-hosted Whisper-compatible endpoint
+speechToText:
+  requireAuth: false
+  provider:
+    name: local-whisper
+    type: whisper-compatible
+    model: large-v3
+    baseUrl: https://my-whisper.example.com/v1
+```
+
+#### Voice authentication message
+
+When `requireAuth: true` and an unauthenticated user sends a voice note, the agent sends a `VOICE_AUTH_REQUIRED` message. This message is configurable per language via the `strings` map:
+
+```yaml
+languages:
+  en:
+    strings:
+      VOICE_AUTH_REQUIRED: "Please log in before sending voice messages."
+  es:
+    strings:
+      VOICE_AUTH_REQUIRED: "Inicia sesión antes de enviar mensajes de voz."
+```
+
+If not overridden, the following defaults are used:
+
+| Language | Default message |
+| -------- | --------------- |
+| `en`     | Voice messages require authentication. Please authenticate first to use this feature. |
+| `es`     | Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función. |
+| `fr`     | Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité. |
 
 ---
 

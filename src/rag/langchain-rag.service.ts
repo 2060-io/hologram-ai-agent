@@ -35,6 +35,10 @@ export class LangchainRagService implements OnModuleInit {
    * Logs each initialization step for observability.
    */
   async onModuleInit() {
+    if (!this.configService.get<boolean>('appConfig.ragEnabled')) {
+      this.logger.log('[RAG] (Langchain) RAG not configured — skipping initialization.')
+      return
+    }
     const vectorStoreProvider = this.configService.get<string>('appConfig.vectorStore') as SupportedStores
     const openaiApiKey = this.configService.get<string>('appConfig.openaiApiKey') || process.env.OPENAI_API_KEY
 

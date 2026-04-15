@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { StateStep } from 'src/core/common/enums/state-step.enum'
+import { StateStep } from '../../core/common/enums/state-step.enum'
 
 export class AskDto {
   @ApiProperty({
