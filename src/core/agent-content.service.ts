@@ -139,6 +139,7 @@ export class AgentContentService {
       enabled: this.toBoolean(authConfig.enabled, true),
       required: this.configService.get<boolean>('appConfig.authRequired') ?? false,
       credentialDefinitionId,
+      issuerServiceDid: authConfig.issuerServiceDid,
       userIdentityAttribute: this.configService.get<string>('appConfig.userIdentityAttribute') ?? 'name',
       rolesAttribute: this.configService.get<string>('appConfig.rolesAttribute') || undefined,
       defaultRole: this.configService.get<string>('appConfig.defaultRole') ?? 'user',

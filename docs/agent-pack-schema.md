@@ -212,6 +212,7 @@ memory:
 | `enabled`                | boolean/string | —                           | Enable credential-based authentication.                                     |
 | `required`               | boolean/string | `AUTH_REQUIRED`             | Block guest (unauthenticated) users from chatting.                          |
 | `credentialDefinitionId` | string         | `CREDENTIAL_DEFINITION_ID`  | Verifiable credential definition ID for authentication.                     |
+| `issuerServiceDid`       | string         | `ISSUER_SERVICE_DID`        | DID of the service that issues the required credential. When set, users who lack the credential receive an invitation to this service. |
 | `userIdentityAttribute`  | string         | `USER_IDENTITY_ATTRIBUTE`   | Credential attribute used as unique user identity (e.g., `email`, `login`). Default: `name`. |
 | `rolesAttribute`         | string         | `ROLES_ATTRIBUTE`           | Credential attribute containing user roles (string, CSV, or JSON array).    |
 | `defaultRole`            | string         | `DEFAULT_ROLE`              | Fallback role when credential lacks the roles attribute. Default: `user`.   |
@@ -245,6 +246,7 @@ flows:
     enabled: true
     required: true
     credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}
+    issuerServiceDid: ${ISSUER_SERVICE_DID}
     userIdentityAttribute: employeeLogin
     rolesAttribute: roles
     defaultRole: employee

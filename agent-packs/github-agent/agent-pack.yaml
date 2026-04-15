@@ -133,6 +133,7 @@ flows:
   authentication:
     enabled: true
     credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}
+    issuerServiceDid: ${ISSUER_SERVICE_DID}
     adminAvatars:
       - mj
       - "@fafa"

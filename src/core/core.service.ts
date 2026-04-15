@@ -15,6 +15,7 @@ import {
   ProfileMessage,
   StatEnum,
   TextMessage,
+  InvitationMessage,
   VerifiableCredentialRequestedProofItem,
   VerifiableCredentialSubmittedProofItem,
 } from '@2060.io/vs-agent-nestjs-client'
@@ -429,11 +430,28 @@ export class CoreService implements EventHandler, OnModuleInit {
               await this.sendText(connectionId, message, userLang)
             } else if (proofItem?.errorCode) {
               this.logger.warn(`[AUTH] Proof submission failed with error: ${proofItem.errorCode}`)
-              await this.sendText(
-                connectionId,
-                `${this.getText('AUTH_ERROR', userLang)}: ${proofItem.errorCode}`,
-                userLang,
-              )
+
+              if (proofItem.errorCode === 'e.req.no-compatible-credentials' && this.authFlowConfig.issuerServiceDid) {
+                await this.sendText(connectionId, this.getText('AUTH_NO_CREDENTIAL', userLang), userLang)
+                await this.apiClient.messages.send(
+                  new InvitationMessage({
+                    connectionId,
+                    did: this.authFlowConfig.issuerServiceDid,
+                  }),
+                )
+                this.logger.log(
+                  `[AUTH] Sent invitation to issuer service ${this.authFlowConfig.issuerServiceDid} for ${connectionId}`,
+                )
+              } else {
+                await this.sendText(
+                  connectionId,
+                  `${this.getText('AUTH_ERROR', userLang)}: ${proofItem.errorCode}`,
+                  userLang,
+                )
+              }
+
+              session.state = StateStep.CHAT
+              await this.sessionRepository.save(session)
             } else {
               await this.sendText(connectionId, this.getText('WAITING_CREDENTIAL', userLang), userLang)
             }
