@@ -306,4 +306,13 @@ export default registerAs('appConfig', () => ({
    * Configurable via MCP_SERVERS_CONFIG env var (JSON array) or agent-pack mcp.servers.
    */
   mcpServers: resolveMcpServers(process.env.MCP_SERVERS_CONFIG, agentPack?.mcp?.servers),
+
+  // Image Generation Providers
+  imageGenerationProviders: (agentPack?.imageGeneration?.providers ?? []) as {
+    name: string
+    type: string
+    model?: string
+    apiKeyEnv?: string
+    defaultSize?: string
+  }[],
 }))

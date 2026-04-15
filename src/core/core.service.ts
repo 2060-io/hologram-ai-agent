@@ -660,6 +660,33 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   /**
+   * Handle media.send events emitted by ImageGenerationService.
+   * Sends generated images to the user as MediaMessage.
+   */
+  @OnEvent('media.send')
+  async onMediaSend(payload: { connectionId: string; images: { url: string; mimeType: string }[] }): Promise<void> {
+    this.logger.log(`[EVENT] media.send for ${payload.connectionId}: ${payload.images.length} image(s)`)
+    try {
+      const { MediaItem } = await import('@2060.io/vs-agent-nestjs-client')
+      const items = payload.images.map(
+        (img) =>
+          new MediaItem({
+            uri: img.url,
+            mimeType: img.mimeType,
+          }),
+      )
+      await this.apiClient.messages.send(
+        new MediaMessage({
+          connectionId: payload.connectionId,
+          items,
+        }),
+      )
+    } catch (err) {
+      this.logger.error(`[EVENT] Error sending MediaMessage for ${payload.connectionId}: ${err}`)
+    }
+  }
+
+  /**
    * Handle menu.refresh events emitted by ApprovalEventHandler.
    */
   @OnEvent('menu.refresh')
