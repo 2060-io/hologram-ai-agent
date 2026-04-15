@@ -83,6 +83,7 @@ const AgentPackSchema = z
             enabled: z.union([z.boolean(), z.string()]).optional(),
             required: z.union([z.boolean(), z.string()]).optional(),
             credentialDefinitionId: z.string().optional(),
+            issuerServiceDid: z.string().optional(),
             userIdentityAttribute: z.string().optional(),
             rolesAttribute: z.string().optional(),
             defaultRole: z.string().optional(),
@@ -437,6 +438,8 @@ export interface AuthFlowConfig {
   /** When true, unauthenticated users cannot send messages */
   required: boolean
   credentialDefinitionId?: string
+  /** DID of the service that issues the required credential (used to send invitation on no-compatible-credentials) */
+  issuerServiceDid?: string
   /** Credential attribute that uniquely identifies the user (e.g., 'name', 'email') */
   userIdentityAttribute: string
   /** Credential attribute containing the user's role(s) */
