@@ -431,10 +431,7 @@ export class CoreService implements EventHandler, OnModuleInit {
             } else if (proofItem?.errorCode) {
               this.logger.warn(`[AUTH] Proof submission failed with error: ${proofItem.errorCode}`)
 
-              if (
-                proofItem.errorCode === 'e.req.no-compatible-credentials' &&
-                this.authFlowConfig.issuerServiceDid
-              ) {
+              if (proofItem.errorCode === 'e.req.no-compatible-credentials' && this.authFlowConfig.issuerServiceDid) {
                 await this.sendText(connectionId, this.getText('AUTH_NO_CREDENTIAL', userLang), userLang)
                 await this.apiClient.messages.send(
                   new InvitationMessage({

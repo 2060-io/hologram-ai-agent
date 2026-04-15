@@ -29,7 +29,8 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS: 'Pending approvals',
     PENDING_APPROVALS_PROMPT: 'Pending approval requests you can act on. Select one to approve or reject:',
     NO_PENDING_APPROVALS: 'There are no pending approvals for you to review.',
-    AUTH_NO_CREDENTIAL: 'You don\'t have the required credential yet. Here is an invitation to the service that can issue it:',
+    AUTH_NO_CREDENTIAL:
+      "You don't have the required credential yet. Here is an invitation to the service that can issue it:",
     VOICE_AUTH_REQUIRED: 'Voice messages require authentication. Please authenticate first to use this feature.',
   },
   es: {
