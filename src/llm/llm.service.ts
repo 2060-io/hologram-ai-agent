@@ -12,10 +12,10 @@ import type { Runnable } from '@langchain/core/runnables'
 import type { AgentExecutor } from 'langchain/agents'
 
 import { ExternalToolDef, SupportedProviders } from './interfaces/llm-provider.interface'
-import { SessionEntity } from 'src/core/models'
+import { SessionEntity } from '../core/models'
 import { statisticsFetcherTool, authCheckerTool, createRagRetrieverTool } from './tools/'
-import { MemoryService } from 'src/memory/memory.service'
-import { LangchainSessionMemory } from 'src/memory/langchain-session-memory'
+import { MemoryService } from '../memory/memory.service'
+import { LangchainSessionMemory } from '../memory/langchain-session-memory'
 import { RagService } from '../rag/rag.service'
 import { McpService } from '../mcp/mcp.service'
 import { ToolCallInterceptorService } from '../rbac/tool-call-interceptor.service'
@@ -164,7 +164,10 @@ export class LlmService implements OnModuleInit {
       this.rbacAgentCache.clear()
 
       // Rebuild agents with updated tool sets
-      if ((this.provider === 'openai' || this.provider === 'anthropic') && (this.publicTools.length > 0 || this.adminTools.length > 0)) {
+      if (
+        (this.provider === 'openai' || this.provider === 'anthropic') &&
+        (this.publicTools.length > 0 || this.adminTools.length > 0)
+      ) {
         const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
         this.publicAgent = publicAgent
         this.adminAgent = adminAgent

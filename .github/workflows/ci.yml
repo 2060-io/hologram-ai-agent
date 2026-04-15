@@ -9,35 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout hologram-generic-ai-agent-vs
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js v22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Enable corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Check Format
-        run: pnpm check-format
-
-      - name: Check Types
-        run: pnpm check-types
-
-      - name: Build
-        run: pnpm build
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
-
-      - name: Validate Helm chart
-        run: helm lint ./charts
+  ci:
+    uses: 2060-io/organization/.github/workflows/2060-linter-call.yml@main
+    with:
+      enable-charts-lint: true

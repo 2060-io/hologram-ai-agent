@@ -34,14 +34,12 @@ export class OpenAiWhisperProvider implements SttProvider {
     this.model = config.model ?? 'whisper-1'
     this.language = config.language || undefined
 
-    const apiKey = config.apiKeyEnv
-      ? process.env[config.apiKeyEnv]
-      : process.env.OPENAI_API_KEY
+    const apiKey = config.apiKeyEnv ? process.env[config.apiKeyEnv] : process.env.OPENAI_API_KEY
 
     if (!apiKey && !config.baseUrl) {
       throw new Error(
         `OpenAiWhisperProvider "${config.name}": missing API key. ` +
-        `Set ${config.apiKeyEnv ?? 'OPENAI_API_KEY'} in the environment.`,
+          `Set ${config.apiKeyEnv ?? 'OPENAI_API_KEY'} in the environment.`,
       )
     }
 
@@ -55,11 +53,7 @@ export class OpenAiWhisperProvider implements SttProvider {
     const ext = MIME_TO_EXT[mimeType] ?? 'ogg'
     const fileName = `audio.${ext}`
 
-    const file: Uploadable = new File(
-      [new Uint8Array(audioBuffer)],
-      fileName,
-      { type: mimeType },
-    )
+    const file: Uploadable = new File([new Uint8Array(audioBuffer)], fileName, { type: mimeType })
 
     const response = await this.client.audio.transcriptions.create({
       model: this.model,

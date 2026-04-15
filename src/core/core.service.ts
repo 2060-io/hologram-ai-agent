@@ -152,7 +152,11 @@ export class CoreService implements EventHandler, OnModuleInit {
               await this.sendText(session.connectionId, this.getText('VOICE_AUTH_REQUIRED', session.lang), session.lang)
             } else {
               try {
-                const result = await this.sttService.transcribeFromUrl(audioItem.uri, audioItem.mimeType, audioItem.ciphering)
+                const result = await this.sttService.transcribeFromUrl(
+                  audioItem.uri,
+                  audioItem.mimeType,
+                  audioItem.ciphering,
+                )
                 if (result.text.trim().length > 0) {
                   content = { content: result.text.trim() }
                 }

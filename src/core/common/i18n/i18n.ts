@@ -19,7 +19,8 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     MCP_CONFIG_ABORT: 'Abort Configuration',
     MCP_CONFIG_SELECT_SERVER: 'Select the MCP server you want to configure:',
     MCP_CONFIG_SAVED: '✅ Configuration for "{server}" saved and verified successfully.',
-    MCP_CONFIG_INVALID: '⚠️ Connection test failed for "{server}". The credentials may be invalid. Please try configuring again.',
+    MCP_CONFIG_INVALID:
+      '⚠️ Connection test failed for "{server}". The credentials may be invalid. Please try configuring again.',
     MCP_CONFIG_ERROR: 'An error occurred while saving configuration. Please try again.',
     MCP_CONFIG_ABORTED: 'Configuration cancelled.',
     MY_APPROVAL_REQUESTS: 'Approval requests',
@@ -48,17 +49,21 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     MCP_CONFIG_ABORT: 'Cancelar Configuración',
     MCP_CONFIG_SELECT_SERVER: 'Selecciona el servidor MCP que deseas configurar:',
     MCP_CONFIG_SAVED: '✅ Configuración de "{server}" guardada y verificada correctamente.',
-    MCP_CONFIG_INVALID: '⚠️ La prueba de conexión falló para "{server}". Las credenciales pueden ser inválidas. Por favor, intenta configurar de nuevo.',
+    MCP_CONFIG_INVALID:
+      '⚠️ La prueba de conexión falló para "{server}". Las credenciales pueden ser inválidas. Por favor, intenta configurar de nuevo.',
     MCP_CONFIG_ERROR: 'Ocurrió un error al guardar la configuración. Por favor, inténtalo de nuevo.',
     MCP_CONFIG_ABORTED: 'Configuración cancelada.',
     MY_APPROVAL_REQUESTS: 'Solicitudes de aprobación',
     MY_APPROVAL_REQUESTS_PROMPT: 'Tus solicitudes de aprobación pendientes. Selecciona una para cancelarla:',
     NO_APPROVAL_REQUESTS: 'No tienes solicitudes de aprobación pendientes.',
     PENDING_APPROVALS: 'Aprobaciones pendientes',
-    PENDING_APPROVALS_PROMPT: 'Solicitudes de aprobación pendientes que puedes revisar. Selecciona una para aprobar o rechazar:',
+    PENDING_APPROVALS_PROMPT:
+      'Solicitudes de aprobación pendientes que puedes revisar. Selecciona una para aprobar o rechazar:',
     NO_PENDING_APPROVALS: 'No hay aprobaciones pendientes para ti.',
-    AUTH_NO_CREDENTIAL: 'Aún no tienes la credencial requerida. Aquí tienes una invitación al servicio que puede emitirla:',
-    VOICE_AUTH_REQUIRED: 'Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función.',
+    AUTH_NO_CREDENTIAL:
+      'Aún no tienes la credencial requerida. Aquí tienes una invitación al servicio que puede emitirla:',
+    VOICE_AUTH_REQUIRED:
+      'Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función.',
   },
   fr: {
     ROOT_TITLE: 'Bienvenue !',
@@ -77,17 +82,21 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     MCP_CONFIG_ABORT: 'Annuler la Configuration',
     MCP_CONFIG_SELECT_SERVER: 'Sélectionnez le serveur MCP que vous souhaitez configurer :',
     MCP_CONFIG_SAVED: '✅ Configuration de "{server}" enregistrée et vérifiée avec succès.',
-    MCP_CONFIG_INVALID: '⚠️ Le test de connexion a échoué pour "{server}". Les identifiants sont peut-être invalides. Veuillez réessayer la configuration.',
+    MCP_CONFIG_INVALID:
+      '⚠️ Le test de connexion a échoué pour "{server}". Les identifiants sont peut-être invalides. Veuillez réessayer la configuration.',
     MCP_CONFIG_ERROR: "Une erreur est survenue lors de l'enregistrement. Veuillez réessayer.",
     MCP_CONFIG_ABORTED: 'Configuration annulée.',
     MY_APPROVAL_REQUESTS: "Demandes d'approbation",
     MY_APPROVAL_REQUESTS_PROMPT: "Vos demandes d'approbation en attente. Sélectionnez-en une pour l'annuler :",
     NO_APPROVAL_REQUESTS: "Vous n'avez aucune demande d'approbation en attente.",
     PENDING_APPROVALS: 'Approbations en attente',
-    PENDING_APPROVALS_PROMPT: "Demandes d'approbation en attente que vous pouvez traiter. Sélectionnez-en une pour approuver ou rejeter :",
+    PENDING_APPROVALS_PROMPT:
+      "Demandes d'approbation en attente que vous pouvez traiter. Sélectionnez-en une pour approuver ou rejeter :",
     NO_PENDING_APPROVALS: "Il n'y a pas d'approbations en attente pour vous.",
-    AUTH_NO_CREDENTIAL: "Vous n'avez pas encore le justificatif requis. Voici une invitation au service qui peut vous le délivrer :",
-    VOICE_AUTH_REQUIRED: "Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité.",
+    AUTH_NO_CREDENTIAL:
+      "Vous n'avez pas encore le justificatif requis. Voici une invitation au service qui peut vous le délivrer :",
+    VOICE_AUTH_REQUIRED:
+      "Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité.",
   },
 }
 

@@ -332,6 +332,5 @@ export default registerAs('appConfig', () => ({
         language?: string
       })
     : undefined,
-  sttRequireAuth: agentPack?.speechToText?.requireAuth === true
-    || agentPack?.speechToText?.requireAuth === 'true',
+  sttRequireAuth: agentPack?.speechToText?.requireAuth === true || agentPack?.speechToText?.requireAuth === 'true',
 }))

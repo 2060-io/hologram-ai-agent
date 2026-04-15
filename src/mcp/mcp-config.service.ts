@@ -30,7 +30,9 @@ export class McpConfigService implements OnModuleInit {
     if (keyHex) {
       const buf = Buffer.from(keyHex, 'hex')
       if (buf.length !== 32) {
-        this.logger.error('MCP_CONFIG_ENCRYPTION_KEY must be exactly 32 bytes (64 hex chars). Per-user MCP config disabled.')
+        this.logger.error(
+          'MCP_CONFIG_ENCRYPTION_KEY must be exactly 32 bytes (64 hex chars). Per-user MCP config disabled.',
+        )
         return
       }
       this.encryptionKey = buf
