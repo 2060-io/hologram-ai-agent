@@ -137,7 +137,6 @@ docker compose -f docker/docker-compose.yml up -d
 This starts:
 - **Redis** on port 6379 (vector store + memory)
 - **PostgreSQL** on port 5432 (sessions, MCP user config)
-- **VS Agent** on ports 3002 (admin) / 3003 (public)
 
 ### Step 4: Run the full setup (optional, for VS Agent + credentials)
 
