@@ -320,4 +320,18 @@ export default registerAs('appConfig', () => ({
     apiKeyEnv?: string
     defaultSize?: string
   }[],
+
+  // Speech-to-Text Configuration
+  sttProvider: agentPack?.speechToText?.provider
+    ? (agentPack.speechToText.provider as {
+        name: string
+        type: string
+        model?: string
+        apiKeyEnv?: string
+        baseUrl?: string
+        language?: string
+      })
+    : undefined,
+  sttRequireAuth: agentPack?.speechToText?.requireAuth === true
+    || agentPack?.speechToText?.requireAuth === 'true',
 }))

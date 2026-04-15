@@ -211,6 +211,13 @@ imageGeneration:
       # Uses OPENAI_API_KEY by default; set apiKeyEnv to override
       defaultSize: 1024x1024
 
+speechToText:
+  requireAuth: false
+  provider:
+    name: whisper
+    type: openai-whisper
+    model: whisper-1
+
 integrations:
   vsAgent:
     adminUrl: ${VS_AGENT_ADMIN_URL}

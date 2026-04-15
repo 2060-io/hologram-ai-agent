@@ -32,6 +32,7 @@ The service reads the path provided via `AGENT_PACK_PATH`. If not set, it defaul
 | `tools`        | object | no       | Dynamic tool JSON and bundled tool settings.                |
 | `mcp`             | object | no       | MCP (Model Context Protocol) server connections.            |
 | `imageGeneration` | object | no       | Image generation providers and MinIO storage.               |
+| `speechToText`    | object | no       | Speech-to-text (voice note transcription) configuration.    |
 | `integrations`    | object | no       | External service configuration (VS Agent, DB, etc.).        |
 
 All top-level fields are optional.
@@ -550,6 +551,72 @@ When image generation is enabled, two tools are automatically registered with th
 | `ref_id`  | string | yes      | Image reference ID returned by `generate_image`. |
 | `server`  | string | yes      | MCP server name.                               |
 | `tool`    | string | yes      | MCP tool name to invoke with the image data.   |
+
+---
+
+### speechToText
+
+Configures voice note transcription (speech-to-text). When enabled, incoming audio `MediaMessage` items are transcribed and fed to the LLM as text input.
+
+| Field         | Type           | Default | Description                                                             |
+| ------------- | -------------- | ------- | ----------------------------------------------------------------------- |
+| `requireAuth` | boolean/string | `false` | When `true`, voice notes from unauthenticated users are rejected.       |
+| `provider`    | object         | —       | STT provider configuration (see below). If omitted, STT is disabled.   |
+
+#### speechToText.provider
+
+| Field       | Type   | Default        | Description                                                                                    |
+| ----------- | ------ | -------------- | ---------------------------------------------------------------------------------------------- |
+| `name`      | string | —              | Unique provider name (for logging).                                                            |
+| `type`      | string | —              | Provider type: `openai-whisper` (OpenAI cloud) or `whisper-compatible` (self-hosted endpoint). |
+| `model`     | string | `whisper-1`    | Whisper model name. Use `whisper-1` for OpenAI, or e.g. `large-v3` for self-hosted.           |
+| `apiKeyEnv` | string | `OPENAI_API_KEY` | Environment variable name containing the API key.                                            |
+| `baseUrl`   | string | —              | Base URL for self-hosted Whisper-compatible endpoints (e.g. `https://my-whisper.example.com/v1`). |
+| `language`  | string | —              | Optional language hint (ISO 639-1 code, e.g. `en`, `es`).                                     |
+
+Both `openai-whisper` and `whisper-compatible` use the same OpenAI-compatible `/v1/audio/transcriptions` API. The difference is that `whisper-compatible` is intended for self-hosted endpoints where `baseUrl` is required and `apiKeyEnv` may not be needed.
+
+```yaml
+# Example: OpenAI cloud Whisper
+speechToText:
+  requireAuth: true
+  provider:
+    name: whisper
+    type: openai-whisper
+    model: whisper-1
+    # apiKeyEnv: OPENAI_API_KEY  # default
+
+# Example: Self-hosted Whisper-compatible endpoint
+speechToText:
+  requireAuth: false
+  provider:
+    name: local-whisper
+    type: whisper-compatible
+    model: large-v3
+    baseUrl: https://my-whisper.example.com/v1
+```
+
+#### Voice authentication message
+
+When `requireAuth: true` and an unauthenticated user sends a voice note, the agent sends a `VOICE_AUTH_REQUIRED` message. This message is configurable per language via the `strings` map:
+
+```yaml
+languages:
+  en:
+    strings:
+      VOICE_AUTH_REQUIRED: "Please log in before sending voice messages."
+  es:
+    strings:
+      VOICE_AUTH_REQUIRED: "Inicia sesión antes de enviar mensajes de voz."
+```
+
+If not overridden, the following defaults are used:
+
+| Language | Default message |
+| -------- | --------------- |
+| `en`     | Voice messages require authentication. Please authenticate first to use this feature. |
+| `es`     | Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función. |
+| `fr`     | Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité. |
 
 ---
 
