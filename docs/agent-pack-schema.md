@@ -30,8 +30,9 @@ The service reads the path provided via `AGENT_PACK_PATH`. If not set, it defaul
 | `memory`       | object | no       | Memory backend and session window config.                   |
 | `flows`        | object | no       | Welcome, authentication, and menu behavior.                 |
 | `tools`        | object | no       | Dynamic tool JSON and bundled tool settings.                |
-| `mcp`          | object | no       | MCP (Model Context Protocol) server connections.            |
-| `integrations` | object | no       | External service configuration (VS Agent, DB, etc.).        |
+| `mcp`             | object | no       | MCP (Model Context Protocol) server connections.            |
+| `imageGeneration` | object | no       | Image generation providers and MinIO storage.               |
+| `integrations`    | object | no       | External service configuration (VS Agent, DB, etc.).        |
 
 All top-level fields are optional.
 
@@ -469,6 +470,86 @@ mcp:
       toolAccess:
         default: public
 ```
+
+---
+
+### imageGeneration
+
+Configures AI image generation. The agent exposes two built-in LangChain tools (`generate_image` and `upload_media_to_mcp`) when at least one provider is configured and MinIO storage is available.
+
+**Architecture:**
+
+1. The LLM calls `generate_image` with a prompt and optional target specs.
+2. The provider generates the raw image (e.g. DALL-E API).
+3. The image is converted (resized, format, quality) via `sharp`.
+4. A 128×128 thumbnail preview is generated for the chat UI.
+5. The converted image is uploaded to MinIO and a presigned URL is returned.
+6. A `MediaMessage` with `preview`, `width`, and `height` is sent to the user.
+7. The image ref is stored in-memory (1h TTL) for optional MCP bridging via `upload_media_to_mcp`.
+
+| Field       | Type   | Description                                     |
+| ----------- | ------ | ----------------------------------------------- |
+| `providers` | array  | List of image generation provider configurations. |
+
+#### imageGeneration.providers[]
+
+| Field         | Type   | Default          | Description                                                                    |
+| ------------- | ------ | ---------------- | ------------------------------------------------------------------------------ |
+| `name`        | string | —                | Unique provider name, referenced by the LLM in `generate_image` tool calls.   |
+| `type`        | string | —                | Provider type. Currently supported: `openai-dalle`.                            |
+| `model`       | string | `dall-e-3`       | Model name (e.g. `dall-e-3`, `dall-e-2`).                                     |
+| `apiKeyEnv`   | string | `OPENAI_API_KEY` | Environment variable name holding the API key.                                 |
+| `defaultSize` | string | `1024x1024`      | Default image size (e.g. `1024x1024`, `1792x1024`). Provider interprets this. |
+
+```yaml
+imageGeneration:
+  providers:
+    - name: dalle
+      type: openai-dalle
+      model: dall-e-3
+      # apiKeyEnv: OPENAI_API_KEY  # default, reuses the LLM key
+      defaultSize: 1024x1024
+```
+
+#### MinIO storage (environment variables)
+
+Image generation requires MinIO for storing generated images and serving presigned URLs. Configure via environment variables:
+
+| Variable           | Default       | Description                                                                    |
+| ------------------ | ------------- | ------------------------------------------------------------------------------ |
+| `MINIO_ENDPOINT`   | —             | MinIO server hostname (e.g. `minio`). **Required** to enable image generation. |
+| `MINIO_PORT`       | `9000`        | MinIO server port.                                                             |
+| `MINIO_ACCESS_KEY` | `minioadmin`  | MinIO access key.                                                              |
+| `MINIO_SECRET_KEY` | `minioadmin`  | MinIO secret key.                                                              |
+| `MINIO_USE_SSL`    | `false`       | Use HTTPS for MinIO connection.                                                |
+| `MINIO_PUBLIC_URL` | auto-derived  | Public base URL for presigned URLs (e.g. `https://minio.example.com:9000`).    |
+| `MINIO_BUCKET`     | `image-gen`   | Bucket name for storing generated images.                                      |
+
+If `MINIO_ENDPOINT` is not set, the media store is disabled and image generation tools will not be registered.
+
+#### Built-in tools
+
+When image generation is enabled, two tools are automatically registered with the LLM:
+
+**`generate_image`** — Generates images via the configured provider, converts them, uploads to MinIO, and sends a preview to the user.
+
+| Parameter            | Type   | Required | Description                                              |
+| -------------------- | ------ | -------- | -------------------------------------------------------- |
+| `provider`           | string | yes      | Provider name (from `imageGeneration.providers[].name`). |
+| `prompt`             | string | yes      | Text prompt describing the desired image.                |
+| `n`                  | number | no       | Number of images to generate (default: 1).               |
+| `target_format`      | string | no       | Output format: `jpeg`, `png`, or `webp`.                 |
+| `target_max_width`   | number | no       | Max width in pixels.                                     |
+| `target_max_height`  | number | no       | Max height in pixels.                                    |
+| `target_max_size_kb` | number | no       | Max file size in KB (quality is reduced to fit).         |
+
+**`upload_media_to_mcp`** — Bridges a generated image to an MCP server by sending it as base64 via an internal MCP tool call, bypassing LLM context.
+
+| Parameter | Type   | Required | Description                                    |
+| --------- | ------ | -------- | ---------------------------------------------- |
+| `ref_id`  | string | yes      | Image reference ID returned by `generate_image`. |
+| `server`  | string | yes      | MCP server name.                               |
+| `tool`    | string | yes      | MCP tool name to invoke with the image data.   |
 
 ---
 
