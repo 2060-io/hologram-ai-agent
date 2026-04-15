@@ -148,7 +148,7 @@ export class CoreService implements EventHandler, OnModuleInit {
           if (audioItem && this.sttService.isEnabled) {
             if (!this.sttService.isAllowed(session.isAuthenticated ?? false)) {
               this.logger.log(`[STT] Blocked voice note from unauthenticated user ${session.connectionId}`)
-              await this.sendText(session.connectionId, this.getText('AUTH_REQUIRED', session.lang), session.lang)
+              await this.sendText(session.connectionId, this.getText('VOICE_AUTH_REQUIRED', session.lang), session.lang)
             } else {
               try {
                 const result = await this.sttService.transcribeFromUrl(audioItem.uri, audioItem.mimeType)
