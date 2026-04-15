@@ -97,6 +97,9 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_LOGIN }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
+      - name: Build Helm dependencies
+        run: helm dependency build ./charts
+
       - name: Push Helm chart to Docker Hub OCI repo
         run: |
           if [ "$RELEASE_TYPE" = "stable" ]; then
