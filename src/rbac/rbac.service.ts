@@ -92,7 +92,10 @@ export class RbacService {
     }
 
     // Comma-separated
-    const roles = trimmed.split(',').map((r) => r.trim()).filter(Boolean)
+    const roles = trimmed
+      .split(',')
+      .map((r) => r.trim())
+      .filter(Boolean)
     return roles.length > 0 ? roles : [this.defaultRole]
   }
 

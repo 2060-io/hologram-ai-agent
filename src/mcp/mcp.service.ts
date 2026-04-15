@@ -76,7 +76,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
 
       // Skip shared connection for user-controlled servers without valid admin headers
       if (def.accessMode === 'user-controlled' && this.hasUnresolvedHeaders(def)) {
-        this.logger.log(`Skipping shared connection for user-controlled server "${def.name}" (no admin token). Tools will be discovered on first user connection.`)
+        this.logger.log(
+          `Skipping shared connection for user-controlled server "${def.name}" (no admin token). Tools will be discovered on first user connection.`,
+        )
         continue
       }
 
@@ -87,7 +89,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    this.logger.log(`MCP initialization complete. ${this.connections.length}/${this.serverDefs.length} server(s) connected.`)
+    this.logger.log(
+      `MCP initialization complete. ${this.connections.length}/${this.serverDefs.length} server(s) connected.`,
+    )
   }
 
   async onModuleDestroy() {
@@ -172,7 +176,12 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
    *
    * @param isAdmin - Whether the caller has admin privileges.
    */
-  async callTool(serverName: string, toolName: string, args: Record<string, unknown>, isAdmin = false): Promise<string> {
+  async callTool(
+    serverName: string,
+    toolName: string,
+    args: Record<string, unknown>,
+    isAdmin = false,
+  ): Promise<string> {
     const sharedConn = this.connections.find((c) => c.name === serverName) ?? null
     const accessMode = this.accessModeMap.get(serverName)
 
@@ -185,7 +194,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     if (!isAdmin) {
       const access = this.toolAccessMap.get(serverName)
       if (!this.isToolPublic(toolName, access)) {
-        this.logger.warn(`[ACCESS] Non-admin caller attempted to call admin-only tool "${toolName}" on server "${serverName}".`)
+        this.logger.warn(
+          `[ACCESS] Non-admin caller attempted to call admin-only tool "${toolName}" on server "${serverName}".`,
+        )
         return 'This tool requires administrator privileges. Please contact an admin.'
       }
     }
@@ -269,7 +280,7 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
         transport = new StdioClientTransport({
           command: def.command,
           args,
-          env: def.env ? { ...process.env, ...def.env } as Record<string, string> : undefined,
+          env: def.env ? ({ ...process.env, ...def.env } as Record<string, string>) : undefined,
         })
         break
       }
@@ -285,9 +296,7 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
           throw new Error(`MCP server "${def.name}" with streamable-http transport requires a "url" field.`)
         }
         transport = new StreamableHTTPClientTransport(new URL(def.url), {
-          requestInit: def.headers
-            ? { headers: def.headers }
-            : undefined,
+          requestInit: def.headers ? { headers: def.headers } : undefined,
         })
         break
       }
@@ -300,7 +309,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     // Metadata may already have been registered in onModuleInit; set here as fallback for direct calls
     if (!this.toolAccessMap.has(def.name)) this.toolAccessMap.set(def.name, def.toolAccess)
     if (def.accessMode && !this.accessModeMap.has(def.name)) this.accessModeMap.set(def.name, def.accessMode)
-    this.logger.log(`Connected to MCP server "${def.name}" via ${def.transport}. accessMode=${def.accessMode ?? 'admin-controlled'}, toolAccess: ${def.toolAccess ? `default=${def.toolAccess.default}` : 'none (all public)'}`)
+    this.logger.log(
+      `Connected to MCP server "${def.name}" via ${def.transport}. accessMode=${def.accessMode ?? 'admin-controlled'}, toolAccess: ${def.toolAccess ? `default=${def.toolAccess.default}` : 'none (all public)'}`,
+    )
   }
 
   /**
@@ -365,7 +376,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
 
       return conn
     } catch (err) {
-      this.logger.error(`[MCP_USER] Failed to create per-user connection for avatar="${avatarName}" server="${serverName}": ${err}`)
+      this.logger.error(
+        `[MCP_USER] Failed to create per-user connection for avatar="${avatarName}" server="${serverName}": ${err}`,
+      )
       return null
     }
   }
@@ -398,7 +411,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     }
     this.serverToolCache.set(serverName, tools)
     this._toolsVersion++
-    this.logger.log(`[MCP] Lazily discovered ${tools.length} tool(s) for server "${serverName}" (toolsVersion=${this._toolsVersion})`)
+    this.logger.log(
+      `[MCP] Lazily discovered ${tools.length} tool(s) for server "${serverName}" (toolsVersion=${this._toolsVersion})`,
+    )
   }
 
   /**
@@ -446,7 +461,11 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     } catch (err) {
       this.logger.warn(`[MCP_USER] Connection test failed for avatar="${avatarName}" server="${serverName}": ${err}`)
       if (client) {
-        try { await client.close() } catch { /* ignore */ }
+        try {
+          await client.close()
+        } catch {
+          /* ignore */
+        }
       }
       return false
     }
@@ -512,7 +531,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
           await this.discoverAndCacheTools(conn, def.name)
         }
       } catch (err) {
-        this.logger.warn(`[MCP_USER] Proactive connection failed for avatar="${avatarName}" server="${def.name}": ${err}`)
+        this.logger.warn(
+          `[MCP_USER] Proactive connection failed for avatar="${avatarName}" server="${def.name}": ${err}`,
+        )
       }
     }
   }
@@ -527,7 +548,9 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     if (conn) {
       try {
         await conn.client.close()
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       this.userConnections.delete(key)
       this.logger.debug(`[MCP_USER] Invalidated connection for avatar="${avatarName}" server="${serverName}".`)
     }

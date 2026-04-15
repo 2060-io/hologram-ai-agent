@@ -17,17 +17,7 @@ import { SessionEntity } from '../core/models'
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
   ],
-  providers: [
-    RbacService,
-    ApprovalService,
-    ToolCallInterceptorService,
-    ApprovalEventHandler,
-    ApprovalExpiryTask,
-  ],
-  exports: [
-    RbacService,
-    ApprovalService,
-    ToolCallInterceptorService,
-  ],
+  providers: [RbacService, ApprovalService, ToolCallInterceptorService, ApprovalEventHandler, ApprovalExpiryTask],
+  exports: [RbacService, ApprovalService, ToolCallInterceptorService],
 })
 export class RbacModule {}
