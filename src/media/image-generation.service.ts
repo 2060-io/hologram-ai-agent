@@ -146,8 +146,7 @@ export class ImageGenerationService implements OnModuleInit {
     const ctx = this.callerCtx.getStore()
     if (ctx?.connectionId) {
       try {
-        const { MediaItem } = await import('@2060.io/vs-agent-nestjs-client')
-        const { MediaMessage } = await import('@2060.io/vs-agent-model')
+        const { MediaItem, MediaMessage } = await import('@2060.io/vs-agent-nestjs-client')
         const items = eventImages.map(
           (img) =>
             new MediaItem({
