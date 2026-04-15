@@ -174,6 +174,21 @@ const AgentPackSchema = z
           .optional(),
       })
       .optional(),
+    imageGeneration: z
+      .object({
+        providers: z
+          .array(
+            z.object({
+              name: z.string(),
+              type: z.string(),
+              model: z.string().optional(),
+              apiKeyEnv: z.string().optional(),
+              defaultSize: z.string().optional(),
+            }),
+          )
+          .optional(),
+      })
+      .optional(),
     speechToText: z
       .object({
         requireAuth: z.union([z.boolean(), z.string()]).optional(),

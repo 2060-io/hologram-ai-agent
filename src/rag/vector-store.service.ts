@@ -30,6 +30,10 @@ export class VectorStoreService implements IRagBackend, OnModuleInit {
   }
 
   async onModuleInit() {
+    if (!this.configService.get<boolean>('appConfig.ragEnabled')) {
+      this.logger.log('[RAG] (VectorStore) RAG not configured — skipping document ingestion.')
+      return
+    }
     try {
       const docsPath = this.configService.getOrThrow<string>('appConfig.ragDocsPath')
       const chunkSize = this.configService.get<number>('appConfig.ragChunkSize')
