@@ -71,7 +71,6 @@ export class MediaStoreService implements OnModuleInit {
       throw new Error('MinIO media store is not initialized.')
     }
 
-    await this.ensureBucket()
     await this.client.putObject(this.bucket, objectName, buffer, buffer.length, {
       'Content-Type': mimeType,
     })

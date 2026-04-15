@@ -79,4 +79,26 @@ export class ImageConverterService {
       height: metadata.height ?? 0,
     }
   }
+
+  /**
+   * Generate a base64-encoded thumbnail for MediaMessage preview.
+   * Uses 128x128 at 50% JPEG quality (Hologram convention).
+   */
+  async generateThumbnail(
+    input: Buffer,
+    options: { size?: number; quality?: number } = {},
+  ): Promise<{ base64: string; mimeType: string }> {
+    const size = options.size ?? 128
+    const quality = options.quality ?? 50
+
+    const buf = await sharp(input)
+      .resize({ width: size, height: size, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality })
+      .toBuffer()
+
+    return {
+      base64: buf.toString('base64'),
+      mimeType: 'image/jpeg',
+    }
+  }
 }

@@ -101,18 +101,35 @@ export class ImageGenerationService implements OnModuleInit {
     }
 
     const results: GeneratedImageResult[] = []
+    const eventImages: {
+      url: string
+      mimeType: string
+      width: number
+      height: number
+      preview: string
+    }[] = []
 
     for (const raw of rawImages) {
       const converted = await this.converter.convert(raw.buffer, conversionOptions)
 
-      // Step 3: Upload converted image to MinIO
+      // Step 3: Generate thumbnail for Hologram preview (128x128, 50% JPEG)
+      const thumbnail = await this.converter.generateThumbnail(converted.buffer)
+
+      // Step 4: Upload converted image to MinIO
       const objectName = `generated/${randomUUID()}.${request.targetFormat ?? 'jpeg'}`
       const previewUrl = await this.mediaStore.upload(objectName, converted.buffer, converted.mimeType)
 
-      // Step 4: Store ref for later retrieval by bridge tool
+      // Step 5: Store ref for later retrieval by bridge tool
       const refId = this.refStore.add(converted.buffer, converted.mimeType, previewUrl)
 
       results.push({ refId, previewUrl })
+      eventImages.push({
+        url: previewUrl,
+        mimeType: converted.mimeType,
+        width: converted.width,
+        height: converted.height,
+        preview: thumbnail.base64,
+      })
     }
 
     this.logger.log(`Generated and stored ${results.length} image(s): ${results.map((r) => r.refId).join(', ')}`)
@@ -122,10 +139,7 @@ export class ImageGenerationService implements OnModuleInit {
     if (ctx?.connectionId) {
       this.eventEmitter.emit('media.send', {
         connectionId: ctx.connectionId,
-        images: results.map((r) => ({
-          url: r.previewUrl,
-          mimeType: request.targetFormat === 'png' ? 'image/png' : request.targetFormat === 'webp' ? 'image/webp' : 'image/jpeg',
-        })),
+        images: eventImages,
       })
     } else {
       this.logger.warn('No connectionId in caller context — MediaMessage will not be sent to user.')

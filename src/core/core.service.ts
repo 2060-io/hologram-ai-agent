@@ -664,7 +664,10 @@ export class CoreService implements EventHandler, OnModuleInit {
    * Sends generated images to the user as MediaMessage.
    */
   @OnEvent('media.send')
-  async onMediaSend(payload: { connectionId: string; images: { url: string; mimeType: string }[] }): Promise<void> {
+  async onMediaSend(payload: {
+    connectionId: string
+    images: { url: string; mimeType: string; width?: number; height?: number; preview?: string }[]
+  }): Promise<void> {
     this.logger.log(`[EVENT] media.send for ${payload.connectionId}: ${payload.images.length} image(s)`)
     try {
       const { MediaItem } = await import('@2060.io/vs-agent-nestjs-client')
@@ -673,6 +676,9 @@ export class CoreService implements EventHandler, OnModuleInit {
           new MediaItem({
             uri: img.url,
             mimeType: img.mimeType,
+            ...(img.width ? { width: img.width } : {}),
+            ...(img.height ? { height: img.height } : {}),
+            ...(img.preview ? { preview: img.preview } : {}),
           }),
       )
       await this.apiClient.messages.send(
