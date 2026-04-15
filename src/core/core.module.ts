@@ -6,6 +6,7 @@ import { ConnectionEntity, EventsModule } from '@2060.io/vs-agent-nestjs-client'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ChatbotModule } from 'src/chatbot/chatbot.module'
 import { MemoryModule } from 'src/memory/memory.module'
+import { SttModule } from 'src/stt/stt.module'
 import { AgentContentService } from './agent-content.service'
 import { McpConfigEntity } from '../mcp/mcp-config.entity'
 import { ApprovalRequestEntity } from '../rbac/approval-request.entity'
@@ -34,6 +35,7 @@ import { ApprovalRequestEntity } from '../rbac/approval-request.entity'
     }),
     ChatbotModule,
     MemoryModule,
+    SttModule,
     EventsModule,
   ],
   controllers: [],
