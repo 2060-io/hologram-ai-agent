@@ -35,6 +35,7 @@ import { McpService } from '../mcp/mcp.service'
 import { RbacService } from '../rbac/rbac.service'
 import { ApprovalService } from '../rbac/approval.service'
 import type { AuthFlowConfig } from '../config/agent-pack.loader'
+import { SttService } from '../stt/stt.service'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -53,6 +54,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly mcpService: McpService,
     @Optional() private readonly rbacService: RbacService,
     @Optional() private readonly approvalService: ApprovalService,
+    private readonly sttService: SttService,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -140,10 +142,29 @@ export class CoreService implements EventHandler, OnModuleInit {
           }
           break
         }
-        case MediaMessage.type:
-          //inMsg = JsonTransformer.fromJSON(message, MediaMessage)
-          content = 'media'
+        case MediaMessage.type: {
+          const mediaMsg = JsonTransformer.fromJSON(message, MediaMessage)
+          const audioItem = mediaMsg.items?.find((item) => this.sttService.isAudioMimeType(item.mimeType))
+          if (audioItem && this.sttService.isEnabled) {
+            if (!this.sttService.isAllowed(session.isAuthenticated ?? false)) {
+              this.logger.log(`[STT] Blocked voice note from unauthenticated user ${session.connectionId}`)
+              await this.sendText(session.connectionId, this.getText('VOICE_AUTH_REQUIRED', session.lang), session.lang)
+            } else {
+              try {
+                const result = await this.sttService.transcribeFromUrl(audioItem.uri, audioItem.mimeType, audioItem.ciphering)
+                if (result.text.trim().length > 0) {
+                  content = { content: result.text.trim() }
+                }
+              } catch (err) {
+                this.logger.error(`[STT] Transcription failed: ${err}`)
+                await this.sendText(session.connectionId, this.getText('ERROR_MESSAGES', session.lang), session.lang)
+              }
+            }
+          } else {
+            content = 'media'
+          }
           break
+        }
         case ProfileMessage.type: {
           const inMsg = JsonTransformer.fromJSON(message, ProfileMessage) as unknown as ProfileMessage
           if (inMsg.preferredLanguage) {

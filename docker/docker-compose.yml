@@ -2,35 +2,16 @@
 # Hologram AI Agent MCP VS — Local Docker Compose
 # =============================================================================
 #
-# Runs ONLY dependent infrastructure services.
+# Runs ONLY dependent infrastructure services (Redis, PostgreSQL).
+# The VS Agent is deployed separately by scripts/setup.sh (with ngrok).
 # The chatbot itself runs natively via scripts/start.sh (for hot-reload).
 #
-# Prerequisites:
-#   - Docker and Docker Compose installed
-#   - ngrok running on port 3003 (or setup.sh handles this)
-#
 # Usage:
-#   source config.env
-#   export NGROK_DOMAIN=your-domain.ngrok-free.app
-#   docker compose up
+#   docker compose -f docker/docker-compose.yml up -d
 #
 # =============================================================================
 
 services:
-  vs-agent:
-    image: ${VS_AGENT_IMAGE:-veranalabs/vs-agent:latest}
-    platform: linux/amd64
-    ports:
-      - "${VS_AGENT_ADMIN_PORT:-3002}:3000"
-      - "${VS_AGENT_PUBLIC_PORT:-3003}:3001"
-    environment:
-      - AGENT_PUBLIC_DID=did:webvh:${NGROK_DOMAIN}
-      - AGENT_LABEL=${SERVICE_NAME:-Hologram AI Agent}
-      - ENABLE_PUBLIC_API_SWAGGER=true
-      - EVENTS_BASE_URL=http://host.docker.internal:${CHATBOT_PORT:-3010}
-    volumes:
-      - vs-agent-data:/root/.afj
-
   redis:
     image: redis/redis-stack-server:latest
     ports:
@@ -50,6 +31,5 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
 volumes:
-  vs-agent-data:
   redis-data:
   postgres-data:

@@ -28,6 +28,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS: 'Pending approvals',
     PENDING_APPROVALS_PROMPT: 'Pending approval requests you can act on. Select one to approve or reject:',
     NO_PENDING_APPROVALS: 'There are no pending approvals for you to review.',
+    VOICE_AUTH_REQUIRED: 'Voice messages require authentication. Please authenticate first to use this feature.',
   },
   es: {
     ROOT_TITLE: '¡Bienvenido!',
@@ -55,6 +56,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS: 'Aprobaciones pendientes',
     PENDING_APPROVALS_PROMPT: 'Solicitudes de aprobación pendientes que puedes revisar. Selecciona una para aprobar o rechazar:',
     NO_PENDING_APPROVALS: 'No hay aprobaciones pendientes para ti.',
+    VOICE_AUTH_REQUIRED: 'Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función.',
   },
   fr: {
     ROOT_TITLE: 'Bienvenue !',
@@ -82,6 +84,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS: 'Approbations en attente',
     PENDING_APPROVALS_PROMPT: "Demandes d'approbation en attente que vous pouvez traiter. Sélectionnez-en une pour approuver ou rejeter :",
     NO_PENDING_APPROVALS: "Il n'y a pas d'approbations en attente pour vous.",
+    VOICE_AUTH_REQUIRED: "Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité.",
   },
 }
 
