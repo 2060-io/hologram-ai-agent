@@ -141,7 +141,7 @@ export class LlmService implements OnModuleInit {
       this.rbacAgentCache.clear()
 
       // Rebuild agents with updated tool sets
-      if ((this.provider === 'openai' || this.provider === 'anthropic') && this.publicTools.length > 0) {
+      if ((this.provider === 'openai' || this.provider === 'anthropic') && (this.publicTools.length > 0 || this.adminTools.length > 0)) {
         const { publicAgent, adminAgent } = await this.setupToolAgent(this.publicTools, this.adminTools)
         this.publicAgent = publicAgent
         this.adminAgent = adminAgent
