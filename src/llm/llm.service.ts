@@ -240,6 +240,7 @@ export class LlmService implements OnModuleInit {
           tools,
           memory,
           verbose: this.config.get<boolean>('appConfig.agentVerbose') ?? false,
+          returnIntermediateSteps: true,
         }) as any as AgentExecutor
 
         // Build RBAC user context for ToolCallInterceptor

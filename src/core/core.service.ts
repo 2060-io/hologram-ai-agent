@@ -158,7 +158,11 @@ export class CoreService implements EventHandler, OnModuleInit {
                   audioItem.ciphering,
                 )
                 if (result.text.trim().length > 0) {
-                  content = { content: result.text.trim() }
+                  content = new TextMessage({
+                    connectionId: message.connectionId,
+                    content: `[Voice note] ${result.text.trim()}`,
+                    ...(message.threadId ? { threadId: message.threadId } : {}),
+                  })
                 }
               } catch (err) {
                 this.logger.error(`[STT] Transcription failed: ${err}`)
@@ -166,7 +170,14 @@ export class CoreService implements EventHandler, OnModuleInit {
               }
             }
           } else {
-            content = 'media'
+            // Non-audio media: describe items so LLM has context
+            const items = mediaMsg.items ?? []
+            const desc = items.map((it) => it.mimeType).join(', ')
+            content = new TextMessage({
+              connectionId: message.connectionId,
+              content: `[Media received: ${desc || 'unknown'}]`,
+              ...(message.threadId ? { threadId: message.threadId } : {}),
+            })
           }
           break
         }
@@ -361,16 +372,18 @@ export class CoreService implements EventHandler, OnModuleInit {
             'content' in content &&
             typeof (content as Record<string, unknown>).content === 'string'
           ) {
-            const textContent = (content as { content: string }).content.trim()
+            const rawText = (content as { content: string }).content.trim()
+            const threadId = (content as any).threadId as string | undefined
+            const textContent = threadId ? `[Replying to messageId: ${threadId}] ${rawText}` : rawText
 
             // Guest access check: when auth is required, block unauthenticated messages
-            if (textContent.length > 0 && !session.isAuthenticated && this.authFlowConfig.required) {
+            if (rawText.length > 0 && !session.isAuthenticated && this.authFlowConfig.required) {
               this.logger.log(`[GUEST] Blocked message from unauthenticated user ${connectionId}`)
               await this.sendText(connectionId, this.getText('AUTH_REQUIRED', userLang), userLang)
               break
             }
 
-            if (textContent.length > 0) {
+            if (rawText.length > 0) {
               const answer = await this.chatBotService.chat({
                 userInput: textContent,
                 session,
