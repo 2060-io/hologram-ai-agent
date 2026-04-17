@@ -13,6 +13,12 @@ const ToolCtor = DynamicStructuredTool as unknown as new (fields: any) => Dynami
  * and calls the MCP tool internally — keeping large binary data out of the LLM context.
  */
 export function createUploadMediaBridgeTool(refStore: ImageRefStore, mcpService: McpService): DynamicStructuredTool {
+  const serverNames = mcpService.getServerNames()
+  const serverHint =
+    serverNames.length > 0
+      ? `One of: ${serverNames.map((n) => `"${n}"`).join(', ')}.`
+      : 'The name of a configured MCP server.'
+
   return new ToolCtor({
     name: 'upload_media_to_mcp',
     description:
@@ -21,7 +27,7 @@ export function createUploadMediaBridgeTool(refStore: ImageRefStore, mcpService:
       'Returns the result from the MCP tool (e.g. a media_id for attaching to posts).',
     schema: z.object({
       ref_id: z.string().describe('The refId returned by generate_image for the image to upload'),
-      server: z.string().describe('MCP server name (e.g. "x-mcp")'),
+      server: z.string().describe(`MCP server name. ${serverHint}`),
       tool: z.string().describe('MCP tool name for media upload (e.g. "upload_media")'),
       extra_args: z
         .record(z.string())
@@ -33,6 +39,19 @@ export function createUploadMediaBridgeTool(refStore: ImageRefStore, mcpService:
     }),
     func: async (args) => {
       try {
+        // Validate server name against the current configuration. This catches
+        // LLM hallucinations early and tells the model exactly which names are
+        // valid so it can retry correctly.
+        const knownServers = mcpService.getServerNames()
+        if (knownServers.length > 0 && !knownServers.includes(args.server)) {
+          const msg =
+            `Unknown MCP server "${args.server}". ` +
+            `Available servers: ${knownServers.map((n) => `"${n}"`).join(', ')}. ` +
+            `Retry with one of these names.`
+          logger.warn(`upload_media_to_mcp: ${msg}`)
+          return JSON.stringify({ status: 'error', message: msg })
+        }
+
         const ref = refStore.get(args.ref_id)
         if (!ref) {
           return JSON.stringify({

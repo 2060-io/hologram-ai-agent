@@ -300,6 +300,15 @@ export class McpService implements OnModuleInit, OnModuleDestroy {
     return this.serverDefs.length > 0
   }
 
+  /**
+   * Returns the names of all configured MCP servers (from the agent pack / env),
+   * regardless of whether they are currently connected. Useful for building tool
+   * schemas that need to reference valid server names.
+   */
+  getServerNames(): string[] {
+    return this.serverDefs.map((d) => d.name)
+  }
+
   /** Per-server tool access configuration, keyed by server name */
   private readonly toolAccessMap = new Map<string, McpToolAccess | undefined>()
 
