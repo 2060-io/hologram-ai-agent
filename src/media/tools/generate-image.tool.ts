@@ -38,7 +38,7 @@ export function createGenerateImageTool(imageGenService: ImageGenerationService)
       try {
         logger.log(`generate_image called: provider=${args.provider}, prompt="${args.prompt}", n=${args.n ?? 1}`)
 
-        const results = await imageGenService.generate({
+        const { images, sentMessageId } = await imageGenService.generate({
           provider: args.provider,
           prompt: args.prompt,
           n: args.n,
@@ -51,11 +51,17 @@ export function createGenerateImageTool(imageGenService: ImageGenerationService)
 
         const response = {
           status: 'ok',
-          images: results.map((r) => ({
+          provider: args.provider,
+          prompt: args.prompt,
+          sentMessageId,
+          images: images.map((r) => ({
             refId: r.refId,
+            url: r.previewUrl,
+            ciphering: r.ciphering,
           })),
           message:
-            `Done. ${results.length} image(s) have already been delivered to the user — do NOT call generate_image again for this request. ` +
+            `Done. ${images.length} image(s) have already been delivered to the user (messageId: ${sentMessageId ?? 'unknown'}) — do NOT call generate_image again for this request. ` +
+            `If the user replies to the media message, their reply will include [Replying to messageId: ${sentMessageId}]. ` +
             `If the user wants to upload an image to an external service, use upload_media_to_mcp with the refId.`,
         }
 

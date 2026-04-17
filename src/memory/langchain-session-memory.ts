@@ -68,6 +68,24 @@ export class LangchainSessionMemory extends BaseChatMemory {
       await this.memoryService.addMessage(this.sessionId, 'user', userInput)
     }
 
+    // Persist intermediate tool steps so the LLM can reference them on subsequent turns
+    const steps = output.intermediateSteps as
+      | { action: { tool: string; toolInput: Record<string, unknown> }; observation: string }[]
+      | undefined
+    if (steps?.length) {
+      const summary = steps
+        .map((s) => {
+          const args = JSON.stringify(s.action.toolInput)
+          const obs = s.observation.length > 500 ? s.observation.slice(0, 500) + '…' : s.observation
+          return `${s.action.tool}(${args}) → ${obs}`
+        })
+        .join('\n')
+      this.logger.debug(
+        `[saveContext] -> addMessage(role=system, tool-steps) sessionId=${this.sessionId} steps=${steps.length}`,
+      )
+      await this.memoryService.addMessage(this.sessionId, 'system', `[Tool calls]\n${summary}`)
+    }
+
     if (aiOutput) {
       this.logger.debug(
         `[saveContext] -> addMessage(role=system) sessionId=${this.sessionId} content="${aiOutput.slice(0, 120)}${aiOutput.length > 120 ? '...' : ''}"`,

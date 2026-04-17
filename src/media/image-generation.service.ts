@@ -24,6 +24,7 @@ export interface GenerateImageRequest {
 export interface GeneratedImageResult {
   refId: string
   previewUrl: string
+  ciphering: CipheringInfo
 }
 
 @Injectable()
@@ -77,7 +78,7 @@ export class ImageGenerationService implements OnModuleInit {
   /**
    * Generate images, convert to target specs, upload to MinIO, and return refs.
    */
-  async generate(request: GenerateImageRequest): Promise<GeneratedImageResult[]> {
+  async generate(request: GenerateImageRequest): Promise<{ images: GeneratedImageResult[]; sentMessageId?: string }> {
     const provider = this.providers.get(request.provider)
     if (!provider) {
       throw new Error(
@@ -131,7 +132,7 @@ export class ImageGenerationService implements OnModuleInit {
       // Step 5: Store ref for later retrieval by bridge tool
       const refId = this.refStore.add(converted.buffer, converted.mimeType, previewUrl)
 
-      results.push({ refId, previewUrl })
+      results.push({ refId, previewUrl, ciphering })
       eventImages.push({
         url: previewUrl,
         mimeType: converted.mimeType,
@@ -145,6 +146,7 @@ export class ImageGenerationService implements OnModuleInit {
     this.logger.log(`Generated and stored ${results.length} image(s): ${results.map((r) => r.refId).join(', ')}`)
 
     // Send MediaMessage directly to the user (avoids event triple-fire)
+    let sentMessageId: string | undefined
     const ctx = this.callerCtx.getStore()
     if (ctx?.connectionId) {
       try {
@@ -160,13 +162,14 @@ export class ImageGenerationService implements OnModuleInit {
               ...(img.ciphering ? { ciphering: img.ciphering } : {}),
             }),
         )
-        await this.apiClient.messages.send(
+        const sent = await this.apiClient.messages.send(
           new MediaMessage({
             connectionId: ctx.connectionId,
             items,
           }),
         )
-        this.logger.log(`Sent MediaMessage to ${ctx.connectionId}: ${items.length} item(s)`)
+        sentMessageId = sent?.id
+        this.logger.log(`Sent MediaMessage ${sentMessageId} to ${ctx.connectionId}: ${items.length} item(s)`)
       } catch (err) {
         this.logger.error(`Failed to send MediaMessage: ${err}`)
       }
@@ -174,7 +177,7 @@ export class ImageGenerationService implements OnModuleInit {
       this.logger.warn('No connectionId in caller context — MediaMessage will not be sent to user.')
     }
 
-    return results
+    return { images: results, sentMessageId }
   }
 
   /**
