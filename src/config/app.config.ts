@@ -319,6 +319,10 @@ export default registerAs('appConfig', () => ({
     model?: string
     apiKeyEnv?: string
     defaultSize?: string
+    // openai-gpt-image only:
+    quality?: 'low' | 'medium' | 'high' | 'auto'
+    outputFormat?: 'png' | 'jpeg' | 'webp'
+    background?: 'transparent' | 'opaque' | 'auto'
   }[],
 
   // Speech-to-Text Configuration

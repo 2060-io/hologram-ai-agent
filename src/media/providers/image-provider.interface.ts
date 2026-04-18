@@ -22,14 +22,20 @@ export interface ImageGenerationOptions {
 export interface ImageProviderConfig {
   /** Unique name used to reference this provider in tool calls. */
   name: string
-  /** Provider type identifier (e.g. "openai-dalle", "stability-ai"). */
+  /** Provider type identifier (e.g. "openai-dalle", "openai-gpt-image", "stability-ai"). */
   type: string
-  /** Model name (e.g. "dall-e-3", "stable-diffusion-xl-1024-v1-0"). */
+  /** Model name (e.g. "dall-e-3", "gpt-image-1.5", "stable-diffusion-xl-1024-v1-0"). */
   model?: string
   /** Environment variable name holding the API key (omit if shared with LLM). */
   apiKeyEnv?: string
   /** Default generation size (e.g. "1024x1024"). */
   defaultSize?: string
+  /** gpt-image only: rendering quality. */
+  quality?: 'low' | 'medium' | 'high' | 'auto'
+  /** gpt-image only: native output format returned by the API. */
+  outputFormat?: 'png' | 'jpeg' | 'webp'
+  /** gpt-image only: background handling. */
+  background?: 'transparent' | 'opaque' | 'auto'
 }
 
 /**

@@ -496,15 +496,24 @@ Configures AI image generation. The agent exposes two built-in LangChain tools (
 
 #### imageGeneration.providers[]
 
-| Field         | Type   | Default          | Description                                                                    |
-| ------------- | ------ | ---------------- | ------------------------------------------------------------------------------ |
-| `name`        | string | —                | Unique provider name, referenced by the LLM in `generate_image` tool calls.   |
-| `type`        | string | —                | Provider type. Currently supported: `openai-dalle`.                            |
-| `model`       | string | `dall-e-3`       | Model name (e.g. `dall-e-3`, `dall-e-2`).                                     |
-| `apiKeyEnv`   | string | `OPENAI_API_KEY` | Environment variable name holding the API key.                                 |
-| `defaultSize` | string | `1024x1024`      | Default image size (e.g. `1024x1024`, `1792x1024`). Provider interprets this. |
+| Field          | Type   | Default          | Description                                                                                    |
+| -------------- | ------ | ---------------- | ---------------------------------------------------------------------------------------------- |
+| `name`         | string | —                | Unique provider name, referenced by the LLM in `generate_image` tool calls.                    |
+| `type`         | string | —                | Provider type. Supported: `openai-dalle`, `openai-gpt-image`.                                  |
+| `model`        | string | depends on type  | Model name (e.g. `dall-e-3`, `dall-e-2`, `gpt-image-1`, `gpt-image-1.5`).                      |
+| `apiKeyEnv`    | string | `OPENAI_API_KEY` | Environment variable name holding the API key.                                                 |
+| `defaultSize`  | string | `1024x1024`      | Default image size. Provider interprets this — see per-type notes below.                       |
+| `quality`      | enum   | provider default | `openai-gpt-image` only: `low` \| `medium` \| `high` \| `auto`.                                |
+| `outputFormat` | enum   | `png`            | `openai-gpt-image` only: `png` \| `jpeg` \| `webp`. Native format returned by the API.         |
+| `background`   | enum   | provider default | `openai-gpt-image` only: `transparent` \| `opaque` \| `auto`.                                  |
+
+##### Type-specific notes
+
+- **`openai-dalle`** — sizes `1024x1024`, `1792x1024`, `1024x1792` (dall-e-3) or `256x256` / `512x512` / `1024x1024` (dall-e-2). Always returns PNG.
+- **`openai-gpt-image`** — sizes `1024x1024`, `1024x1536`, `1536x1024`, or `auto`. Does **not** accept `response_format`; native format is controlled by `outputFormat`. Supports up to `n=10` per call.
 
 ```yaml
+# DALL-E 3
 imageGeneration:
   providers:
     - name: dalle
@@ -512,6 +521,19 @@ imageGeneration:
       model: dall-e-3
       # apiKeyEnv: OPENAI_API_KEY  # default, reuses the LLM key
       defaultSize: 1024x1024
+```
+
+```yaml
+# gpt-image-1.5
+imageGeneration:
+  providers:
+    - name: gpt-image
+      type: openai-gpt-image
+      model: gpt-image-1.5
+      defaultSize: 1024x1024
+      quality: high
+      outputFormat: png
+      # background: transparent  # optional
 ```
 
 #### MinIO storage (environment variables)

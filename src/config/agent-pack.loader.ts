@@ -185,6 +185,10 @@ const AgentPackSchema = z
               model: z.string().optional(),
               apiKeyEnv: z.string().optional(),
               defaultSize: z.string().optional(),
+              // openai-gpt-image only (ignored by other provider types):
+              quality: z.enum(['low', 'medium', 'high', 'auto']).optional(),
+              outputFormat: z.enum(['png', 'jpeg', 'webp']).optional(),
+              background: z.enum(['transparent', 'opaque', 'auto']).optional(),
             }),
           )
           .optional(),
