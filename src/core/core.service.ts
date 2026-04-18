@@ -37,6 +37,7 @@ import { RbacService } from '../rbac/rbac.service'
 import { ApprovalService } from '../rbac/approval.service'
 import type { AuthFlowConfig } from '../config/agent-pack.loader'
 import { SttService } from '../stt/stt.service'
+import { VisionService } from '../vision/vision.service'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -56,6 +57,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     @Optional() private readonly rbacService: RbacService,
     @Optional() private readonly approvalService: ApprovalService,
     private readonly sttService: SttService,
+    private readonly visionService: VisionService,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -170,14 +172,49 @@ export class CoreService implements EventHandler, OnModuleInit {
               }
             }
           } else {
-            // Non-audio media: describe items so LLM has context
+            // Non-audio media: try vision (image-to-text) first, then fall
+            // back to a descriptive stub so the LLM always has context.
             const items = mediaMsg.items ?? []
-            const desc = items.map((it) => it.mimeType).join(', ')
-            content = new TextMessage({
-              connectionId: message.connectionId,
-              content: `[Media received: ${desc || 'unknown'}]`,
-              ...(message.threadId ? { threadId: message.threadId } : {}),
-            })
+            const imageItem = items.find((it) => this.visionService.isImageMimeType(it.mimeType))
+
+            if (imageItem && this.visionService.isEnabled) {
+              if (!this.visionService.isAllowed(session.isAuthenticated ?? false)) {
+                this.logger.log(`[Vision] Blocked image from unauthenticated user ${session.connectionId}`)
+                await this.sendText(
+                  session.connectionId,
+                  this.getText('IMAGE_AUTH_REQUIRED', session.lang),
+                  session.lang,
+                )
+              } else {
+                try {
+                  const result = await this.visionService.describeFromUrl(
+                    imageItem.uri,
+                    imageItem.mimeType,
+                    imageItem.ciphering,
+                  )
+                  if (result.text.trim().length > 0) {
+                    content = new TextMessage({
+                      connectionId: message.connectionId,
+                      content: `[Image] ${result.text.trim()}`,
+                      ...(message.threadId ? { threadId: message.threadId } : {}),
+                    })
+                  }
+                } catch (err) {
+                  this.logger.error(`[Vision] Description failed: ${err}`)
+                }
+              }
+            }
+
+            // Fallback stub when vision didn't produce content (not an image,
+            // not enabled, blocked, or errored).
+            if (!content) {
+              const desc = items.map((it) => it.mimeType).join(', ')
+              content = new TextMessage({
+                connectionId: message.connectionId,
+                content: `[Media received: ${desc || 'unknown'}]`,
+                ...(message.threadId ? { threadId: message.threadId } : {}),
+              })
+            }
           }
           break
         }

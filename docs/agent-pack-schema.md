@@ -622,6 +622,78 @@ If not overridden, the following defaults are used:
 
 ---
 
+### vision
+
+Configures image-to-text description (vision). When enabled, incoming image `MediaMessage` items are described by a vision-capable LLM and injected into the chat flow as `[Image] <description>` so the main LLM has textual context to reason over. Non-image media (documents, etc.) is unaffected.
+
+| Field         | Type           | Default | Description                                                            |
+| ------------- | -------------- | ------- | ---------------------------------------------------------------------- |
+| `requireAuth` | boolean/string | `false` | When `true`, images from unauthenticated users are rejected.           |
+| `provider`    | object         | —       | Vision provider configuration (see below). If omitted, vision is disabled. |
+
+#### vision.provider
+
+| Field       | Type   | Default          | Description                                                                                         |
+| ----------- | ------ | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `name`      | string | —                | Unique provider name (for logging).                                                                 |
+| `type`      | string | —                | Provider type: `openai-vision` (OpenAI cloud) or `openai-compatible-vision` (self-hosted endpoint). |
+| `model`     | string | `gpt-4o-mini`    | Vision-capable model name (e.g. `gpt-4o`, `gpt-4o-mini`, `gpt-4.1-mini`).                           |
+| `apiKeyEnv` | string | `OPENAI_API_KEY` | Environment variable name containing the API key.                                                   |
+| `baseUrl`   | string | —                | Base URL for OpenAI-compatible endpoints (e.g. `https://my-llm.example.com/v1`).                    |
+| `prompt`    | string | built-in concise-description prompt | Prompt used when asking the model to describe the image. Useful to tune verbosity or domain focus. |
+| `maxTokens` | number | `300`            | Max tokens for the description output.                                                              |
+| `detail`    | enum   | `auto`           | OpenAI image detail hint: `auto`, `low`, or `high`. `low` is cheaper; `high` is more accurate.      |
+| `language`  | string | —                | Optional language hint for the description (ISO 639-1, e.g. `en`, `es`).                            |
+
+Both `openai-vision` and `openai-compatible-vision` use the same OpenAI-compatible `/v1/chat/completions` API with an `image_url` content block containing a `data:` URI. The difference is that `openai-compatible-vision` is intended for self-hosted endpoints where `baseUrl` is required and `apiKeyEnv` may not be needed.
+
+```yaml
+# Example: OpenAI cloud vision
+vision:
+  requireAuth: true
+  provider:
+    name: vision
+    type: openai-vision
+    model: gpt-4o-mini
+    detail: auto
+    # apiKeyEnv: OPENAI_API_KEY  # default
+
+# Example: Self-hosted OpenAI-compatible vision endpoint
+vision:
+  requireAuth: false
+  provider:
+    name: local-vision
+    type: openai-compatible-vision
+    model: llava-next
+    baseUrl: https://my-llm.example.com/v1
+    prompt: "Describe the key visual elements of this image in one short paragraph."
+    maxTokens: 200
+```
+
+#### Image authentication message
+
+When `requireAuth: true` and an unauthenticated user sends an image, the agent sends an `IMAGE_AUTH_REQUIRED` message. This message is configurable per language via the `strings` map:
+
+```yaml
+languages:
+  en:
+    strings:
+      IMAGE_AUTH_REQUIRED: "Please log in before sending images."
+  es:
+    strings:
+      IMAGE_AUTH_REQUIRED: "Inicia sesión antes de enviar imágenes."
+```
+
+If not overridden, the following defaults are used:
+
+| Language | Default message |
+| -------- | --------------- |
+| `en`     | Images require authentication. Please authenticate first to use this feature. |
+| `es`     | Las imágenes requieren autenticación. Por favor, autentícate primero para usar esta función. |
+| `fr`     | Les images nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité. |
+
+---
+
 ### integrations
 
 Free-form configuration for external services. The schema accepts any structure under `vsAgent` and `postgres`.

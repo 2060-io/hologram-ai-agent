@@ -333,4 +333,20 @@ export default registerAs('appConfig', () => ({
       })
     : undefined,
   sttRequireAuth: agentPack?.speechToText?.requireAuth === true || agentPack?.speechToText?.requireAuth === 'true',
+
+  // Vision (image-to-text) Configuration
+  visionProvider: agentPack?.vision?.provider
+    ? (agentPack.vision.provider as {
+        name: string
+        type: string
+        model?: string
+        apiKeyEnv?: string
+        baseUrl?: string
+        prompt?: string
+        maxTokens?: number
+        detail?: 'auto' | 'low' | 'high'
+        language?: string
+      })
+    : undefined,
+  visionRequireAuth: agentPack?.vision?.requireAuth === true || agentPack?.vision?.requireAuth === 'true',
 }))

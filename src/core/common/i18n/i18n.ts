@@ -32,6 +32,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     AUTH_NO_CREDENTIAL:
       "You don't have the required credential yet. Here is an invitation to the service that can issue it:",
     VOICE_AUTH_REQUIRED: 'Voice messages require authentication. Please authenticate first to use this feature.',
+    IMAGE_AUTH_REQUIRED: 'Images require authentication. Please authenticate first to use this feature.',
   },
   es: {
     ROOT_TITLE: '¡Bienvenido!',
@@ -65,6 +66,8 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
       'Aún no tienes la credencial requerida. Aquí tienes una invitación al servicio que puede emitirla:',
     VOICE_AUTH_REQUIRED:
       'Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función.',
+    IMAGE_AUTH_REQUIRED:
+      'Las imágenes requieren autenticación. Por favor, autentícate primero para usar esta función.',
   },
   fr: {
     ROOT_TITLE: 'Bienvenue !',
@@ -98,6 +101,8 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Vous n'avez pas encore le justificatif requis. Voici une invitation au service qui peut vous le délivrer :",
     VOICE_AUTH_REQUIRED:
       "Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité.",
+    IMAGE_AUTH_REQUIRED:
+      "Les images nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité.",
   },
 }
 

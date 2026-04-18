@@ -205,6 +205,24 @@ const AgentPackSchema = z
           .optional(),
       })
       .optional(),
+    vision: z
+      .object({
+        requireAuth: z.union([z.boolean(), z.string()]).optional(),
+        provider: z
+          .object({
+            name: z.string(),
+            type: z.string(),
+            model: z.string().optional(),
+            apiKeyEnv: z.string().optional(),
+            baseUrl: z.string().optional(),
+            prompt: z.string().optional(),
+            maxTokens: z.number().optional(),
+            detail: z.enum(['auto', 'low', 'high']).optional(),
+            language: z.string().optional(),
+          })
+          .optional(),
+      })
+      .optional(),
     integrations: z
       .object({
         vsAgent: z.any().optional(),
