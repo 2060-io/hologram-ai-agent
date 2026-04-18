@@ -46,8 +46,7 @@ export class OpenAiVisionProvider implements VisionProvider {
   async describe(imageBuffer: Buffer, mimeType: string, promptOverride?: string): Promise<DescriptionResult> {
     const dataUrl = `data:${mimeType};base64,${imageBuffer.toString('base64')}`
     const instruction =
-      (promptOverride?.trim() || this.prompt) +
-      (this.language ? `\n\nRespond in language: ${this.language}.` : '')
+      (promptOverride?.trim() || this.prompt) + (this.language ? `\n\nRespond in language: ${this.language}.` : '')
 
     const response = await this.client.chat.completions.create({
       model: this.model,

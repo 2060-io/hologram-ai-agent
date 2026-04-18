@@ -1,11 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { createDecipheriv } from 'crypto'
-import type {
-  DescriptionResult,
-  VisionProvider,
-  VisionProviderConfig,
-} from './providers/vision-provider.interface'
+import type { DescriptionResult, VisionProvider, VisionProviderConfig } from './providers/vision-provider.interface'
 import { createVisionProvider } from './providers/vision-provider.factory'
 
 export interface ImageCiphering {
@@ -87,11 +83,7 @@ export class VisionService implements OnModuleInit {
   /**
    * Download an image from a URL (decrypting if ciphered) and describe it.
    */
-  async describeFromUrl(
-    url: string,
-    mimeType: string,
-    ciphering?: ImageCiphering,
-  ): Promise<DescriptionResult> {
+  async describeFromUrl(url: string, mimeType: string, ciphering?: ImageCiphering): Promise<DescriptionResult> {
     if (!this.provider) {
       throw new Error('Vision provider is not configured.')
     }

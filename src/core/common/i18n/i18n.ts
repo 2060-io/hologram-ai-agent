@@ -66,8 +66,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
       'Aún no tienes la credencial requerida. Aquí tienes una invitación al servicio que puede emitirla:',
     VOICE_AUTH_REQUIRED:
       'Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función.',
-    IMAGE_AUTH_REQUIRED:
-      'Las imágenes requieren autenticación. Por favor, autentícate primero para usar esta función.',
+    IMAGE_AUTH_REQUIRED: 'Las imágenes requieren autenticación. Por favor, autentícate primero para usar esta función.',
   },
   fr: {
     ROOT_TITLE: 'Bienvenue !',
