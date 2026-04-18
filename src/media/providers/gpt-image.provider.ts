@@ -19,12 +19,7 @@ import type {
  *  - `n` can be up to 10 in a single call; no per-request dall-e-3 workaround.
  */
 export class GptImageProvider implements ImageProvider {
-  private static readonly SUPPORTED_SIZES = new Set([
-    '1024x1024',
-    '1024x1536',
-    '1536x1024',
-    'auto',
-  ])
+  private static readonly SUPPORTED_SIZES = new Set(['1024x1024', '1024x1536', '1536x1024', 'auto'])
 
   readonly name: string
   private readonly client: OpenAI
