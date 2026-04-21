@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.13.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.12.0...v1.13.0) (2026-04-18)
+
+
+### Features
+
+* add image generation feature with DALL-E provider ([#76](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/76)) ([71a5aca](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/71a5aca441ed83ac68ae90092bb52d07526d7895))
+* improve agent memory context for voice notes, media, and generated content ([#85](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/85)) ([02dab20](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/02dab2049fc70039ca6253bcee3175e91eabcb7e))
+* **mcp:** auto-reconnect shared MCP connections on failure ([#86](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/86)) ([0ae9403](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/0ae94037f7695952da4baa7e43777c0ce1ede3e3))
+* **media:** add openai-gpt-image provider for gpt-image-1.x models ([#88](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/88)) ([0484dbe](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/0484dbeae14ddab17634f91daa1b8fce503e0e33))
+* send invitation when user lacks required credential ([#80](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/80)) ([d08c81c](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/d08c81c3bb82d78204fae08eea686da94f5c8de3))
+* **vision:** add image-to-text description for incoming media ([#89](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/89)) ([73ab2e2](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/73ab2e25e5e37e2912cfb6638eb9da11b79ab272))
+* voice to text ([#77](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/77)) ([b1ca972](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/b1ca972589f76502e3fef4ad97bfee802c8b0af2))
+
+
+### Bug Fixes
+
+* add helm dependency build before packaging in CD workflow ([#83](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/83)) ([5cb79ab](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/5cb79abcbd8b115f87594d4064d49e998816ffa9))
+* **media:** guide LLM to correct MCP server name for upload_media_to_mcp ([#87](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/87)) ([332d549](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/332d549bc8729b7359e0eb90e1b48a94da93811b))
+
 ## [1.12.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.11.2...v1.12.0) (2026-04-15)
 
 
