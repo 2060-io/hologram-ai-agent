@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.13.0...v1.13.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **cd:** publish Docker image as hologram-ai-agent ([#91](https://github.com/2060-io/hologram-ai-agent/issues/91)) ([b4e5e62](https://github.com/2060-io/hologram-ai-agent/commit/b4e5e62d6b943d8132f928f4e7277b7cbb2a228b))
+
 ## [1.13.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.12.0...v1.13.0) (2026-04-18)
 
 
