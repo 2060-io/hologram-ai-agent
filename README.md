@@ -1,4 +1,4 @@
-# 🤖 hologram-generic-ai-agent-vs
+# 🤖 hologram-ai-agent
 
 A modular, multi-language AI agent built with NestJS for the Hologram + Verana ecosystem. Supports LLM integration (OpenAI, Ollama, Anthropic), RAG, MCP (Model Context Protocol) servers, verifiable credential authentication, and per-user tool configuration — all driven by a single `agent-pack.yaml` manifest.
 
@@ -66,8 +66,8 @@ charts/                    # Helm chart for Kubernetes deployment
 ### Step 1: Clone and install
 
 ```bash
-git clone git@github.com:2060-io/hologram-generic-ai-agent-vs.git
-cd hologram-generic-ai-agent-vs
+git clone git@github.com:2060-io/hologram-ai-agent.git
+cd hologram-ai-agent
 corepack enable
 pnpm install
 ```

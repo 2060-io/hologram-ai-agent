@@ -1,8 +1,8 @@
 apiVersion: v2
-name: hologram-generic-ai-agent-chart
+name: hologram-ai-agent-chart
 version: 1.3.2
 appVersion: '1.3.2'
-description: Helm chart to deploy Hologram Generic AI Agent Verifiable Service
+description: Helm chart to deploy Hologram AI Agent Verifiable Service
 dependencies:
   - name: vs-agent-chart
     version: v1.9.2
