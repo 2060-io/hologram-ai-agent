@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 env:
-  IMAGE_NAME: 'hologram-generic-ai-agent-app'
+  IMAGE_NAME: 'hologram-ai-agent'
 
 jobs:
   resolve-version:
