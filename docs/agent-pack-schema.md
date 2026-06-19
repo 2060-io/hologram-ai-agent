@@ -119,6 +119,12 @@ llm:
 Any API that follows the OpenAI chat completions format can be used by setting `provider: openai` and providing a `baseUrl`:
 
 ```yaml
+# OpenRouter (one API key → many models across providers, with fallback routing)
+llm:
+  provider: openai
+  model: anthropic/claude-3.5-sonnet   # provider/model slug
+  baseUrl: https://openrouter.ai/api/v1
+
 # Kimi (Moonshot AI)
 llm:
   provider: openai
@@ -145,6 +151,8 @@ llm:
 ```
 
 Set the corresponding API key via `OPENAI_API_KEY` (or the agent pack's environment variable resolution).
+
+> **OpenRouter note.** OpenRouter is OpenAI-wire-compatible, so it works through the `openai` provider with **no code changes** — point `baseUrl` at `https://openrouter.ai/api/v1` and set `OPENAI_API_KEY` to your OpenRouter key. Its differentiators — cross-provider fallback (a `models` list), cost/latency routing (`:floor` / `:nitro` model suffixes), privacy routing (`provider: { data_collection: deny }`), and `HTTP-Referer` / `X-Title` attribution headers — require provider-level passthrough and are **not yet surfaced in this schema** (follow-up if needed).
 
 ---
 
