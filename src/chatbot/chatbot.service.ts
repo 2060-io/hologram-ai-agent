@@ -50,7 +50,7 @@ export class ChatbotService {
     const prompt = template('', userInput, userName)
     this.logger.verbose(`Final prompt built for LLM:\n${prompt}`)
 
-    // Call LLM to get response (memory + RAG via tools se manejan dentro de LlmService)
+    // Call LLM to get response (memory + RAG via tools are handled inside LlmService)
     const answer = await this.llmService.generate(prompt, { session, isAdmin })
     this.logger.debug(`LLM generated answer: "${answer}"`)
 

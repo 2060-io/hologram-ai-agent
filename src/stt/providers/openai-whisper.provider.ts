@@ -55,17 +55,20 @@ export class OpenAiWhisperProvider implements SttProvider {
 
     const file: Uploadable = new File([new Uint8Array(audioBuffer)], fileName, { type: mimeType })
 
+    // Only whisper-* models support verbose_json; newer transcription models
+    // (gpt-4o-transcribe, gpt-audio-*) accept json/text only.
+    const verbose = this.model.startsWith('whisper')
     const response = await this.client.audio.transcriptions.create({
       model: this.model,
       file,
       language: this.language,
-      response_format: 'verbose_json',
+      response_format: verbose ? 'verbose_json' : 'json',
     })
 
     return {
       text: response.text,
-      language: response.language ?? undefined,
-      duration: response.duration ?? undefined,
+      language: (response as { language?: string }).language ?? undefined,
+      duration: (response as { duration?: number }).duration ?? undefined,
     }
   }
 }

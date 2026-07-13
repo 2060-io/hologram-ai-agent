@@ -61,3 +61,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # VS Agent local data
 /data
 ids.env
+
+# pnpm store created by containerized installs
+.pnpm-store/

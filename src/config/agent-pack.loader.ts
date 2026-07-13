@@ -35,6 +35,7 @@ const AgentPackSchema = z
       .object({
         provider: z.string().optional(),
         model: z.string().optional(),
+        reasoningEffort: z.enum(['minimal', 'low', 'medium', 'high']).optional(),
         temperature: z.union([z.number(), z.string()]).optional(),
         maxTokens: z.union([z.number(), z.string()]).optional(),
         agentPrompt: z.string().optional(),
@@ -310,7 +311,7 @@ export function loadAgentPack(): AgentPackLoaderResult {
   const manifestPath = findManifestPath(basePath)
 
   if (!manifestPath) {
-    warnings.push(`No se encontró agent-pack en "${basePath}".`)
+    warnings.push(`No agent pack found at "${basePath}".`)
     return { pack: null, manifestPath: null, warnings }
   }
 
@@ -322,7 +323,7 @@ export function loadAgentPack(): AgentPackLoaderResult {
     return { pack, manifestPath, warnings }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    warnings.push(`Error al cargar agent-pack: ${message}`)
+    warnings.push(`Failed to load agent pack: ${message}`)
     return { pack: null, manifestPath, warnings, errorMessage: message }
   }
 }

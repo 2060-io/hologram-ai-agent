@@ -29,6 +29,17 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS: 'Pending approvals',
     PENDING_APPROVALS_PROMPT: 'Pending approval requests you can act on. Select one to approve or reject:',
     NO_PENDING_APPROVALS: 'There are no pending approvals for you to review.',
+    APPROVAL_REVIEW_DETAILS:
+      'Approval request from {requester}:\n\nTool: {tool} ({server})\nArguments:\n{args}\nExpires: {expires}',
+    APPROVAL_REVIEW_PROMPT: 'What do you want to do with this request?',
+    APPROVE: '✅ Approve',
+    REJECT: '❌ Reject',
+    APPROVAL_APPROVED_CONFIRM: 'Request approved. The tool call is being executed and the requester will be notified.',
+    APPROVAL_REJECTED_CONFIRM: 'Request rejected. The requester will be notified.',
+    APPROVAL_CANCELLED_CONFIRM: 'Your approval request has been cancelled.',
+    APPROVAL_ALREADY_RESOLVED: 'This approval request has already been resolved.',
+    APPROVAL_NOT_ALLOWED: 'You are not allowed to act on this approval request.',
+    APPROVAL_NOT_FOUND: 'Approval request not found.',
     AUTH_NO_CREDENTIAL:
       "You don't have the required credential yet. Here is an invitation to the service that can issue it:",
     VOICE_AUTH_REQUIRED: 'Voice messages require authentication. Please authenticate first to use this feature.',
@@ -62,6 +73,18 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS_PROMPT:
       'Solicitudes de aprobación pendientes que puedes revisar. Selecciona una para aprobar o rechazar:',
     NO_PENDING_APPROVALS: 'No hay aprobaciones pendientes para ti.',
+    APPROVAL_REVIEW_DETAILS:
+      'Solicitud de aprobación de {requester}:\n\nHerramienta: {tool} ({server})\nArgumentos:\n{args}\nExpira: {expires}',
+    APPROVAL_REVIEW_PROMPT: '¿Qué deseas hacer con esta solicitud?',
+    APPROVE: '✅ Aprobar',
+    REJECT: '❌ Rechazar',
+    APPROVAL_APPROVED_CONFIRM:
+      'Solicitud aprobada. La herramienta se está ejecutando y el solicitante será notificado.',
+    APPROVAL_REJECTED_CONFIRM: 'Solicitud rechazada. El solicitante será notificado.',
+    APPROVAL_CANCELLED_CONFIRM: 'Tu solicitud de aprobación ha sido cancelada.',
+    APPROVAL_ALREADY_RESOLVED: 'Esta solicitud de aprobación ya fue resuelta.',
+    APPROVAL_NOT_ALLOWED: 'No tienes permiso para actuar sobre esta solicitud de aprobación.',
+    APPROVAL_NOT_FOUND: 'Solicitud de aprobación no encontrada.',
     AUTH_NO_CREDENTIAL:
       'Aún no tienes la credencial requerida. Aquí tienes una invitación al servicio que puede emitirla:',
     VOICE_AUTH_REQUIRED:
@@ -96,6 +119,17 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     PENDING_APPROVALS_PROMPT:
       "Demandes d'approbation en attente que vous pouvez traiter. Sélectionnez-en une pour approuver ou rejeter :",
     NO_PENDING_APPROVALS: "Il n'y a pas d'approbations en attente pour vous.",
+    APPROVAL_REVIEW_DETAILS:
+      "Demande d'approbation de {requester} :\n\nOutil : {tool} ({server})\nArguments :\n{args}\nExpire : {expires}",
+    APPROVAL_REVIEW_PROMPT: 'Que voulez-vous faire de cette demande ?',
+    APPROVE: '✅ Approuver',
+    REJECT: '❌ Rejeter',
+    APPROVAL_APPROVED_CONFIRM: "Demande approuvée. L'outil est en cours d'exécution et le demandeur sera notifié.",
+    APPROVAL_REJECTED_CONFIRM: 'Demande rejetée. Le demandeur sera notifié.',
+    APPROVAL_CANCELLED_CONFIRM: "Votre demande d'approbation a été annulée.",
+    APPROVAL_ALREADY_RESOLVED: 'Cette demande a déjà été traitée.',
+    APPROVAL_NOT_ALLOWED: "Vous n'êtes pas autorisé à traiter cette demande d'approbation.",
+    APPROVAL_NOT_FOUND: "Demande d'approbation introuvable.",
     AUTH_NO_CREDENTIAL:
       "Vous n'avez pas encore le justificatif requis. Voici une invitation au service qui peut vous le délivrer :",
     VOICE_AUTH_REQUIRED:
