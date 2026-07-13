@@ -13,3 +13,26 @@ jobs:
     uses: 2060-io/organization/.github/workflows/2060-linter-call.yml@main
     with:
       enable-charts-lint: true
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm check-types
+
+      - name: Unit tests
+        run: pnpm test
