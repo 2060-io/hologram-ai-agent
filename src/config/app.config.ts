@@ -91,6 +91,12 @@ export default registerAs('appConfig', () => ({
   openaiModel: pickString('OPENAI_MODEL', agentPack?.llm?.model, 'gpt-4o-mini'),
 
   /**
+   * Reasoning effort for reasoning-capable models (minimal | low | medium | high).
+   * Omit for models without reasoning support.
+   */
+  openaiReasoningEffort: pickString('OPENAI_REASONING_EFFORT', agentPack?.llm?.reasoningEffort),
+
+  /**
    * OpenAI temperature (0-1).
    */
   openaiTemperature: pickNumber('OPENAI_TEMPERATURE', agentPack?.llm?.temperature, 0.3),
@@ -277,7 +283,7 @@ export default registerAs('appConfig', () => ({
    *     }
    *   ]
    *
-   *   Puede declararse en agent-pack (tools.dynamicConfig) y sobrescribirse con LLM_TOOLS_CONFIG.
+   *   Can be declared in the agent pack (tools.dynamicConfig) and overridden with LLM_TOOLS_CONFIG.
    */
   llmToolsConfig,
 

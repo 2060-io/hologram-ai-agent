@@ -98,6 +98,7 @@ languages:
 | -------------- | -------------- | --------------------- | ------------ | ------------------------------------ |
 | `provider`     | string         | `LLM_PROVIDER`        | `openai`     | LLM provider (`openai`, `ollama`, `anthropic`). Use `openai` for any OpenAI-compatible API. |
 | `model`        | string         | `OPENAI_MODEL`        | `gpt-4o-mini`| Model name.                          |
+| `reasoningEffort` | string      | `OPENAI_REASONING_EFFORT` | —        | Reasoning effort for reasoning-capable models (`minimal`, `low`, `medium`, `high`). Ignored for non-reasoning models. |
 | `temperature`  | number/string  | `OPENAI_TEMPERATURE`  | `0.3`        | Sampling temperature (0–1).          |
 | `maxTokens`    | number/string  | `OPENAI_MAX_TOKENS`   | `512`        | Max tokens per completion.           |
 | `baseUrl`      | string         | `OPENAI_BASE_URL`     | —            | Base URL for OpenAI-compatible APIs (e.g., Kimi, DeepSeek, Groq, Together AI). |

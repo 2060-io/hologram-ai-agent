@@ -341,12 +341,14 @@ export class LlmService implements OnModuleInit {
       default: {
         const maxTokens = this.config.get<number>('appConfig.openaiMaxTokens')
         const baseUrl = this.config.get<string>('appConfig.openaiBaseUrl')
+        const reasoningEffort = this.config.get<string>('appConfig.openaiReasoningEffort')
         return new ChatOpenAI({
           openAIApiKey: this.getOrThrow('OPENAI_API_KEY'),
           model: this.config.get<string>('appConfig.openaiModel') ?? 'gpt-4o',
           temperature: this.config.get<number>('appConfig.openaiTemperature'),
           maxTokens: -1,
           modelKwargs: maxTokens ? { max_completion_tokens: maxTokens } : undefined,
+          ...(reasoningEffort ? { reasoningEffort: reasoningEffort as 'low' | 'medium' | 'high' } : {}),
           ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
         })
       }
