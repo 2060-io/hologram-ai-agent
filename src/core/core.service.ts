@@ -35,6 +35,7 @@ import { McpConfigService } from '../mcp/mcp-config.service'
 import { McpService } from '../mcp/mcp.service'
 import { RbacService } from '../rbac/rbac.service'
 import { ApprovalService } from '../rbac/approval.service'
+import type { ApprovalRequestEntity } from '../rbac/approval-request.entity'
 import type { AuthFlowConfig } from '../config/agent-pack.loader'
 import { SttService } from '../stt/stt.service'
 import { VisionService } from '../vision/vision.service'
@@ -137,11 +138,11 @@ export class CoreService implements EventHandler, OnModuleInit {
         }
         case MenuSelectMessage.type: {
           const rawItems = (message as any).menuItems as Array<{ id: string }> | undefined
-          if (session.state === StateStep.MCP_CONFIG && !session.mcpConfigServer && rawItems?.length) {
-            const selectedId = rawItems[0]?.id
-            if (selectedId) {
-              await this.startMcpConfigForServer(selectedId, session)
-            }
+          const selectedId = rawItems?.[0]?.id
+          if (selectedId && this.isApprovalSelection(selectedId)) {
+            await this.handleApprovalSelection(selectedId, session)
+          } else if (session.state === StateStep.MCP_CONFIG && !session.mcpConfigServer && selectedId) {
+            await this.startMcpConfigForServer(selectedId, session)
           }
           break
         }
@@ -748,6 +749,113 @@ export class CoreService implements EventHandler, OnModuleInit {
         connectionId: session.connectionId,
         prompt: this.getText('PENDING_APPROVALS_PROMPT', session.lang),
         menuItems,
+      }),
+    )
+  }
+
+  private static readonly APPROVAL_MENU_ACTIONS = [
+    'review-approval',
+    'approve-approval',
+    'reject-approval',
+    'cancel-approval',
+  ]
+
+  private isApprovalSelection(selectionId: string): boolean {
+    return CoreService.APPROVAL_MENU_ACTIONS.some((action) => selectionId.startsWith(`${action}:`))
+  }
+
+  /**
+   * Route review/approve/reject/cancel selections coming back from the
+   * approval MenuDisplay messages (handleMyApprovalRequests /
+   * handlePendingApprovals / handleReviewApproval).
+   */
+  private async handleApprovalSelection(selectionId: string, session: SessionEntity): Promise<void> {
+    if (!this.approvalService) return
+    const { connectionId, lang } = session
+    const separator = selectionId.indexOf(':')
+    const action = selectionId.slice(0, separator)
+    const requestId = selectionId.slice(separator + 1)
+
+    const request = await this.approvalService.getById(requestId)
+    if (!request) {
+      await this.sendText(connectionId, this.getText('APPROVAL_NOT_FOUND', lang), lang)
+      return
+    }
+
+    // The identity used to resolve/cancel; legacy (adminAvatars) sessions may
+    // have no RBAC identity, fall back to the user name.
+    const actorIdentity = session.userIdentity || session.userName || connectionId
+
+    if (action === 'cancel-approval') {
+      try {
+        const { applied } = await this.approvalService.cancel(requestId, actorIdentity)
+        const key = applied ? 'APPROVAL_CANCELLED_CONFIRM' : 'APPROVAL_ALREADY_RESOLVED'
+        await this.sendText(connectionId, this.getText(key, lang), lang)
+      } catch (err) {
+        this.logger.warn(`[APPROVAL] Cancel of ${requestId} by ${actorIdentity} refused: ${err}`)
+        await this.sendText(connectionId, this.getText('APPROVAL_NOT_ALLOWED', lang), lang)
+      }
+      return
+    }
+
+    // review/approve/reject require one of the request's approver roles
+    const canAct = (session.userRoles ?? []).some((role) => request.approverRoles.includes(role))
+    if (!canAct) {
+      await this.sendText(connectionId, this.getText('APPROVAL_NOT_ALLOWED', lang), lang)
+      return
+    }
+
+    if (action === 'review-approval') {
+      await this.handleReviewApproval(request, session)
+      return
+    }
+
+    if (action === 'approve-approval' || action === 'reject-approval') {
+      const resolveAction = action === 'approve-approval' ? 'approve' : 'reject'
+      const { applied } = await this.approvalService.resolve(requestId, resolveAction, actorIdentity)
+      const key = applied
+        ? resolveAction === 'approve'
+          ? 'APPROVAL_APPROVED_CONFIRM'
+          : 'APPROVAL_REJECTED_CONFIRM'
+        : 'APPROVAL_ALREADY_RESOLVED'
+      await this.sendText(connectionId, this.getText(key, lang), lang)
+    }
+  }
+
+  /**
+   * Show the details of a pending request to an approver, with
+   * Approve / Reject options.
+   */
+  private async handleReviewApproval(request: ApprovalRequestEntity, session: SessionEntity): Promise<void> {
+    const { connectionId, lang } = session
+
+    let details = this.getText('APPROVAL_REVIEW_DETAILS', lang)
+      .replace('{requester}', request.requesterIdentity)
+      .replace('{tool}', request.toolName)
+      .replace('{server}', request.serverName)
+      .replace('{args}', JSON.stringify(request.args ?? {}, null, 2))
+      .replace('{expires}', request.expiresAt.toISOString())
+    if (request.toolDescription) {
+      details += `\n\n${request.toolDescription}`
+    }
+    await this.sendText(connectionId, details, lang)
+
+    await this.apiClient.messages.send(
+      new MenuDisplayMessage({
+        connectionId,
+        prompt: this.getText('APPROVAL_REVIEW_PROMPT', lang),
+        menuItems: [
+          {
+            id: `approve-approval:${request.id}`,
+            text: this.getText('APPROVE', lang),
+            action: `approve-approval:${request.id}`,
+          },
+          {
+            id: `reject-approval:${request.id}`,
+            text: this.getText('REJECT', lang),
+            action: `reject-approval:${request.id}`,
+          },
+        ],
       }),
     )
   }
