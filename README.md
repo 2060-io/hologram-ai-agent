@@ -174,10 +174,11 @@ The chatbot runs on `http://localhost:3010` with hot-reload enabled.
 
 All agent configuration lives in a single `agent-pack.yaml` manifest. Set `AGENT_PACK_PATH` to point to the directory containing the manifest.
 
-Two example packs are included:
+Three example packs are included:
 
 - **`agent-packs/hologram-welcome/`** — default Hologram welcome agent
 - **`agent-packs/github-agent/`** — GitHub MCP-enabled agent with per-user token configuration
+- **`agent-packs/customer-service/`** — PQRSD customer-service intake demo
 
 Full schema reference: [`docs/agent-pack-schema.md`](./docs/agent-pack-schema.md)
 
@@ -391,6 +392,7 @@ Full design specification: [`docs/rbac-approval-spec.md`](./docs/rbac-approval-s
 | `LLM_PROVIDER` | LLM backend: `openai`, `ollama`, `anthropic` | `ollama` |
 | `OPENAI_API_KEY` | OpenAI API key | |
 | `OPENAI_MODEL` | OpenAI model | `gpt-4o-mini` |
+| `OPENAI_REASONING_EFFORT` | Reasoning effort for reasoning-capable models: `minimal`, `low`, `medium`, `high` | |
 | `OPENAI_TEMPERATURE` | Temperature (0–1) | `0.3` |
 | `OPENAI_MAX_TOKENS` | Max tokens per completion | `512` |
 | `OPENAI_BASE_URL` | Base URL for OpenAI-compatible APIs (OpenRouter, Kimi, DeepSeek, Groq, etc.) | |
@@ -424,6 +426,17 @@ Full design specification: [`docs/rbac-approval-spec.md`](./docs/rbac-approval-s
 | `STATISTICS_API_URL` | Statistics API URL | |
 | `STATISTICS_REQUIRE_AUTH` | Require auth for statistics | `false` |
 | `MCP_CONFIG_ENCRYPTION_KEY` | AES-256-GCM key for per-user MCP config (64 hex chars) | |
+| `MCP_SERVERS_CONFIG` | MCP servers (JSON array; overrides the agent pack) | |
+| `AGENT_PROMPT` | System prompt override (usually set via agent pack) | |
+| `MINIO_ENDPOINT` | MinIO host for generated-media storage | |
+| `MINIO_PORT` | MinIO port | `9000` |
+| `MINIO_ACCESS_KEY` | MinIO access key | |
+| `MINIO_SECRET_KEY` | MinIO secret key | |
+| `MINIO_BUCKET` | MinIO bucket for generated media | |
+| `MINIO_USE_SSL` | Use TLS for the MinIO connection | `false` |
+| `MINIO_PUBLIC_URL` | Public base URL for presigned media URLs | |
+
+Image generation, speech-to-text (STT), and vision are configured through the agent pack (`imageGeneration`, `speechToText`, `vision` sections); their providers read the API key from `OPENAI_API_KEY` unless the pack sets `apiKeyEnv`. The credential-issuer invitation DID (`issuerServiceDid`) is likewise set in the pack's `flows.authentication` section.
 
 ---
 

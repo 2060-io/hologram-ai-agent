@@ -7,118 +7,118 @@
 
 * **cd:** publish Docker image as hologram-ai-agent ([#91](https://github.com/2060-io/hologram-ai-agent/issues/91)) ([b4e5e62](https://github.com/2060-io/hologram-ai-agent/commit/b4e5e62d6b943d8132f928f4e7277b7cbb2a228b))
 
-## [1.13.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.12.0...v1.13.0) (2026-04-18)
+## [1.13.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.12.0...v1.13.0) (2026-04-18)
 
 
 ### Features
 
-* add image generation feature with DALL-E provider ([#76](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/76)) ([71a5aca](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/71a5aca441ed83ac68ae90092bb52d07526d7895))
-* improve agent memory context for voice notes, media, and generated content ([#85](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/85)) ([02dab20](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/02dab2049fc70039ca6253bcee3175e91eabcb7e))
-* **mcp:** auto-reconnect shared MCP connections on failure ([#86](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/86)) ([0ae9403](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/0ae94037f7695952da4baa7e43777c0ce1ede3e3))
-* **media:** add openai-gpt-image provider for gpt-image-1.x models ([#88](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/88)) ([0484dbe](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/0484dbeae14ddab17634f91daa1b8fce503e0e33))
-* send invitation when user lacks required credential ([#80](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/80)) ([d08c81c](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/d08c81c3bb82d78204fae08eea686da94f5c8de3))
-* **vision:** add image-to-text description for incoming media ([#89](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/89)) ([73ab2e2](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/73ab2e25e5e37e2912cfb6638eb9da11b79ab272))
-* voice to text ([#77](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/77)) ([b1ca972](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/b1ca972589f76502e3fef4ad97bfee802c8b0af2))
+* add image generation feature with DALL-E provider ([#76](https://github.com/2060-io/hologram-ai-agent/issues/76)) ([71a5aca](https://github.com/2060-io/hologram-ai-agent/commit/71a5aca441ed83ac68ae90092bb52d07526d7895))
+* improve agent memory context for voice notes, media, and generated content ([#85](https://github.com/2060-io/hologram-ai-agent/issues/85)) ([02dab20](https://github.com/2060-io/hologram-ai-agent/commit/02dab2049fc70039ca6253bcee3175e91eabcb7e))
+* **mcp:** auto-reconnect shared MCP connections on failure ([#86](https://github.com/2060-io/hologram-ai-agent/issues/86)) ([0ae9403](https://github.com/2060-io/hologram-ai-agent/commit/0ae94037f7695952da4baa7e43777c0ce1ede3e3))
+* **media:** add openai-gpt-image provider for gpt-image-1.x models ([#88](https://github.com/2060-io/hologram-ai-agent/issues/88)) ([0484dbe](https://github.com/2060-io/hologram-ai-agent/commit/0484dbeae14ddab17634f91daa1b8fce503e0e33))
+* send invitation when user lacks required credential ([#80](https://github.com/2060-io/hologram-ai-agent/issues/80)) ([d08c81c](https://github.com/2060-io/hologram-ai-agent/commit/d08c81c3bb82d78204fae08eea686da94f5c8de3))
+* **vision:** add image-to-text description for incoming media ([#89](https://github.com/2060-io/hologram-ai-agent/issues/89)) ([73ab2e2](https://github.com/2060-io/hologram-ai-agent/commit/73ab2e25e5e37e2912cfb6638eb9da11b79ab272))
+* voice to text ([#77](https://github.com/2060-io/hologram-ai-agent/issues/77)) ([b1ca972](https://github.com/2060-io/hologram-ai-agent/commit/b1ca972589f76502e3fef4ad97bfee802c8b0af2))
 
 
 ### Bug Fixes
 
-* add helm dependency build before packaging in CD workflow ([#83](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/83)) ([5cb79ab](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/5cb79abcbd8b115f87594d4064d49e998816ffa9))
-* **media:** guide LLM to correct MCP server name for upload_media_to_mcp ([#87](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/87)) ([332d549](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/332d549bc8729b7359e0eb90e1b48a94da93811b))
+* add helm dependency build before packaging in CD workflow ([#83](https://github.com/2060-io/hologram-ai-agent/issues/83)) ([5cb79ab](https://github.com/2060-io/hologram-ai-agent/commit/5cb79abcbd8b115f87594d4064d49e998816ffa9))
+* **media:** guide LLM to correct MCP server name for upload_media_to_mcp ([#87](https://github.com/2060-io/hologram-ai-agent/issues/87)) ([332d549](https://github.com/2060-io/hologram-ai-agent/commit/332d549bc8729b7359e0eb90e1b48a94da93811b))
 
-## [1.12.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.11.2...v1.12.0) (2026-04-15)
+## [1.12.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.11.2...v1.12.0) (2026-04-15)
 
 
 ### Features
 
-* implement RBAC and approval workflow ([#70](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/70)) ([93dcce6](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/93dcce68bd833ac95be8523f8ab7ab33071794fd))
-* support OpenAI-compatible API providers via OPENAI_BASE_URL ([#74](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/74)) ([4d3a2ec](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/4d3a2ec45f0397b07917ca157b95fcd8310fe73e))
+* implement RBAC and approval workflow ([#70](https://github.com/2060-io/hologram-ai-agent/issues/70)) ([93dcce6](https://github.com/2060-io/hologram-ai-agent/commit/93dcce68bd833ac95be8523f8ab7ab33071794fd))
+* support OpenAI-compatible API providers via OPENAI_BASE_URL ([#74](https://github.com/2060-io/hologram-ai-agent/issues/74)) ([4d3a2ec](https://github.com/2060-io/hologram-ai-agent/commit/4d3a2ec45f0397b07917ca157b95fcd8310fe73e))
 
 
 ### Bug Fixes
 
-* rebuild agents when only admin-only MCP tools exist ([#75](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/75)) ([7efae51](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/7efae513a990a5c5b0075b4a167bb886cb91356d))
-* remove unused variables flagged by eslint ([#73](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/73)) ([e4c981a](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/e4c981a7b03e8d64f57d6f9a97c4f73a612eb939))
+* rebuild agents when only admin-only MCP tools exist ([#75](https://github.com/2060-io/hologram-ai-agent/issues/75)) ([7efae51](https://github.com/2060-io/hologram-ai-agent/commit/7efae513a990a5c5b0075b4a167bb886cb91356d))
+* remove unused variables flagged by eslint ([#73](https://github.com/2060-io/hologram-ai-agent/issues/73)) ([e4c981a](https://github.com/2060-io/hologram-ai-agent/commit/e4c981a7b03e8d64f57d6f9a97c4f73a612eb939))
 
-## [1.11.2](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.11.1...v1.11.2) (2026-04-10)
-
-
-### Bug Fixes
-
-* proactively connect user-controlled MCP servers before LLM runs ([#66](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/66)) ([904d775](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/904d775c46cc1f906557af97494e7513dbad6c92))
-
-## [1.11.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.11.0...v1.11.1) (2026-04-10)
+## [1.11.2](https://github.com/2060-io/hologram-ai-agent/compare/v1.11.1...v1.11.2) (2026-04-10)
 
 
 ### Bug Fixes
 
-* use root context ($) for include calls inside range loops ([#64](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/64)) ([779ae69](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/779ae698fdf8e878d98073a00bdd620bb799add3))
+* proactively connect user-controlled MCP servers before LLM runs ([#66](https://github.com/2060-io/hologram-ai-agent/issues/66)) ([904d775](https://github.com/2060-io/hologram-ai-agent/commit/904d775c46cc1f906557af97494e7513dbad6c92))
 
-## [1.11.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.10.1...v1.11.0) (2026-04-10)
+## [1.11.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.11.0...v1.11.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* use root context ($) for include calls inside range loops ([#64](https://github.com/2060-io/hologram-ai-agent/issues/64)) ([779ae69](https://github.com/2060-io/hologram-ai-agent/commit/779ae698fdf8e878d98073a00bdd620bb799add3))
+
+## [1.11.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.10.1...v1.11.0) (2026-04-10)
 
 
 ### Features
 
-* MCP support, admin mode, and more ([#60](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/60)) ([2c4add6](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/2c4add6a92529843b69046395149e0cfbc798185))
+* MCP support, admin mode, and more ([#60](https://github.com/2060-io/hologram-ai-agent/issues/60)) ([2c4add6](https://github.com/2060-io/hologram-ai-agent/commit/2c4add6a92529843b69046395149e0cfbc798185))
 
 
 ### Bug Fixes
 
-* prefix secret names with release fullname to avoid namespace collisions ([#63](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/63)) ([c197f7e](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/c197f7e336485834709964aafc6e940de418cdf5))
-* wrap stats deployment in enabled condition ([#62](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/62)) ([a0cfa12](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/a0cfa12da96562b546f4bcb7138536d768b0104d))
+* prefix secret names with release fullname to avoid namespace collisions ([#63](https://github.com/2060-io/hologram-ai-agent/issues/63)) ([c197f7e](https://github.com/2060-io/hologram-ai-agent/commit/c197f7e336485834709964aafc6e940de418cdf5))
+* wrap stats deployment in enabled condition ([#62](https://github.com/2060-io/hologram-ai-agent/issues/62)) ([a0cfa12](https://github.com/2060-io/hologram-ai-agent/commit/a0cfa12da96562b546f4bcb7138536d768b0104d))
 
-## [1.10.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.10.0...v1.10.1) (2026-04-07)
+## [1.10.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.10.0...v1.10.1) (2026-04-07)
 
 
 ### Bug Fixes
 
-* **chart:** update vs agent and enable extern secrets ([#58](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/58)) ([7805f0b](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/7805f0b58f00b98f743289aa120a971394d37320))
+* **chart:** update vs agent and enable extern secrets ([#58](https://github.com/2060-io/hologram-ai-agent/issues/58)) ([7805f0b](https://github.com/2060-io/hologram-ai-agent/commit/7805f0b58f00b98f743289aa120a971394d37320))
 
-## [1.10.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.9.1...v1.10.0) (2026-02-28)
+## [1.10.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.9.1...v1.10.0) (2026-02-28)
 
 
 ### Features
 
-* Add agentNameOverride support to agent custom naming ([#54](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/54)) ([1c79b7d](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/1c79b7dc5912321f032bc7752907ef3541e2644b))
-* Update charts with vs-agent 1.7.0 ([#56](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/56)) ([811fa01](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/811fa0123936bbb79ddbadb668384f55c32facaf))
+* Add agentNameOverride support to agent custom naming ([#54](https://github.com/2060-io/hologram-ai-agent/issues/54)) ([1c79b7d](https://github.com/2060-io/hologram-ai-agent/commit/1c79b7dc5912321f032bc7752907ef3541e2644b))
+* Update charts with vs-agent 1.7.0 ([#56](https://github.com/2060-io/hologram-ai-agent/issues/56)) ([811fa01](https://github.com/2060-io/hologram-ai-agent/commit/811fa0123936bbb79ddbadb668384f55c32facaf))
 
 
 ### Bug Fixes
 
-* charts update vs agent image ([#57](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/57)) ([49ece1d](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/49ece1def09e4c8c10288f10cc91f350a4d2c5f0))
+* charts update vs agent image ([#57](https://github.com/2060-io/hologram-ai-agent/issues/57)) ([49ece1d](https://github.com/2060-io/hologram-ai-agent/commit/49ece1def09e4c8c10288f10cc91f350a4d2c5f0))
 
-## [1.9.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.9.0...v1.9.1) (2026-01-13)
+## [1.9.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.9.0...v1.9.1) (2026-01-13)
 
 
 ### Bug Fixes
 
-* bump to vs-agent 1.6.0-dev ([fd1f450](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/fd1f450682f937dc5806ec829267e31eed5acf7f))
-* bump vs-agent dependency to 1.5.7 ([#52](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/52)) ([028633f](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/028633f44e7b39e7608d651b33ceeac9434f2f5a))
-* bump vs-agent to 1.6.0 stable ([cf7b5e6](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/cf7b5e6d99e7d8d409c1ed7fcda1771661db290a))
-* bump vs-agent version ([65c0599](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/65c0599c13a9c2a7a287fdccddf8e5baee6aac96))
+* bump to vs-agent 1.6.0-dev ([fd1f450](https://github.com/2060-io/hologram-ai-agent/commit/fd1f450682f937dc5806ec829267e31eed5acf7f))
+* bump vs-agent dependency to 1.5.7 ([#52](https://github.com/2060-io/hologram-ai-agent/issues/52)) ([028633f](https://github.com/2060-io/hologram-ai-agent/commit/028633f44e7b39e7608d651b33ceeac9434f2f5a))
+* bump vs-agent to 1.6.0 stable ([cf7b5e6](https://github.com/2060-io/hologram-ai-agent/commit/cf7b5e6d99e7d8d409c1ed7fcda1771661db290a))
+* bump vs-agent version ([65c0599](https://github.com/2060-io/hologram-ai-agent/commit/65c0599c13a9c2a7a287fdccddf8e5baee6aac96))
 
-## [1.9.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.8.1...v1.9.0) (2026-01-06)
+## [1.9.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.8.1...v1.9.0) (2026-01-06)
 
 
 ### Features
 
-* generic AI agent via configurable agent packs ([#40](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/40)) ([d9ea4c5](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/d9ea4c5cfd6d5e1eaf8611770305bb562955562f))
-* Update Generic AI Agent chart to use VS Agent 1.5.6 ([#50](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/50)) ([d730f80](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/d730f8046a51c7503ecd1dc09bb644600adb7f50))
+* generic AI agent via configurable agent packs ([#40](https://github.com/2060-io/hologram-ai-agent/issues/40)) ([d9ea4c5](https://github.com/2060-io/hologram-ai-agent/commit/d9ea4c5cfd6d5e1eaf8611770305bb562955562f))
+* Update Generic AI Agent chart to use VS Agent 1.5.6 ([#50](https://github.com/2060-io/hologram-ai-agent/issues/50)) ([d730f80](https://github.com/2060-io/hologram-ai-agent/commit/d730f8046a51c7503ecd1dc09bb644600adb7f50))
 
-## [1.8.1](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.8.0...v1.8.1) (2025-12-03)
+## [1.8.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.8.0...v1.8.1) (2025-12-03)
 
 
 ### Bug Fixes
 
-* Auth hide menu when no auth option exists ([#47](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/47)) ([4e6ceee](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/4e6ceeea9766c6e184d19e8da85df2d4388ccda8))
-* Fix image name to hologram-generic-ai-agent in stable-release  ([#46](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/46)) ([681b78b](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/681b78b23f7031b55fd1498da945f15008afc6d5))
+* Auth hide menu when no auth option exists ([#47](https://github.com/2060-io/hologram-ai-agent/issues/47)) ([4e6ceee](https://github.com/2060-io/hologram-ai-agent/commit/4e6ceeea9766c6e184d19e8da85df2d4388ccda8))
+* Fix image name to hologram-generic-ai-agent in stable-release  ([#46](https://github.com/2060-io/hologram-ai-agent/issues/46)) ([681b78b](https://github.com/2060-io/hologram-ai-agent/commit/681b78b23f7031b55fd1498da945f15008afc6d5))
 
-## [1.8.0](https://github.com/2060-io/hologram-generic-ai-agent-vs/compare/v1.7.0...v1.8.0) (2025-11-20)
+## [1.8.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.7.0...v1.8.0) (2025-11-20)
 
 ### Features
 
-* Enhance RAG ingestion with remote caching, configurable chunking vector ([#36](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/36)) ([5107a27](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/5107a27b21f7c9c2421056c0c9a60c9c1ee330a2))
-* rebranding hologram-generic-ai-agents ([#44](https://github.com/2060-io/hologram-generic-ai-agent-vs/issues/44)) ([841120b](https://github.com/2060-io/hologram-generic-ai-agent-vs/commit/841120ba221f8165fda9687c1dfccc9767975d1a))
+* Enhance RAG ingestion with remote caching, configurable chunking vector ([#36](https://github.com/2060-io/hologram-ai-agent/issues/36)) ([5107a27](https://github.com/2060-io/hologram-ai-agent/commit/5107a27b21f7c9c2421056c0c9a60c9c1ee330a2))
+* rebranding hologram-generic-ai-agents ([#44](https://github.com/2060-io/hologram-ai-agent/issues/44)) ([841120b](https://github.com/2060-io/hologram-ai-agent/commit/841120ba221f8165fda9687c1dfccc9767975d1a))
 
 ## [1.7.0](https://github.com/2060-io/hologram-welcome-ai-agent-vs/compare/v1.6.3...v1.7.0) (2025-10-22)
 
