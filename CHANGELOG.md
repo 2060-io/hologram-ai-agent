@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.13.1...v1.14.0) (2026-07-15)
+
+
+### Features
+
+* approval menu actions, LLM reasoning effort, non-whisper STT models ([#96](https://github.com/2060-io/hologram-ai-agent/issues/96)) ([6fa4225](https://github.com/2060-io/hologram-ai-agent/commit/6fa4225b2b1aebe8e5a22f605c2ba2494a501491))
+
 ## [1.13.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.13.0...v1.13.1) (2026-04-27)
 
 
