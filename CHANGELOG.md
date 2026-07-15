@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.14.0...v1.14.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* use vs-agent-chart v1.11.1 ([#100](https://github.com/2060-io/hologram-ai-agent/issues/100)) ([61e147f](https://github.com/2060-io/hologram-ai-agent/commit/61e147fea986e96236f7a070184b2583f225f7ee))
+
 ## [1.14.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.13.1...v1.14.0) (2026-07-15)
 
 
