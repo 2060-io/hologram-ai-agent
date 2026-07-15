@@ -1,36 +1,57 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
 import { Pinecone } from '@pinecone-database/pinecone'
 import { PineconeStore } from '@langchain/pinecone'
 import { RedisVectorStore } from '@langchain/redis'
+import { PGVectorStore } from '@langchain/community/vectorstores/pgvector'
 import { createClient, RedisClientType } from 'redis'
 import { OpenAIEmbeddings, OpenAI } from '@langchain/openai'
 import { loadDocuments } from './utils/load-documents'
 import { parseRagLoadOptions, RagLoadOptionsDto } from './dto/RagLoadOptionsDto'
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
+import { RagManifestEntity } from './entities/rag-manifest.entity'
+import { contentHash, deterministicChunkId, planSeeding, SeedDoc } from './utils/seeding'
 
-type SupportedStores = 'pinecone' | 'redis'
+type SupportedStores = 'pinecone' | 'redis' | 'pgvector'
+
+interface Chunk {
+  id: string
+  content: string
+  docId: string
+}
 
 /**
  * Service for modular Retrieval Augmented Generation (RAG) using LangChainJS.
- * Supports multiple vector stores (Pinecone, Redis) via environment-based configuration.
+ * Supports multiple vector stores (Pinecone, Redis, pgvector) via environment-based configuration.
  * Handles document ingestion, similarity search, and LLM context generation.
+ *
+ * Seeding is idempotent: chunk ids are deterministic (doc id + chunk index + content hash)
+ * and a manifest table records what is already indexed, so restarts skip unchanged
+ * documents instead of re-embedding and duplicating the corpus.
  */
 @Injectable()
 export class LangchainRagService implements OnModuleInit {
-  private vectorStore: PineconeStore | RedisVectorStore
+  private vectorStore: PineconeStore | RedisVectorStore | PGVectorStore
   private redisClient: RedisClientType | undefined
+  private redisKeyPrefix = ''
   private llm: OpenAI
   private readonly logger = new Logger(LangchainRagService.name)
 
   /**
    * Constructs the RAG service.
    * @param configService - The NestJS ConfigService for environment/config access.
+   * @param manifestRepo - Repository tracking which document versions are indexed.
    */
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(RagManifestEntity)
+    private readonly manifestRepo: Repository<RagManifestEntity>,
+  ) {}
 
   /**
-   * Initializes the vector store (Pinecone or Redis) and LLM (OpenAI).
+   * Initializes the vector store (Pinecone, Redis or pgvector) and LLM (OpenAI).
    * Selection is dynamic based on VECTOR_STORE env/config.
    * Logs each initialization step for observability.
    */
@@ -59,6 +80,9 @@ export class LangchainRagService implements OnModuleInit {
     } else if (vectorStoreProvider === 'redis') {
       // Initialize Redis vector store
       await this.initRedis(embeddings)
+    } else if (vectorStoreProvider === 'pgvector') {
+      // Initialize Postgres/pgvector vector store
+      await this.initPgvector(embeddings)
     } else {
       this.logger.error(`Unsupported VECTOR_STORE: ${JSON.stringify(vectorStoreProvider)}`)
       throw new Error(`Unsupported VECTOR_STORE: ${JSON.stringify(vectorStoreProvider)}`)
@@ -72,18 +96,25 @@ export class LangchainRagService implements OnModuleInit {
         remoteUrls: this.configService.get<string[]>('appConfig.ragRemoteUrls'),
       }),
     )
-
-    this.logger.log('Seeded vector store with initial document.')
   }
 
   /**
-   * Adds a document to the vector store for RAG-based retrieval.
+   * Adds (or replaces) a single document in the vector store for RAG-based retrieval.
+   * Idempotent: re-adding the same id replaces its previous chunks.
    * @param id - Unique identifier for the document.
    * @param text - Content of the document to index.
    */
   async addDocument(id: string, text: string) {
     this.logger.debug(`Adding document to vector store | id: ${id}`)
-    await this.vectorStore.addDocuments([{ pageContent: text, metadata: { id } }])
+    const hash = contentHash(text)
+    const chunkId = deterministicChunkId(id, 0, hash)
+
+    const previous = await this.manifestRepo.findOneBy({ docId: id })
+    if (previous) await this.deleteChunks(previous.chunkIds)
+
+    await this.deleteChunks([chunkId])
+    await this.addChunks([{ id: chunkId, content: text, docId: id }])
+    await this.manifestRepo.save({ docId: id, contentHash: hash, chunkIds: [chunkId] })
     this.logger.verbose(`Document "${id}" added to vector store.`)
   }
 
@@ -106,7 +137,7 @@ export class LangchainRagService implements OnModuleInit {
   }
 
   /**
-   * Cleans up resources (closes Redis client if used) when the module is destroyed.
+   * Cleans up resources (closes Redis/Postgres clients if used) when the module is destroyed.
    */
   async onModuleDestroy() {
     if (this.redisClient) {
@@ -114,24 +145,44 @@ export class LangchainRagService implements OnModuleInit {
       await this.redisClient.disconnect()
       this.logger.log('Redis client disconnected.')
     }
+    if (this.vectorStore instanceof PGVectorStore) {
+      this.logger.log('Closing pgvector pool...')
+      await this.vectorStore.end()
+      this.logger.log('pgvector pool closed.')
+    }
   }
+
   /**
-   * Loads documents from the specified path into the vector store.
-   * Splits documents into chunks for efficient indexing.
-   * Handles errors gracefully and logs progress.
-   * @param docsPath - Path to the directory containing documents.
-   * @param chunkSize - Size of each text chunk for indexing.
-   * @param chunkOverlap - Overlap size between chunks (default is 200).
+   * Synchronizes the vector store with the document corpus (local folder + remote URLs).
+   * Uses the manifest to skip unchanged documents (no re-embedding cost), re-index
+   * changed ones, and delete chunks of removed ones. Safe to run on every boot.
+   * @param options - Validated load options (paths, chunking, remote URLs).
    */
   private async loadVectorStore(options: RagLoadOptionsDto) {
     const { folderBasePath, remoteUrls, chunkSize, chunkOverlap } = options
     try {
       this.logger.log(`[RAG] Loading documents from: ${folderBasePath}`)
-      const docs = await loadDocuments({
+      const loaded = await loadDocuments({
         folderBasePath,
         logger: this.logger,
         remoteUrls,
       })
+      const docs: SeedDoc[] = loaded.map((d) => ({ ...d, hash: contentHash(d.content) }))
+
+      const manifest = await this.manifestRepo.find()
+      const plan = planSeeding(docs, manifest)
+
+      if (plan.unchangedDocIds.length) {
+        this.logger.log(`[RAG] ${plan.unchangedDocIds.length} document(s) unchanged — skipping re-indexing.`)
+      }
+      if (plan.staleChunkIds.length) {
+        await this.deleteChunks(plan.staleChunkIds)
+        this.logger.log(`[RAG] Deleted ${plan.staleChunkIds.length} stale chunk(s).`)
+      }
+      if (plan.removedDocIds.length) {
+        await this.manifestRepo.delete(plan.removedDocIds)
+        this.logger.log(`[RAG] Forgot ${plan.removedDocIds.length} removed document(s).`)
+      }
 
       const splitter = new RecursiveCharacterTextSplitter({
         chunkSize,
@@ -139,31 +190,63 @@ export class LangchainRagService implements OnModuleInit {
       })
       this.logger.debug(`[RAG] Splitter -> chunkSize=${chunkSize} overlap=${chunkOverlap}`)
 
-      for (const doc of docs) {
+      for (const doc of plan.toIndex) {
         const t0 = Date.now()
         const chunks = await splitter.createDocuments([doc.content], [{ id: doc.id }])
+        const chunkIds = chunks.map((_, index) => deterministicChunkId(doc.id, index, doc.hash))
         this.logger.debug(`[RAG] "${doc.id}" → ${chunks.length} chunks`)
 
-        for (const chunk of chunks) {
-          try {
-            await this.addDocument(chunk.metadata.id, chunk.pageContent)
-          } catch (error) {
-            this.logger.error(
-              `[RAG] Error indexing chunk "${chunk.metadata.id}": ${error instanceof Error ? error.message : error}`,
-            )
-            continue
-          }
+        try {
+          // Deterministic ids already make re-adds collision-stable, but delete first
+          // so seeding stays idempotent even if the manifest was lost or reset.
+          await this.deleteChunks(chunkIds)
+          await this.addChunks(
+            chunks.map((chunk, index) => ({ id: chunkIds[index], content: chunk.pageContent, docId: doc.id })),
+          )
+          await this.manifestRepo.save({ docId: doc.id, contentHash: doc.hash, chunkIds })
+        } catch (error) {
+          this.logger.error(`[RAG] Error indexing "${doc.id}": ${error instanceof Error ? error.message : error}`)
+          continue
         }
 
         this.logger.debug(`[RAG] Indexed "${doc.id}" in ${Date.now() - t0}ms`)
       }
 
-      this.logger.log('[RAG] Seeding complete.')
+      this.logger.log(
+        `[RAG] Seeding complete (${plan.toIndex.length} indexed, ${plan.unchangedDocIds.length} unchanged).`,
+      )
     } catch (error) {
       const err = error as Error
       this.logger.warn(`[RAG] Seeding failed but service will continue: ${err?.message ?? err}`)
     }
   }
+
+  /**
+   * Writes chunks to the vector store under their deterministic ids.
+   * Redis takes full key names; Pinecone/pgvector take ids.
+   */
+  private async addChunks(chunks: Chunk[]) {
+    if (!chunks.length) return
+    const documents = chunks.map((chunk) => ({ pageContent: chunk.content, metadata: { id: chunk.docId } }))
+    if (this.vectorStore instanceof RedisVectorStore) {
+      await this.vectorStore.addDocuments(documents, {
+        keys: chunks.map((chunk) => `${this.redisKeyPrefix}${chunk.id}`),
+      })
+    } else {
+      await this.vectorStore.addDocuments(documents, { ids: chunks.map((chunk) => chunk.id) })
+    }
+  }
+
+  /**
+   * Deletes chunks by id. All supported stores accept `{ ids }`
+   * (Redis prefixes them with its configured keyPrefix internally).
+   */
+  private async deleteChunks(chunkIds: string[]) {
+    if (!chunkIds.length) return
+    const store = this.vectorStore as unknown as { delete: (params: { ids: string[] }) => Promise<void> }
+    await store.delete({ ids: chunkIds })
+  }
+
   /**
    * Initializes Pinecone vector store and client.
    * Logs connection status and handles errors.
@@ -206,10 +289,46 @@ export class LangchainRagService implements OnModuleInit {
     try {
       this.redisClient = createClient({ url }) as RedisClientType
       await this.redisClient.connect()
-      this.vectorStore = new RedisVectorStore(embeddings, { redisClient: this.redisClient, indexName })
+      this.redisKeyPrefix = `doc:${indexName}:`
+      this.vectorStore = new RedisVectorStore(embeddings, {
+        redisClient: this.redisClient,
+        indexName,
+        keyPrefix: this.redisKeyPrefix,
+      })
       this.logger.log('Redis vector store initialized.')
     } catch (err: any) {
       this.logger.error(`Redis init failed: ${err?.message ?? err}`)
+      throw err
+    }
+  }
+
+  /**
+   * Initializes the Postgres/pgvector vector store, reusing the application's
+   * Postgres connection settings. Requires a server with the pgvector extension
+   * available (e.g. the pgvector/pgvector image); the table and extension are
+   * created on first run.
+   * @param embeddings - OpenAIEmbeddings instance for the pgvector store.
+   */
+  private async initPgvector(embeddings: OpenAIEmbeddings) {
+    const host = this.configService.get<string>('appConfig.postgresHost')
+    const tableName = this.configService.get<string>('appConfig.pgvectorTable') || 'rag_embeddings'
+    this.logger.log(`Connecting to Postgres/pgvector: ${host} (table=${tableName})`)
+    try {
+      this.vectorStore = await PGVectorStore.initialize(embeddings, {
+        postgresConnectionOptions: {
+          host,
+          port: 5432,
+          user: this.configService.get<string>('appConfig.postgresUser'),
+          password: this.configService.get<string>('appConfig.postgresPassword'),
+          database: this.configService.get<string>('appConfig.postgresDbName'),
+        },
+        tableName,
+      })
+      this.logger.log('pgvector vector store initialized.')
+    } catch (err: any) {
+      this.logger.error(
+        `pgvector init failed (is the Postgres server built with the pgvector extension, e.g. pgvector/pgvector:pg16?): ${err?.message ?? err}`,
+      )
       throw err
     }
   }

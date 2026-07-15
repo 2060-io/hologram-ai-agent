@@ -404,9 +404,10 @@ Full design specification: [`docs/rbac-approval-spec.md`](./docs/rbac-approval-s
 | `RAG_CHUNK_SIZE` | Max chars per chunk | `1000` |
 | `RAG_CHUNK_OVERLAP` | Overlap between chunks | `200` |
 | `RAG_REMOTE_URLS` | Remote document URLs (CSV or JSON array) | |
-| `VECTOR_STORE` | Vector store: `pinecone` or `redis` | `redis` |
+| `VECTOR_STORE` | Vector store: `pinecone`, `redis` or `pgvector` | `redis` |
 | `VECTOR_INDEX_NAME` | Vector index name | `hologram-ia` |
 | `PINECONE_API_KEY` | Pinecone API key | |
+| `PGVECTOR_TABLE` | Table for the `pgvector` store (reuses the app's `POSTGRES_*` connection; requires a pgvector-enabled Postgres image, e.g. `pgvector/pgvector:pg16`) | `rag_embeddings` |
 | `REDIS_URL` | Redis connection URL | `redis://localhost:6379` |
 | `AGENT_MEMORY_BACKEND` | Memory backend: `memory` or `redis` | `redis` |
 | `AGENT_MEMORY_WINDOW` | Chat memory window size | `8` |

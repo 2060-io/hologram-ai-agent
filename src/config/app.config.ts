@@ -143,11 +143,19 @@ export default registerAs('appConfig', () => ({
   ragProvider: pickString('RAG_PROVIDER', agentPack?.rag?.provider, 'vectorstore'),
 
   /**
-   * Vector store provider for RAG: "pinecone","redis" etc.
+   * Vector store provider for RAG: "pinecone", "redis" or "pgvector".
    * Used when RAG_PROVIDER = "langchain"
    * Default: redis
    */
   vectorStore: pickString('VECTOR_STORE', agentPack?.rag?.vectorStore?.type, 'redis'),
+
+  /**
+   * Table used by the pgvector vector store (VECTOR_STORE=pgvector). Reuses the
+   * application's Postgres connection; the server must provide the pgvector
+   * extension (e.g. the pgvector/pgvector image).
+   * Default: rag_embeddings
+   */
+  pgvectorTable: pickString('PGVECTOR_TABLE', agentPack?.rag?.vectorStore?.tableName, 'rag_embeddings'),
 
   /**
    * Shared index name for all supported vector stores (e.g., Pinecone, Redis).

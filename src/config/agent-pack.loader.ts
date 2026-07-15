@@ -54,6 +54,7 @@ const AgentPackSchema = z
           .object({
             type: z.string().optional(),
             indexName: z.string().optional(),
+            tableName: z.string().optional(),
           })
           .optional(),
         pinecone: z
