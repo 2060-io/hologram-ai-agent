@@ -185,6 +185,9 @@ postgres:
   enabled: true
   port: 5432
   image:
+    # pgvector-enabled Postgres, drop-in replacement for the previous postgres:15.2
+    # (pg15 major matches existing data volumes; required for VECTOR_STORE=pgvector)
+    repository: 'pgvector/pgvector:pg15'
     pullPolicy: Always
   env:
     - name: PGDATA
