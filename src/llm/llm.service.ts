@@ -341,7 +341,11 @@ export class LlmService implements OnModuleInit {
       default: {
         const maxTokens = this.config.get<number>('appConfig.openaiMaxTokens')
         const baseUrl = this.config.get<string>('appConfig.openaiBaseUrl')
-        const reasoningEffort = this.config.get<string>('appConfig.openaiReasoningEffort')
+        const reasoningEffortRaw = this.config.get<string>('appConfig.openaiReasoningEffort')
+        // 'none' (or unset) disables reasoning handling entirely: the parameter is
+        // omitted from requests, since some models reject it with function tools
+        // regardless of its value.
+        const reasoningEffort = reasoningEffortRaw && reasoningEffortRaw !== 'none' ? reasoningEffortRaw : undefined
         return new ChatOpenAI({
           openAIApiKey: this.getOrThrow('OPENAI_API_KEY'),
           model: this.config.get<string>('appConfig.openaiModel') ?? 'gpt-4o',
