@@ -11,6 +11,7 @@ import { VisionModule } from '../vision/vision.module'
 import { AgentContentService } from './agent-content.service'
 import { McpConfigEntity } from '../mcp/mcp-config.entity'
 import { ApprovalRequestEntity } from '../rbac/approval-request.entity'
+import { RagManifestEntity } from '../rag/entities/rag-manifest.entity'
 
 @Global()
 @Module({
@@ -25,7 +26,7 @@ import { ApprovalRequestEntity } from '../rbac/approval-request.entity'
         username: configService.get<string>('appConfig.postgresUser'),
         password: configService.get<string>('appConfig.postgresPassword'),
         database: configService.get<string>('appConfig.postgresDbName'),
-        entities: [ConnectionEntity, SessionEntity, McpConfigEntity, ApprovalRequestEntity],
+        entities: [ConnectionEntity, SessionEntity, McpConfigEntity, ApprovalRequestEntity, RagManifestEntity],
         synchronize: true,
         ssl: false,
         logging: false,

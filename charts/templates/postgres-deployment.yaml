@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: "postgres:15.2"
+          image: {{ .Values.postgres.image.repository | default "pgvector/pgvector:pg15" | quote }}
           imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.postgres.port }}
