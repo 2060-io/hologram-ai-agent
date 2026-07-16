@@ -67,7 +67,9 @@ export function createGenerateImageTool(imageGenService: ImageGenerationService)
 
         return JSON.stringify(response)
       } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err)
+        // Some errors (e.g. AggregateError from failed connects) carry an empty
+        // message — fall back to code/name so the log is never blank.
+        const msg = err instanceof Error ? err.message || (err as NodeJS.ErrnoException).code || err.name : String(err)
         logger.error(`generate_image failed: ${msg}`)
         return JSON.stringify({ status: 'error', message: msg })
       }
