@@ -28,6 +28,11 @@ export class MediaStoreService implements OnModuleInit {
     const secretKey = process.env.MINIO_SECRET_KEY || 'minioadmin'
     const useSSL = process.env.MINIO_USE_SSL === 'true'
     const publicUrl = process.env.MINIO_PUBLIC_URL || `http://${endpoint}:${port}`
+    // Explicit region: without it, presignedGetObject() first performs a
+    // bucket-region lookup against its endpoint. The public endpoint only
+    // needs to be reachable by download clients — not from this container —
+    // so signing must not depend on contacting it.
+    const region = process.env.MINIO_REGION || 'us-east-1'
 
     try {
       this.client = new Minio.Client({
@@ -36,6 +41,7 @@ export class MediaStoreService implements OnModuleInit {
         useSSL,
         accessKey,
         secretKey,
+        region,
       })
 
       // Public client for presigned URL generation (HMAC signature includes the host)
@@ -47,6 +53,7 @@ export class MediaStoreService implements OnModuleInit {
         useSSL: pub.protocol === 'https:',
         accessKey,
         secretKey,
+        region,
       })
 
       await this.ensureBucket()
