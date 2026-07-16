@@ -7,7 +7,6 @@ export interface ImageRef {
   mimeType: string
   previewUrl: string
   createdAt: number
-  /** Connection the image was generated for — enables latest-image fallback */
   connectionId?: string
 }
 
