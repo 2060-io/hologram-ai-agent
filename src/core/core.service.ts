@@ -329,34 +329,18 @@ export class CoreService implements EventHandler, OnModuleInit {
    */
   private async handleContextualAction(action: string, session: SessionEntity): Promise<SessionEntity> {
     const { connectionId, lang } = session
+
+    // 'authenticate' (re)starts the flow from any state except an active MCP
+    // config flow: users may have dismissed or lost the original proof request,
+    // so re-selecting the menu item must fully restart the flow and resend it.
+    if (action === 'authenticate' && this.authFlowConfig.enabled && session.state !== StateStep.MCP_CONFIG) {
+      await this.startAuthenticationFlow(session)
+      return await this.sessionRepository.save(session)
+    }
+
     switch (session.state) {
       case StateStep.CHAT: {
         this.logger.debug(`this.authFlowConfig.enabled: ${this.authFlowConfig.enabled}`)
-        if (action === 'authenticate' && this.authFlowConfig.enabled) {
-          const credentialDefinitionId = this.credentialDefinitionId
-          this.logger.debug(`credentialDefinition: ${credentialDefinitionId}`)
-          if (!credentialDefinitionId) {
-            throw new Error('Missing config: credentialDefinitionId')
-          }
-
-          const body = new IdentityProofRequestMessage({
-            connectionId,
-            requestedProofItems: [],
-          })
-          const requestedProofItem = new VerifiableCredentialRequestedProofItem({
-            id: '1',
-            type: 'verifiable-credential',
-            credentialDefinitionId,
-          })
-          body.requestedProofItems.push(requestedProofItem)
-
-          await this.apiClient.messages.send(body)
-
-          session.state = StateStep.AUTH
-          this.logger.debug(`[AUTH] Proof request sent to ${connectionId}`)
-          await this.sendText(connectionId, this.getText('AUTH_PROCESS_STARTED', lang), lang)
-        }
-
         if (action === 'logout') {
           await this.sendText(connectionId, this.getText('LOGOUT_CONFIRMATION', lang), lang)
           session.isAuthenticated = false
@@ -389,6 +373,39 @@ export class CoreService implements EventHandler, OnModuleInit {
         break
     }
     return await this.sessionRepository.save(session)
+  }
+
+  /**
+   * Starts (or restarts) the credential authentication flow: sends a fresh
+   * verifiable-credential proof request and moves the session to AUTH.
+   * Safe to call repeatedly — each call resends the presentation request.
+   *
+   * @param session - The current session; its state is set to AUTH (not persisted here).
+   */
+  private async startAuthenticationFlow(session: SessionEntity): Promise<void> {
+    const { connectionId, lang } = session
+    const credentialDefinitionId = this.credentialDefinitionId
+    this.logger.debug(`credentialDefinition: ${credentialDefinitionId}`)
+    if (!credentialDefinitionId) {
+      throw new Error('Missing config: credentialDefinitionId')
+    }
+
+    const body = new IdentityProofRequestMessage({
+      connectionId,
+      requestedProofItems: [],
+    })
+    const requestedProofItem = new VerifiableCredentialRequestedProofItem({
+      id: '1',
+      type: 'verifiable-credential',
+      credentialDefinitionId,
+    })
+    body.requestedProofItems.push(requestedProofItem)
+
+    await this.apiClient.messages.send(body)
+
+    this.logger.debug(`[AUTH] Proof request sent to ${connectionId} (previous state: ${session.state})`)
+    session.state = StateStep.AUTH
+    await this.sendText(connectionId, this.getText('AUTH_PROCESS_STARTED', lang), lang)
   }
 
   /**
