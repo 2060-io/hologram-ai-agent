@@ -341,14 +341,28 @@ export class LlmService implements OnModuleInit {
       default: {
         const maxTokens = this.config.get<number>('appConfig.openaiMaxTokens')
         const baseUrl = this.config.get<string>('appConfig.openaiBaseUrl')
-        const reasoningEffort = this.config.get<string>('appConfig.openaiReasoningEffort')
+        const reasoningEffortRaw = this.config.get<string>('appConfig.openaiReasoningEffort')
+        // 'none' (or unset) disables reasoning handling entirely: the parameter is
+        // omitted from requests, since some models reject it with function tools
+        // regardless of its value.
+        const reasoningEffort = reasoningEffortRaw && reasoningEffortRaw !== 'none' ? reasoningEffortRaw : undefined
         return new ChatOpenAI({
           openAIApiKey: this.getOrThrow('OPENAI_API_KEY'),
           model: this.config.get<string>('appConfig.openaiModel') ?? 'gpt-4o',
-          temperature: this.config.get<number>('appConfig.openaiTemperature'),
-          maxTokens: -1,
-          modelKwargs: maxTokens ? { max_completion_tokens: maxTokens } : undefined,
-          ...(reasoningEffort ? { reasoningEffort: reasoningEffort as 'low' | 'medium' | 'high' } : {}),
+          // Reasoning models (reasoningEffort set) reject custom temperature values,
+          // and function tools with reasoning_effort are only supported on the
+          // Responses API — so switch API and let temperature use its default.
+          ...(reasoningEffort
+            ? {
+                reasoningEffort: reasoningEffort as 'low' | 'medium' | 'high',
+                useResponsesApi: true,
+                ...(maxTokens ? { maxTokens } : {}),
+              }
+            : {
+                temperature: this.config.get<number>('appConfig.openaiTemperature'),
+                maxTokens: -1,
+                modelKwargs: maxTokens ? { max_completion_tokens: maxTokens } : undefined,
+              }),
           ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
         })
       }
