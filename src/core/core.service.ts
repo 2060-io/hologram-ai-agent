@@ -180,8 +180,8 @@ export class CoreService implements EventHandler, OnModuleInit {
             const items = mediaMsg.items ?? []
             const imageItem = items.find((it) => this.visionService.isImageMimeType(it.mimeType))
 
-            if (imageItem && this.visionService.isEnabled) {
-              if (!this.visionService.isAllowed(session.isAuthenticated ?? false)) {
+            if (imageItem) {
+              if (this.visionService.isEnabled && !this.visionService.isAllowed(session.isAuthenticated ?? false)) {
                 this.logger.log(`[Vision] Blocked image from unauthenticated user ${session.connectionId}`)
                 await this.sendText(
                   session.connectionId,
@@ -190,28 +190,33 @@ export class CoreService implements EventHandler, OnModuleInit {
                 )
               } else {
                 try {
-                  const result = await this.visionService.describeFromUrl(
-                    imageItem.uri,
-                    imageItem.mimeType,
-                    imageItem.ciphering,
-                  )
-                  // Store the user-sent image as an uploadable ref, so the LLM
-                  // can attach it to posts via upload_media_to_mcp — previously
-                  // only generated images had refs and user images were unusable.
+                  // Store the user-sent image as an uploadable ref even when no
+                  // vision provider is configured — the description is optional,
+                  // attachability (upload_media_to_mcp by refId) is not.
+                  const buffer = await this.visionService.fetchImage(imageItem.uri, imageItem.ciphering)
                   const refId = this.imageRefStore.add(
-                    result.buffer,
+                    buffer,
                     imageItem.mimeType,
                     imageItem.uri ?? '',
                     message.connectionId,
                   )
-                  this.logger.log(`[Vision] Stored user image as ref "${refId}" (${imageItem.mimeType})`)
+                  this.logger.log(`[Image] Stored user image as ref "${refId}" (${imageItem.mimeType})`)
+
+                  let description = ''
+                  if (this.visionService.isEnabled) {
+                    try {
+                      description = (await this.visionService.describeBuffer(buffer, imageItem.mimeType)).text.trim()
+                    } catch (err) {
+                      this.logger.error(`[Vision] Description failed: ${err}`)
+                    }
+                  }
                   content = new TextMessage({
                     connectionId: message.connectionId,
-                    content: `[Image received — refId: ${refId}] ${result.text.trim()}`,
+                    content: `[Image received — refId: ${refId}]${description ? ` ${description}` : ''}`,
                     ...(message.threadId ? { threadId: message.threadId } : {}),
                   })
                 } catch (err) {
-                  this.logger.error(`[Vision] Description failed: ${err}`)
+                  this.logger.error(`[Image] Failed to process user image: ${err}`)
                 }
               }
             }

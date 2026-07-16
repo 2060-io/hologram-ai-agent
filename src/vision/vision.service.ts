@@ -81,18 +81,12 @@ export class VisionService implements OnModuleInit {
   }
 
   /**
-   * Download an image from a URL (decrypting if ciphered) and describe it.
+   * Download an image from a URL, decrypting if ciphered. Works without a
+   * configured vision provider, so callers can keep user-sent images (e.g. as
+   * uploadable refs) even when image-to-text is disabled.
    */
-  async describeFromUrl(
-    url: string,
-    mimeType: string,
-    ciphering?: ImageCiphering,
-  ): Promise<DescriptionResult & { buffer: Buffer }> {
-    if (!this.provider) {
-      throw new Error('Vision provider is not configured.')
-    }
-
-    this.logger.log(`Downloading image for description (${mimeType})...`)
+  async fetchImage(url: string, ciphering?: ImageCiphering): Promise<Buffer> {
+    this.logger.log(`Downloading image...`)
 
     const response = await fetch(url)
     if (!response.ok) {
@@ -107,7 +101,18 @@ export class VisionService implements OnModuleInit {
       this.logger.log(`Decrypted image (${ciphering.algorithm}): ${Math.round(buffer.length / 1024)}KB`)
     }
 
-    this.logger.log(`Downloaded ${Math.round(buffer.length / 1024)}KB image. Describing...`)
+    return buffer
+  }
+
+  /**
+   * Describe an already-downloaded image buffer. Requires a configured provider.
+   */
+  async describeBuffer(buffer: Buffer, mimeType: string): Promise<DescriptionResult> {
+    if (!this.provider) {
+      throw new Error('Vision provider is not configured.')
+    }
+
+    this.logger.log(`Describing ${Math.round(buffer.length / 1024)}KB image (${mimeType})...`)
 
     const result = await this.provider.describe(buffer, mimeType)
 
@@ -116,6 +121,19 @@ export class VisionService implements OnModuleInit {
         ` (model=${result.model ?? 'unknown'})`,
     )
 
+    return result
+  }
+
+  /**
+   * Download an image from a URL (decrypting if ciphered) and describe it.
+   */
+  async describeFromUrl(
+    url: string,
+    mimeType: string,
+    ciphering?: ImageCiphering,
+  ): Promise<DescriptionResult & { buffer: Buffer }> {
+    const buffer = await this.fetchImage(url, ciphering)
+    const result = await this.describeBuffer(buffer, mimeType)
     // Return the decrypted buffer too, so callers can keep the image itself
     // (e.g. store it as an uploadable ref) — not just its description.
     return { ...result, buffer }
