@@ -4,6 +4,7 @@ import { BaseChatMemory, type InputValues, type OutputValues, type MemoryVariabl
 
 import { MemoryService } from './memory.service'
 import { ChatMessage } from './interfaces/memory-backend.interface'
+import { contentToText } from '../common/utils/message-content.util'
 
 /**
  * LangchainSessionMemory
@@ -54,8 +55,10 @@ export class LangchainSessionMemory extends BaseChatMemory {
   }
 
   async saveContext(input: InputValues, output: OutputValues): Promise<void> {
-    const userInput = (input.input ?? input.question ?? '') as string
-    const aiOutput = (output.output ?? output.response ?? '') as string
+    // Normalize: with the Responses API (reasoning models) content arrives as
+    // content-block arrays; persisting them raw poisons the history.
+    const userInput = contentToText(input.input ?? input.question ?? '')
+    const aiOutput = contentToText(output.output ?? output.response ?? '')
 
     this.logger.debug(
       `[saveContext] sessionId=${this.sessionId} rawInput="${userInput.slice(0, 120)}${userInput.length > 120 ? '...' : ''}" rawOutput="${aiOutput.slice(0, 120)}${aiOutput.length > 120 ? '...' : ''}"`,
@@ -76,7 +79,8 @@ export class LangchainSessionMemory extends BaseChatMemory {
       const summary = steps
         .map((s) => {
           const args = JSON.stringify(s.action.toolInput)
-          const obs = s.observation.length > 500 ? s.observation.slice(0, 500) + '…' : s.observation
+          const obsText = contentToText(s.observation)
+          const obs = obsText.length > 500 ? obsText.slice(0, 500) + '…' : obsText
           return `${s.action.tool}(${args}) → ${obs}`
         })
         .join('\n')

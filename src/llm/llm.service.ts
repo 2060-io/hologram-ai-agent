@@ -8,6 +8,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools'
 import { createToolCallingAgent } from 'langchain/agents'
 import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts'
 import { AIMessage, BaseMessage } from '@langchain/core/messages'
+import { contentToText } from '../common/utils/message-content.util'
 import type { Runnable } from '@langchain/core/runnables'
 import type { AgentExecutor } from 'langchain/agents'
 
@@ -277,12 +278,14 @@ export class LlmService implements OnModuleInit {
 
         const output = (result as any)?.output ?? result
 
-        if (typeof output === 'string') {
-          this.logger.log('Agent executor returned output string.')
-          return this.sanitizeResponse(output)
+        // Responses API (reasoning models) returns content-block arrays — normalize to text
+        const outputText = contentToText(output)
+        if (outputText) {
+          this.logger.log('Agent executor returned output text.')
+          return this.sanitizeResponse(outputText)
         }
 
-        this.logger.warn('Agent executor returned a non-string result. Returning JSON stringified result.')
+        this.logger.warn('Agent executor returned a non-text result. Returning JSON stringified result.')
         return this.sanitizeResponse(JSON.stringify(output))
       }
 
