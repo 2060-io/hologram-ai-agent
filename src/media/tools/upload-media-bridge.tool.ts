@@ -3,6 +3,7 @@ import { DynamicStructuredTool } from '@langchain/core/tools'
 import { Logger } from '@nestjs/common'
 import type { ImageRefStore } from '../image-ref.store'
 import type { McpService } from '../../mcp/mcp.service'
+import type { ImageGenerationService } from '../image-generation.service'
 
 const logger = new Logger('UploadMediaBridgeTool')
 const ToolCtor = DynamicStructuredTool as unknown as new (fields: any) => DynamicStructuredTool
@@ -12,7 +13,11 @@ const ToolCtor = DynamicStructuredTool as unknown as new (fields: any) => Dynami
  * Retrieves the converted image buffer from the ref store, converts to base64,
  * and calls the MCP tool internally — keeping large binary data out of the LLM context.
  */
-export function createUploadMediaBridgeTool(refStore: ImageRefStore, mcpService: McpService): DynamicStructuredTool {
+export function createUploadMediaBridgeTool(
+  refStore: ImageRefStore,
+  mcpService: McpService,
+  imageGenService?: ImageGenerationService,
+): DynamicStructuredTool {
   const serverNames = mcpService.getServerNames()
   const serverHint =
     serverNames.length > 0
@@ -52,16 +57,31 @@ export function createUploadMediaBridgeTool(refStore: ImageRefStore, mcpService:
           return JSON.stringify({ status: 'error', message: msg })
         }
 
-        const ref = refStore.get(args.ref_id)
+        let ref = refStore.get(args.ref_id)
+        let substituted = false
+        if (!ref) {
+          // The LLM often picks a stale refId out of chat history (older image,
+          // or one from before a restart). Fall back to the most recent image
+          // generated for this connection instead of failing.
+          const connectionId = imageGenService?.getCallerConnectionId()
+          const latest = connectionId ? refStore.getLatestForConnection(connectionId) : null
+          if (latest) {
+            logger.warn(
+              `upload_media_to_mcp: refId "${args.ref_id}" not found — falling back to latest image ref "${latest.refId}" for this connection`,
+            )
+            ref = latest
+            substituted = true
+          }
+        }
         if (!ref) {
           return JSON.stringify({
             status: 'error',
-            message: `Image ref "${args.ref_id}" not found or expired. Generate a new image first.`,
+            message: `Image ref "${args.ref_id}" not found or expired, and no recent image exists for this conversation. Generate a new image first.`,
           })
         }
 
         logger.log(
-          `upload_media_to_mcp: refId=${args.ref_id} → server="${args.server}" tool="${args.tool}" ` +
+          `upload_media_to_mcp: refId=${ref.refId} → server="${args.server}" tool="${args.tool}" ` +
             `(${Math.round(ref.buffer.length / 1024)}KB, ${ref.mimeType})`,
         )
 
@@ -77,6 +97,13 @@ export function createUploadMediaBridgeTool(refStore: ImageRefStore, mcpService:
 
         logger.log(`upload_media_to_mcp result: ${result.slice(0, 300)}`)
 
+        if (substituted) {
+          return JSON.stringify({
+            status: 'ok',
+            note: `The requested refId "${args.ref_id}" was stale; the most recent generated image (refId "${ref.refId}") was uploaded instead.`,
+            result,
+          })
+        }
         return result
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)

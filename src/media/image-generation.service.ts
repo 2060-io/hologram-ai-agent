@@ -129,8 +129,14 @@ export class ImageGenerationService implements OnModuleInit {
       const objectName = `generated/${randomUUID()}.${request.targetFormat ?? 'jpeg'}`
       const previewUrl = await this.mediaStore.upload(objectName, encrypted, converted.mimeType)
 
-      // Step 5: Store ref for later retrieval by bridge tool
-      const refId = this.refStore.add(converted.buffer, converted.mimeType, previewUrl)
+      // Step 5: Store ref for later retrieval by bridge tool (tagged with the
+      // caller connection so a stale refId can fall back to the latest image)
+      const refId = this.refStore.add(
+        converted.buffer,
+        converted.mimeType,
+        previewUrl,
+        this.callerCtx.getStore()?.connectionId,
+      )
 
       results.push({ refId, previewUrl, ciphering })
       eventImages.push({
@@ -186,5 +192,10 @@ export class ImageGenerationService implements OnModuleInit {
    */
   async runWithCaller<T>(connectionId: string, fn: () => Promise<T>): Promise<T> {
     return this.callerCtx.run({ connectionId }, fn)
+  }
+
+  /** The connectionId of the current caller, if running inside runWithCaller(). */
+  getCallerConnectionId(): string | undefined {
+    return this.callerCtx.getStore()?.connectionId
   }
 }

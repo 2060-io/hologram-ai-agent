@@ -7,6 +7,7 @@ export interface ImageRef {
   mimeType: string
   previewUrl: string
   createdAt: number
+  connectionId?: string
 }
 
 const DEFAULT_TTL_MS = 60 * 60 * 1000 // 1 hour
@@ -25,7 +26,7 @@ export class ImageRefStore {
   /**
    * Store a converted image and return a unique refId.
    */
-  add(buffer: Buffer, mimeType: string, previewUrl: string): string {
+  add(buffer: Buffer, mimeType: string, previewUrl: string, connectionId?: string): string {
     const refId = randomUUID()
     this.store.set(refId, {
       refId,
@@ -33,9 +34,25 @@ export class ImageRefStore {
       mimeType,
       previewUrl,
       createdAt: Date.now(),
+      connectionId,
     })
     this.logger.debug(`Stored image ref "${refId}" (${Math.round(buffer.length / 1024)}KB, ${mimeType})`)
     return refId
+  }
+
+  /**
+   * The most recent non-expired ref generated for a connection. Used as a
+   * fallback when the LLM references a stale refId from chat history.
+   */
+  getLatestForConnection(connectionId: string): ImageRef | null {
+    let latest: ImageRef | null = null
+    const now = Date.now()
+    for (const ref of this.store.values()) {
+      if (ref.connectionId !== connectionId) continue
+      if (now - ref.createdAt > DEFAULT_TTL_MS) continue
+      if (!latest || ref.createdAt > latest.createdAt) latest = ref
+    }
+    return latest
   }
 
   /**
