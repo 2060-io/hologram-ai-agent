@@ -10,6 +10,11 @@ import { LoadDocumentsOptions } from '../interfaces/LoadDocumentsOptions'
  * - Supports .txt, .md, .pdf, .csv
  * - If no valid docs are found, creates a sample example.txt
  *
+ * Remote documents are loaded first: their cache files live under
+ * `folderBasePath` with deterministic names (used as document ids), and the
+ * local scan skips them — otherwise a persistent cache directory would load
+ * every remote document twice ("name" + "name#2") on subsequent boots.
+ *
  * @param opts LoadDocumentsOptions with folderBasePath, optional logger, and optional remoteUrls.
  * @returns Array of { id, content } ready for chunking/indexing.
  */
@@ -25,24 +30,8 @@ export async function loadDocuments(opts: LoadDocumentsOptions): Promise<{ id: s
 
   try {
     await fs.mkdir(folderBasePath, { recursive: true })
-    const files = await fs.readdir(folderBasePath)
-    let foundDocs = false
-    for (const file of files) {
-      const fullPath = path.join(folderBasePath, file)
-      const stat = await fs.stat(fullPath)
-      if (!stat.isFile()) continue
-      try {
-        const doc = await loadLocalDocument(fullPath, file, options, usedIds, logger)
-        if (doc) {
-          documents.push(doc)
-          foundDocs = true
-        }
-      } catch (err) {
-        logger?.error?.(`[RAG] Error processing file "${file}": ${err}`)
-      }
-    }
 
-    // Optionally fetch remote documents from env: RAG_REMOTE_URLS
+    // Resolve remote document URLs (options or env: RAG_REMOTE_URLS)
     let urls: string[] = []
     if (opts?.remoteUrls && opts.remoteUrls.length > 0) {
       urls = opts.remoteUrls
@@ -67,19 +56,31 @@ export async function loadDocuments(opts: LoadDocumentsOptions): Promise<{ id: s
 
     if (urls.length) {
       logger?.log?.(`[RAG] Downloading ${urls.length} remote document(s) into cache under: ${folderBasePath}`)
-      await fs.mkdir(folderBasePath, { recursive: true })
       const results = await Promise.all(
         urls.map((u) => loadRemoteDocument(u, folderBasePath, options, usedIds, logger)),
       )
       for (const doc of results) {
-        if (doc) {
-          documents.push(doc)
-          foundDocs = true
-        }
+        if (doc) documents.push(doc)
       }
     }
+
+    // Local documents — skip files already loaded through the remote cache
+    const files = await fs.readdir(folderBasePath)
+    for (const file of files) {
+      if (usedIds.has(file)) continue
+      const fullPath = path.join(folderBasePath, file)
+      const stat = await fs.stat(fullPath)
+      if (!stat.isFile()) continue
+      try {
+        const doc = await loadLocalDocument(fullPath, file, options, usedIds, logger)
+        if (doc) documents.push(doc)
+      } catch (err) {
+        logger?.error?.(`[RAG] Error processing file "${file}": ${err}`)
+      }
+    }
+
     // If no documents found anywhere, create a sample file
-    if (!foundDocs && documents.length === 0) {
+    if (documents.length === 0) {
       const samplePath = path.join(folderBasePath, 'example.txt')
       const exampleText = 'This is an example document for testing the RAG system.'
       await fs.writeFile(samplePath, exampleText)

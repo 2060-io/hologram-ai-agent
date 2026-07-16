@@ -60,6 +60,10 @@ export class LangchainRagService implements OnModuleInit {
       this.logger.log('[RAG] (Langchain) RAG not configured — skipping initialization.')
       return
     }
+    if (this.configService.get<string>('appConfig.ragProvider', 'langchain') !== 'langchain') {
+      this.logger.log('[RAG] (Langchain) Not the selected RAG provider — skipping initialization.')
+      return
+    }
     const vectorStoreProvider = this.configService.get<string>('appConfig.vectorStore') as SupportedStores
     const openaiApiKey = this.configService.get<string>('appConfig.openaiApiKey') || process.env.OPENAI_API_KEY
 
