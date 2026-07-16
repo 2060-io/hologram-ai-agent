@@ -37,7 +37,7 @@ chatbot:
     - name: AGENT_PACK_PATH
       value: '/app/agent-packs/custom-pack'
     - name: VECTOR_STORE
-      value: 'redis'
+      value: 'pgvector'
     - name: VECTOR_INDEX_NAME
       value: 'chat_example_index'
     - name: RAG_PROVIDER

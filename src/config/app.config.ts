@@ -137,17 +137,17 @@ export default registerAs('appConfig', () => ({
   ragRemoteUrls: resolveRagRemoteUrls(process.env.RAG_REMOTE_URLS, agentPack?.rag?.remoteUrls),
 
   /**
-   * RAG provider selection. "vectorstore" (custom) or "langchain" (with supported vector stores).
-   * Default: "vectorstore"
+   * RAG provider selection. "vectorstore" (custom, in-memory) or "langchain" (with supported vector stores).
+   * Default: "langchain"
    */
-  ragProvider: pickString('RAG_PROVIDER', agentPack?.rag?.provider, 'vectorstore'),
+  ragProvider: pickString('RAG_PROVIDER', agentPack?.rag?.provider, 'langchain'),
 
   /**
    * Vector store provider for RAG: "pinecone", "redis" or "pgvector".
    * Used when RAG_PROVIDER = "langchain"
-   * Default: redis
+   * Default: pgvector
    */
-  vectorStore: pickString('VECTOR_STORE', agentPack?.rag?.vectorStore?.type, 'redis'),
+  vectorStore: pickString('VECTOR_STORE', agentPack?.rag?.vectorStore?.type, 'pgvector'),
 
   /**
    * Table used by the pgvector vector store (VECTOR_STORE=pgvector). Reuses the

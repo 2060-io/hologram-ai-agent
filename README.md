@@ -8,7 +8,7 @@ A modular, multi-language AI agent built with NestJS for the Hologram + Verana e
 
 - **Personalized AI welcome** — sends a greeting message when a user connects via Hologram
 - **Multi-LLM support** — OpenAI, Ollama, Anthropic + any OpenAI-compatible API (OpenRouter, Kimi, DeepSeek, Groq, Together AI, etc.)
-- **RAG** — Retrieval Augmented Generation with Pinecone or Redis vector stores
+- **RAG** — Retrieval Augmented Generation with pgvector (default), Pinecone or Redis vector stores
 - **MCP integration** — connect to remote MCP servers (e.g. GitHub Copilot MCP) and expose their tools to the LLM agent
 - **Per-user MCP credentials** — users configure their own tokens via an in-chat flow; stored with AES-256-GCM encryption
 - **Lazy tool discovery** — MCP servers that require user tokens connect on-demand, not at startup
@@ -98,7 +98,7 @@ POSTGRES_PASSWORD=hologram
 POSTGRES_DB_NAME=hologram-agent
 
 # RAG
-VECTOR_STORE=redis
+VECTOR_STORE=pgvector
 RAG_PROVIDER=langchain
 RAG_DOCS_PATH=./docs
 
@@ -399,12 +399,12 @@ Full design specification: [`docs/rbac-approval-spec.md`](./docs/rbac-approval-s
 | `OLLAMA_ENDPOINT` | Ollama endpoint | `http://ollama:11434` |
 | `OLLAMA_MODEL` | Ollama model | `llama3` |
 | `ANTHROPIC_API_KEY` | Anthropic API key | |
-| `RAG_PROVIDER` | RAG backend: `vectorstore` or `langchain` | `vectorstore` |
+| `RAG_PROVIDER` | RAG backend: `vectorstore` (in-memory) or `langchain` | `langchain` |
 | `RAG_DOCS_PATH` | RAG documents directory | `/app/rag/docs` |
 | `RAG_CHUNK_SIZE` | Max chars per chunk | `1000` |
 | `RAG_CHUNK_OVERLAP` | Overlap between chunks | `200` |
 | `RAG_REMOTE_URLS` | Remote document URLs (CSV or JSON array) | |
-| `VECTOR_STORE` | Vector store: `pinecone`, `redis` or `pgvector` | `redis` |
+| `VECTOR_STORE` | Vector store: `pinecone`, `redis` or `pgvector` | `pgvector` |
 | `VECTOR_INDEX_NAME` | Vector index name | `hologram-ia` |
 | `PINECONE_API_KEY` | Pinecone API key | |
 | `PGVECTOR_TABLE` | Table for the `pgvector` store (reuses the app's `POSTGRES_*` connection; requires a pgvector-enabled Postgres image, e.g. `pgvector/pgvector:pg16`) | `rag_embeddings` |
