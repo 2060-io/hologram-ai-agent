@@ -83,7 +83,11 @@ export class VisionService implements OnModuleInit {
   /**
    * Download an image from a URL (decrypting if ciphered) and describe it.
    */
-  async describeFromUrl(url: string, mimeType: string, ciphering?: ImageCiphering): Promise<DescriptionResult> {
+  async describeFromUrl(
+    url: string,
+    mimeType: string,
+    ciphering?: ImageCiphering,
+  ): Promise<DescriptionResult & { buffer: Buffer }> {
     if (!this.provider) {
       throw new Error('Vision provider is not configured.')
     }
@@ -112,7 +116,9 @@ export class VisionService implements OnModuleInit {
         ` (model=${result.model ?? 'unknown'})`,
     )
 
-    return result
+    // Return the decrypted buffer too, so callers can keep the image itself
+    // (e.g. store it as an uploadable ref) — not just its description.
+    return { ...result, buffer }
   }
 
   private decrypt(encrypted: Buffer, ciphering: ImageCiphering): Buffer {

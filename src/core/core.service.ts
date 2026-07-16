@@ -39,6 +39,7 @@ import type { ApprovalRequestEntity } from '../rbac/approval-request.entity'
 import type { AuthFlowConfig } from '../config/agent-pack.loader'
 import { SttService } from '../stt/stt.service'
 import { VisionService } from '../vision/vision.service'
+import { ImageRefStore } from '../media/image-ref.store'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -59,6 +60,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     @Optional() private readonly approvalService: ApprovalService,
     private readonly sttService: SttService,
     private readonly visionService: VisionService,
+    private readonly imageRefStore: ImageRefStore,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -193,13 +195,21 @@ export class CoreService implements EventHandler, OnModuleInit {
                     imageItem.mimeType,
                     imageItem.ciphering,
                   )
-                  if (result.text.trim().length > 0) {
-                    content = new TextMessage({
-                      connectionId: message.connectionId,
-                      content: `[Image] ${result.text.trim()}`,
-                      ...(message.threadId ? { threadId: message.threadId } : {}),
-                    })
-                  }
+                  // Store the user-sent image as an uploadable ref, so the LLM
+                  // can attach it to posts via upload_media_to_mcp — previously
+                  // only generated images had refs and user images were unusable.
+                  const refId = this.imageRefStore.add(
+                    result.buffer,
+                    imageItem.mimeType,
+                    imageItem.uri ?? '',
+                    message.connectionId,
+                  )
+                  this.logger.log(`[Vision] Stored user image as ref "${refId}" (${imageItem.mimeType})`)
+                  content = new TextMessage({
+                    connectionId: message.connectionId,
+                    content: `[Image received — refId: ${refId}] ${result.text.trim()}`,
+                    ...(message.threadId ? { threadId: message.threadId } : {}),
+                  })
                 } catch (err) {
                   this.logger.error(`[Vision] Description failed: ${err}`)
                 }

@@ -27,7 +27,8 @@ export function createUploadMediaBridgeTool(
   return new ToolCtor({
     name: 'upload_media_to_mcp',
     description:
-      "Upload a previously generated image (by refId from generate_image) to an MCP server's media upload tool. " +
+      "Upload an image by refId to an MCP server's media upload tool. The refId comes either from a generate_image result " +
+      'or from a user-sent image (announced in the conversation as "[Image received — refId: …]"). ' +
       'This tool handles the base64 encoding and MCP call internally, so no binary data passes through the conversation. ' +
       'Returns the result from the MCP tool (e.g. a media_id for attaching to posts).',
     schema: z.object({
