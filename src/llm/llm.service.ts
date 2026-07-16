@@ -119,7 +119,7 @@ export class LlmService implements OnModuleInit {
     // Register image generation built-in tools if enabled
     if (this.imageGenService.isEnabled) {
       const genTool = createGenerateImageTool(this.imageGenService)
-      const bridgeTool = createUploadMediaBridgeTool(this.imageRefStore, this.mcpService)
+      const bridgeTool = createUploadMediaBridgeTool(this.imageRefStore, this.mcpService, this.imageGenService)
       this.baseTools.push(genTool, bridgeTool)
       this.publicTools = [...this.baseTools]
       this.adminTools = [...this.baseTools]
