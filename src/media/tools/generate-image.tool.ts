@@ -49,16 +49,16 @@ export function createGenerateImageTool(imageGenService: ImageGenerationService)
           targetMaxSizeKb: args.target_max_size_kb,
         })
 
+        // Keep this response compact, with refIds first: tool observations are
+        // truncated when persisted to session memory, and the refId must survive
+        // so later turns can still upload the image. Do not echo the prompt back,
+        // and do not expose the preview URL / ciphering keys — the image has
+        // already been delivered to the user and the LLM only needs the refId.
         const response = {
           status: 'ok',
+          images: images.map((r) => ({ refId: r.refId })),
           provider: args.provider,
-          prompt: args.prompt,
           sentMessageId,
-          images: images.map((r) => ({
-            refId: r.refId,
-            url: r.previewUrl,
-            ciphering: r.ciphering,
-          })),
           message:
             `Done. ${images.length} image(s) have already been delivered to the user (messageId: ${sentMessageId ?? 'unknown'}) — do NOT call generate_image again for this request. ` +
             `If the user replies to the media message, their reply will include [Replying to messageId: ${sentMessageId}]. ` +
