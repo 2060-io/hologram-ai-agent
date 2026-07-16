@@ -92,6 +92,7 @@ describe('CoreService approval selections', () => {
       approvalService as never,
       { isAudioMimeType: () => false, isEnabled: false } as never, // sttService
       { isImageMimeType: () => false, isEnabled: false } as never, // visionService
+      { add: jest.fn(() => 'test-ref-id') } as never, // imageRefStore
     )
 
     sentMessages = []

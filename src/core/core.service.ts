@@ -39,6 +39,7 @@ import type { ApprovalRequestEntity } from '../rbac/approval-request.entity'
 import type { AuthFlowConfig } from '../config/agent-pack.loader'
 import { SttService } from '../stt/stt.service'
 import { VisionService } from '../vision/vision.service'
+import { ImageRefStore } from '../media/image-ref.store'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -59,6 +60,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     @Optional() private readonly approvalService: ApprovalService,
     private readonly sttService: SttService,
     private readonly visionService: VisionService,
+    private readonly imageRefStore: ImageRefStore,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
     this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
@@ -178,8 +180,8 @@ export class CoreService implements EventHandler, OnModuleInit {
             const items = mediaMsg.items ?? []
             const imageItem = items.find((it) => this.visionService.isImageMimeType(it.mimeType))
 
-            if (imageItem && this.visionService.isEnabled) {
-              if (!this.visionService.isAllowed(session.isAuthenticated ?? false)) {
+            if (imageItem) {
+              if (this.visionService.isEnabled && !this.visionService.isAllowed(session.isAuthenticated ?? false)) {
                 this.logger.log(`[Vision] Blocked image from unauthenticated user ${session.connectionId}`)
                 await this.sendText(
                   session.connectionId,
@@ -188,20 +190,33 @@ export class CoreService implements EventHandler, OnModuleInit {
                 )
               } else {
                 try {
-                  const result = await this.visionService.describeFromUrl(
-                    imageItem.uri,
+                  // Store the user-sent image as an uploadable ref even when no
+                  // vision provider is configured — the description is optional,
+                  // attachability (upload_media_to_mcp by refId) is not.
+                  const buffer = await this.visionService.fetchImage(imageItem.uri, imageItem.ciphering)
+                  const refId = this.imageRefStore.add(
+                    buffer,
                     imageItem.mimeType,
-                    imageItem.ciphering,
+                    imageItem.uri ?? '',
+                    message.connectionId,
                   )
-                  if (result.text.trim().length > 0) {
-                    content = new TextMessage({
-                      connectionId: message.connectionId,
-                      content: `[Image] ${result.text.trim()}`,
-                      ...(message.threadId ? { threadId: message.threadId } : {}),
-                    })
+                  this.logger.log(`[Image] Stored user image as ref "${refId}" (${imageItem.mimeType})`)
+
+                  let description = ''
+                  if (this.visionService.isEnabled) {
+                    try {
+                      description = (await this.visionService.describeBuffer(buffer, imageItem.mimeType)).text.trim()
+                    } catch (err) {
+                      this.logger.error(`[Vision] Description failed: ${err}`)
+                    }
                   }
+                  content = new TextMessage({
+                    connectionId: message.connectionId,
+                    content: `[Image received — refId: ${refId}]${description ? ` ${description}` : ''}`,
+                    ...(message.threadId ? { threadId: message.threadId } : {}),
+                  })
                 } catch (err) {
-                  this.logger.error(`[Vision] Description failed: ${err}`)
+                  this.logger.error(`[Image] Failed to process user image: ${err}`)
                 }
               }
             }

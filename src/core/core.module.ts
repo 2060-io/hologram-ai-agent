@@ -8,6 +8,7 @@ import { ChatbotModule } from '../chatbot/chatbot.module'
 import { MemoryModule } from '../memory/memory.module'
 import { SttModule } from '../stt/stt.module'
 import { VisionModule } from '../vision/vision.module'
+import { MediaModule } from '../media/media.module'
 import { AgentContentService } from './agent-content.service'
 import { McpConfigEntity } from '../mcp/mcp-config.entity'
 import { ApprovalRequestEntity } from '../rbac/approval-request.entity'
@@ -39,6 +40,7 @@ import { RagManifestEntity } from '../rag/entities/rag-manifest.entity'
     MemoryModule,
     SttModule,
     VisionModule,
+    MediaModule,
     EventsModule,
   ],
   controllers: [],

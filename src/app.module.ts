@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'
 import { ChatbotModule } from './chatbot/chatbot.module'
 import { LlmModule } from './llm/llm.module'
 import { RagModule } from './rag/rag.module'
+import { MediaModule } from './media/media.module'
 import { IntegrationsModule } from './integrations/integrations.module'
 import { EventsModule } from '@2060.io/vs-agent-nestjs-client'
 import appConfig from './config/app.config'
@@ -44,7 +45,7 @@ import { RbacModule } from './rbac/rbac.module'
         },
         eventHandler: CoreService,
         url: process.env.VS_AGENT_ADMIN_URL,
-        imports: [ChatbotModule, MemoryModule],
+        imports: [ChatbotModule, MemoryModule, MediaModule],
       },
     }),
   ],
