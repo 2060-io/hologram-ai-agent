@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.15.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.14.1...v1.15.0) (2026-07-16)
+
+
+### Features
+
+* **media:** user-sent images become uploadable refs announced to the LLM ([#110](https://github.com/2060-io/hologram-ai-agent/issues/110)) ([6cdd13e](https://github.com/2060-io/hologram-ai-agent/commit/6cdd13e2ca2d4fbbe86fc7699be78457a766c0b2))
+* **rag:** idempotent seeding and pgvector vector store ([#102](https://github.com/2060-io/hologram-ai-agent/issues/102)) ([7534fb1](https://github.com/2060-io/hologram-ai-agent/commit/7534fb15065f42cc71a88378d3cd071960ca6000))
+
+
+### Bug Fixes
+
+* **core:** re-selecting authenticate restarts the flow and resends the proof request ([#106](https://github.com/2060-io/hologram-ai-agent/issues/106)) ([08e55fb](https://github.com/2060-io/hologram-ai-agent/commit/08e55fb01f6e2c7c2b6e936ed3a57ccf3b162179))
+* **llm:** normalize Responses API content blocks to text in replies and session memory ([#105](https://github.com/2060-io/hologram-ai-agent/issues/105)) ([f2aa029](https://github.com/2060-io/hologram-ai-agent/commit/f2aa029d72b4447940a1aa889c8ca3c2d44c8aec))
+* **llm:** support OpenAI reasoning models — Responses API for tools, default temperature ([#103](https://github.com/2060-io/hologram-ai-agent/issues/103)) ([996b1ee](https://github.com/2060-io/hologram-ai-agent/commit/996b1ee991cf3e05099328c467545ec7a56da74a))
+* **media:** compact generate_image tool response so refIds survive memory truncation ([#108](https://github.com/2060-io/hologram-ai-agent/issues/108)) ([4785010](https://github.com/2060-io/hologram-ai-agent/commit/47850106453c7224619df51236a682490a36f904))
+* **media:** fall back to the connection's latest image when a stale refId is uploaded ([#109](https://github.com/2060-io/hologram-ai-agent/issues/109)) ([ff67c66](https://github.com/2060-io/hologram-ai-agent/commit/ff67c661107c52169c3b76af3efde41e8823b311))
+* **media:** set explicit MinIO region so presigning works without reaching the public endpoint ([#107](https://github.com/2060-io/hologram-ai-agent/issues/107)) ([920bc50](https://github.com/2060-io/hologram-ai-agent/commit/920bc503d66ef47d3ecb794abef1bd64f4a02933))
+
 ## [1.14.1](https://github.com/2060-io/hologram-ai-agent/compare/v1.14.0...v1.14.1) (2026-07-15)
 
 
