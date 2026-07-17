@@ -525,6 +525,10 @@ export class CoreService implements EventHandler, OnModuleInit {
                 this.logger.log(
                   `[AUTH] Sent invitation to issuer service ${this.authFlowConfig.issuerServiceDid} for ${connectionId}`,
                 )
+              } else if (proofItem.errorCode === 'Request declined') {
+                // The user actively declined the proof request — no error, just
+                // let them know how to retry when ready.
+                await this.sendText(connectionId, this.getText('AUTH_DECLINED', userLang), userLang)
               } else {
                 await this.sendText(
                   connectionId,
