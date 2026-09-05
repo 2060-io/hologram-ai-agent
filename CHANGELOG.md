@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.15.0...v1.16.0) (2026-09-05)
+
+
+### Features
+
+* **auth:** issuer invitation works out of the box; friendly decline handling ([#111](https://github.com/2060-io/hologram-ai-agent/issues/111)) ([a279586](https://github.com/2060-io/hologram-ai-agent/commit/a279586cbbd72372d7be8bffad82e28fe8fdbd26))
+
 ## [1.15.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.14.1...v1.15.0) (2026-07-16)
 
 
