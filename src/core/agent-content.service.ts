@@ -135,11 +135,17 @@ export class AgentContentService {
     const credentialDefinitionId =
       authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId')
     const adminAvatars: string[] = this.configService.get('appConfig.adminAvatars') ?? []
+    // Derive the issuer service DID from a resource-based credential definition
+    // id (did:…:host/resources/… → did:…:host) when not explicitly configured,
+    // so the "get your credential here" invitation works out of the box.
+    const issuerServiceDid =
+      authConfig.issuerServiceDid ||
+      (credentialDefinitionId?.includes('/resources/') ? credentialDefinitionId.split('/resources/')[0] : undefined)
     return {
       enabled: this.toBoolean(authConfig.enabled, true),
       required: this.configService.get<boolean>('appConfig.authRequired') ?? false,
       credentialDefinitionId,
-      issuerServiceDid: authConfig.issuerServiceDid,
+      issuerServiceDid,
       userIdentityAttribute: this.configService.get<string>('appConfig.userIdentityAttribute') ?? 'name',
       rolesAttribute: this.configService.get<string>('appConfig.rolesAttribute') || undefined,
       defaultRole: this.configService.get<string>('appConfig.defaultRole') ?? 'user',

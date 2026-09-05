@@ -42,6 +42,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     APPROVAL_NOT_FOUND: 'Approval request not found.',
     AUTH_NO_CREDENTIAL:
       "You don't have the required credential yet. Here is an invitation to the service that can issue it:",
+    AUTH_DECLINED: 'You declined the credential request. Tap Authenticate in the menu whenever you are ready.',
     VOICE_AUTH_REQUIRED: 'Voice messages require authentication. Please authenticate first to use this feature.',
     IMAGE_AUTH_REQUIRED: 'Images require authentication. Please authenticate first to use this feature.',
   },
@@ -87,6 +88,7 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     APPROVAL_NOT_FOUND: 'Solicitud de aprobación no encontrada.',
     AUTH_NO_CREDENTIAL:
       'Aún no tienes la credencial requerida. Aquí tienes una invitación al servicio que puede emitirla:',
+    AUTH_DECLINED: 'Has rechazado la solicitud de credencial. Toca Autenticar en el menú cuando estés listo.',
     VOICE_AUTH_REQUIRED:
       'Los mensajes de voz requieren autenticación. Por favor, autentícate primero para usar esta función.',
     IMAGE_AUTH_REQUIRED: 'Las imágenes requieren autenticación. Por favor, autentícate primero para usar esta función.',
@@ -132,6 +134,8 @@ export const DEFAULT_TRANSLATIONS: Record<string, Record<string, string>> = {
     APPROVAL_NOT_FOUND: "Demande d'approbation introuvable.",
     AUTH_NO_CREDENTIAL:
       "Vous n'avez pas encore le justificatif requis. Voici une invitation au service qui peut vous le délivrer :",
+    AUTH_DECLINED:
+      'Vous avez refusé la demande de justificatif. Touchez Authentifier dans le menu quand vous êtes prêt.',
     VOICE_AUTH_REQUIRED:
       "Les messages vocaux nécessitent une authentification. Veuillez vous authentifier d'abord pour utiliser cette fonctionnalité.",
     IMAGE_AUTH_REQUIRED:
