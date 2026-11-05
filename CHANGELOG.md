@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.15.0...v2.0.0) (2026-11-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* port to the VS Agent v2 Admin API and events ([#113](https://github.com/2060-io/hologram-ai-agent/issues/113))
+
+### Features
+
+* **auth:** issuer invitation works out of the box; friendly decline handling ([#111](https://github.com/2060-io/hologram-ai-agent/issues/111)) ([a279586](https://github.com/2060-io/hologram-ai-agent/commit/a279586cbbd72372d7be8bffad82e28fe8fdbd26))
+* port to the VS Agent v2 Admin API and events ([#113](https://github.com/2060-io/hologram-ai-agent/issues/113)) ([fe91e49](https://github.com/2060-io/hologram-ai-agent/commit/fe91e492faf955af9d12d3916b5d6bf49553bcc5))
+
 ## [1.15.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.14.1...v1.15.0) (2026-07-16)
 
 
