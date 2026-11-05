@@ -14,46 +14,46 @@ CS -> CS : handleSession()
 CS -> CS : sendContextualMenu()
 
 == Profile Received ==
-User -> CS : ProfileMessage
+User -> CS : didcomm.user-profile.profile-received
 CS -> CS : handleSession()
 CS -> CS : update lang
 CS -> CS : sendGreetingMessage()
-CS -> API : send(TextMessage with greeting)
+CS -> API : didcomm.sendBasicMessage(greeting)
 
 == Menu Selection ==
-User -> CS : ContextualMenuSelectMessage
+User -> CS : didcomm.action-menu.perform-received
 CS -> CS : handleContextualAction()
 alt Authenticate
-    CS -> API : send(IdentityProofRequestMessage)
-    CS -> API : send(TextMessage AUTH_PROCESS_STARTED)
+    CS -> API : didcomm.createPresentationRequest(jsonSchemaCredentialId | credentialDefinitionId)
+    CS -> API : didcomm.sendBasicMessage(AUTH_PROCESS_STARTED)
     CS -> CS : state = AUTH
 else Logout
     CS -> CS : isAuthenticated = false
     CS -> CS : purgeUserData()
 end
 
-== TextMessage Input ==
-User -> CS : TextMessage
+== Basic Message / Presentation Input ==
+User -> CS : didcomm.basic-messages.message-received\nor didcomm.presentations.state-updated
 CS -> CS : handleStateInput()
 alt state == CHAT
     alt needsAuth && !isAuthenticated
-        CS -> API : send(TextMessage AUTH_REQUIRED)
+        CS -> API : didcomm.sendBasicMessage(AUTH_REQUIRED)
     else
         CS -> Chatbot : chat()
         Chatbot -> CS : answer
-        CS -> API : send(TextMessage answer)
+        CS -> API : didcomm.sendBasicMessage(answer)
     end
 else state == AUTH
-    alt CredentialReceptionMessage && state == done
+    alt presentation done && verified
         CS -> CS : isAuthenticated = true
         CS -> CS : state = CHAT
-        CS -> API : send(TextMessage AUTH_SUCCESS)
+        CS -> API : didcomm.sendBasicMessage(AUTH_SUCCESS_NAME)
     else
-        CS -> API : send(TextMessage WAITING_CREDENTIAL)
+        CS -> API : didcomm.sendBasicMessage(WAITING_CREDENTIAL)
     end
 end
 
 == Menu Update ==
-CS -> API : send(ContextualMenuUpdateMessage)
+CS -> API : didcomm.sendMenu(contextual menu)
 
 @enduml

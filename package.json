@@ -22,9 +22,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@2060.io/vs-agent-nestjs-client": "1.5.5",
+    "@verana-labs/vs-agent-model": "2.0.0-dev.105",
+    "@verana-labs/vs-agent-nestjs-client": "2.0.0-dev.105",
     "@anthropic-ai/sdk": "^0.51.0",
-    "@credo-ts/core": "^0.5.18",
     "@langchain/anthropic": "^0.3.21",
     "@langchain/community": "^0.3.43",
     "@langchain/core": "^0.3.57",
@@ -118,7 +118,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@verana-labs/vs-agent-model$": "<rootDir>/../node_modules/@verana-labs/vs-agent-model/build/utils/stats.js"
+    }
   },
   "packageManager": "pnpm@10.7.0+sha1.66453f13fbf9078d3db193718206a8d738afdbdb",
   "pnpm": {

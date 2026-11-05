@@ -220,13 +220,16 @@ memory:
 | ------------------------ | -------------- | --------------------------- | --------------------------------------------------------------------------- |
 | `enabled`                | boolean/string | —                           | Enable credential-based authentication.                                     |
 | `required`               | boolean/string | `AUTH_REQUIRED`             | Block guest (unauthenticated) users from chatting.                          |
-| `credentialDefinitionId` | string         | `CREDENTIAL_DEFINITION_ID`  | Verifiable credential definition ID for authentication.                     |
+| `jsonSchemaCredentialId` | string         | `JSON_SCHEMA_CREDENTIAL_ID` | JSON Schema Credential (VTJSC) id of the credential schema requested for authentication, e.g. the Avatar Credential. The presentation request accepts that credential from any accredited issuer of the schema. Takes precedence over `credentialDefinitionId`. An empty value or an unresolved `${VAR}` placeholder counts as unset. |
+| `credentialDefinitionId` | string         | `CREDENTIAL_DEFINITION_ID`  | Alternative to `jsonSchemaCredentialId`: AnonCreds credential definition id; restricts the request to the credentials of that one issuer. |
 | `issuerServiceDid`       | string         | `ISSUER_SERVICE_DID`        | DID of the service that issues the required credential. When set, users who lack the credential receive an invitation to this service. |
 | `userIdentityAttribute`  | string         | `USER_IDENTITY_ATTRIBUTE`   | Credential attribute used as unique user identity (e.g., `email`, `login`). Default: `name`. |
 | `rolesAttribute`         | string         | `ROLES_ATTRIBUTE`           | Credential attribute containing user roles (string, CSV, or JSON array).    |
 | `defaultRole`            | string         | `DEFAULT_ROLE`              | Fallback role when credential lacks the roles attribute. Default: `user`.   |
 | `adminUsers`             | string[]       | `ADMIN_USERS` (CSV)         | User identities that bypass all RBAC checks. Replaces legacy `adminAvatars`. |
 | `adminAvatars`           | string[]       | `ADMIN_AVATARS` (CSV)       | (Legacy) Avatar names with admin privileges. Use `adminUsers` instead.      |
+
+The `authenticate` menu entry is shown only when `jsonSchemaCredentialId` or `credentialDefinitionId` is set. The VS Agent must hold an active VERIFIER participant for the requested credential schema, otherwise it refuses the presentation request. Every attribute of the schema is requested; the user is greeted by `firstName` + `lastName`, or else by `name` (e.g. the Avatar Credential, attributes `name` and `avatar`).
 
 #### flows.menu
 
@@ -254,7 +257,8 @@ flows:
   authentication:
     enabled: true
     required: true
-    credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}
+    jsonSchemaCredentialId: ${JSON_SCHEMA_CREDENTIAL_ID}   # preferred: any accredited issuer
+    credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}   # alternative: one issuer
     issuerServiceDid: ${ISSUER_SERVICE_DID}
     userIdentityAttribute: employeeLogin
     rolesAttribute: roles

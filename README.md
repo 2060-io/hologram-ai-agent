@@ -110,8 +110,9 @@ AGENT_MEMORY_WINDOW=8
 VS_AGENT_ADMIN_PORT=3002
 VS_AGENT_PUBLIC_PORT=3003
 
-# Auth (optional — omit to hide the Authenticate menu)
-# CREDENTIAL_DEFINITION_ID=did:webvh:...
+# Auth (optional — omit both to hide the Authenticate menu)
+# JSON_SCHEMA_CREDENTIAL_ID=https://<ecosystem>/vt/schemas-<schema>-jsc.json   # preferred: any accredited issuer
+# CREDENTIAL_DEFINITION_ID=did:webvh:...                                       # alternative: one issuer
 
 # MCP — GitHub remote MCP server (optional)
 GITHUB_MCP_URL=https://api.githubcopilot.com/mcp/
@@ -153,6 +154,8 @@ This script:
 4. Optionally creates an AnonCreds credential definition for authentication
 
 Output is saved to `ids.env`.
+
+> **VS Agent v2:** the app talks to VS Agent v2 (the `/v2` Admin API, tested with `v2.0.0-dev.105`) and receives its events on `POST /events`. Point the VS Agent at it with `EVENTS_WEBHOOK_URL=http://<app-host>:<APP_PORT>/events`, and let the app reach the Admin API: in `ADMIN_API_AUTH_MODE=internal` (default) the app's source address must be inside `ADMIN_API_TRUSTED_NETWORKS`. `scripts/setup.sh` still drives the v1 Admin API (`/v1/...`, `EVENTS_BASE_URL`) and does not set up a v2 VS Agent; use the Helm chart in `charts/` for a v2 deployment.
 
 ### Step 5: Start the chatbot
 
@@ -415,14 +418,16 @@ Full design specification: [`docs/rbac-approval-spec.md`](./docs/rbac-approval-s
 | `POSTGRES_USER` | PostgreSQL user | `2060demo` |
 | `POSTGRES_PASSWORD` | PostgreSQL password | `2060demo` |
 | `POSTGRES_DB_NAME` | PostgreSQL database name | `test-service-agent` |
-| `CREDENTIAL_DEFINITION_ID` | VC definition ID (omit to hide auth menu) | |
+| `JSON_SCHEMA_CREDENTIAL_ID` | JSON Schema Credential (VTJSC) id of the credential schema requested for authentication; any accredited issuer is accepted. Preferred over `CREDENTIAL_DEFINITION_ID` | |
+| `CREDENTIAL_DEFINITION_ID` | AnonCreds credential definition id requested for authentication (one issuer). Omit both to hide the auth menu | |
 | `AUTH_REQUIRED` | Require authentication before chat (blocks guests) | `false` |
 | `USER_IDENTITY_ATTRIBUTE` | Credential attribute for user identity | `name` |
 | `ROLES_ATTRIBUTE` | Credential attribute containing user roles | |
 | `DEFAULT_ROLE` | Fallback role when credential lacks roles | `user` |
 | `ADMIN_USERS` | Comma-separated list of admin user identities | |
 | `ADMIN_AVATARS` | (Legacy) Comma-separated admin avatar names | |
-| `VS_AGENT_ADMIN_URL` | VS Agent admin API URL | |
+| `VS_AGENT_ADMIN_URL` | VS Agent Admin API base URL (VS Agent v2, `/v2` API) | |
+| `EVENTS_WEBHOOK_API_KEY` | When set, the events webhook `POST /events` requires `Authorization: Bearer <key>` (set the same value as `EVENTS_WEBHOOK_API_KEY` of the VS Agent) | |
 | `LLM_TOOLS_CONFIG` | External HTTP tools (JSON array) | `[]` |
 | `STATISTICS_API_URL` | Statistics API URL | |
 | `STATISTICS_REQUIRE_AUTH` | Require auth for statistics | `false` |

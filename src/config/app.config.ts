@@ -226,6 +226,14 @@ export default registerAs('appConfig', () => ({
   credentialDefinitionId: process.env.CREDENTIAL_DEFINITION_ID,
 
   /**
+   * JSON Schema Credential (VTJSC) id of the credential schema users authenticate
+   * with, e.g. the Avatar Credential schema. The presentation request then accepts
+   * that credential from any accredited issuer. Takes precedence over
+   * credentialDefinitionId, which restricts the request to one issuer.
+   */
+  jsonSchemaCredentialId: process.env.JSON_SCHEMA_CREDENTIAL_ID,
+
+  /**
    * When true, unauthenticated users cannot send messages to the agent.
    */
   authRequired: pickBoolean('AUTH_REQUIRED', agentPack?.flows?.authentication?.required, false),

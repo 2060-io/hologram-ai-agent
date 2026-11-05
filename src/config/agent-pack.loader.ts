@@ -84,6 +84,7 @@ const AgentPackSchema = z
           .object({
             enabled: z.union([z.boolean(), z.string()]).optional(),
             required: z.union([z.boolean(), z.string()]).optional(),
+            jsonSchemaCredentialId: z.string().optional(),
             credentialDefinitionId: z.string().optional(),
             issuerServiceDid: z.string().optional(),
             userIdentityAttribute: z.string().optional(),
@@ -491,6 +492,12 @@ export interface AuthFlowConfig {
   enabled: boolean
   /** When true, unauthenticated users cannot send messages */
   required: boolean
+  /**
+   * JSON Schema Credential (VTJSC) id of the credential schema to request: any
+   * accredited issuer of that schema is accepted. Preferred over credentialDefinitionId.
+   */
+  jsonSchemaCredentialId?: string
+  /** AnonCreds credential definition id to request: restricts the request to that one issuer */
   credentialDefinitionId?: string
   /** DID of the service that issues the required credential (used to send invitation on no-compatible-credentials) */
   issuerServiceDid?: string

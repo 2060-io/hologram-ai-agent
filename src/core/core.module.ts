@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common'
 import { SessionEntity } from './models'
 import { CoreService } from './core.service'
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm'
-import { ConnectionEntity, EventsModule } from '@2060.io/vs-agent-nestjs-client'
+import { ConnectionEntity } from '@verana-labs/vs-agent-nestjs-client'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ChatbotModule } from '../chatbot/chatbot.module'
 import { MemoryModule } from '../memory/memory.module'
@@ -41,7 +41,6 @@ import { RagManifestEntity } from '../rag/entities/rag-manifest.entity'
     SttModule,
     VisionModule,
     MediaModule,
-    EventsModule,
   ],
   controllers: [],
   providers: [CoreService, AgentContentService],
