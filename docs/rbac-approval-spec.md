@@ -21,7 +21,8 @@ The agent supports a flexible, credential-driven role system where:
 flows:
   authentication:
     required: true                        # true = guests cannot send messages
-    credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}
+    jsonSchemaCredentialId: ${JSON_SCHEMA_CREDENTIAL_ID}  # credential schema (VTJSC), any accredited issuer
+    credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}   # alternative: one issuer's credential definition
     userIdentityAttribute: email          # credential attribute that uniquely identifies the user
     rolesAttribute: roles                 # credential attribute containing the user's role(s)
     defaultRole: user                     # role assigned when rolesAttribute is absent or empty
@@ -33,7 +34,8 @@ flows:
 | Field                    | Type     | Required | Description |
 | ------------------------ | -------- | -------- | ----------- |
 | `required`               | boolean  | no       | When `true`, unauthenticated users cannot send messages. They receive the welcome message and authentication instructions only. Default: `false`. |
-| `credentialDefinitionId` | string   | yes      | Verifiable credential definition ID used for proof requests. |
+| `jsonSchemaCredentialId` | string   | one of   | JSON Schema Credential (VTJSC) id of the credential schema used for proof requests. Accepts the credential from any accredited issuer. Takes precedence over `credentialDefinitionId`. |
+| `credentialDefinitionId` | string   | one of   | AnonCreds credential definition ID used for proof requests when `jsonSchemaCredentialId` is not set. Restricts the request to that one issuer. |
 | `userIdentityAttribute`  | string   | yes      | Credential attribute that uniquely identifies the user (e.g., `name`, `email`, `employeeLogin`). |
 | `rolesAttribute`         | string   | no       | Credential attribute containing the user's roles. Accepts a single string, comma-separated list, or JSON array. |
 | `defaultRole`            | string   | no       | Role assigned to authenticated users whose credential lacks the `rolesAttribute` or has it empty. Default: `user`. |
@@ -41,7 +43,7 @@ flows:
 
 ### Role resolution logic
 
-1. User authenticates by presenting a verifiable credential matching `credentialDefinitionId`.
+1. User authenticates by presenting a verifiable credential of the `jsonSchemaCredentialId` schema (or matching `credentialDefinitionId`).
 2. Extract the unique identity from `userIdentityAttribute`.
 3. If `rolesAttribute` is defined and present in the credential, parse it into a set of roles.
 4. If `rolesAttribute` is absent or empty, assign `defaultRole`.

@@ -147,8 +147,10 @@ Below is a summary of the environment variables required by each component. All 
 | Env    | VS_AGENT_STATS_PASSWORD  | Broker password                    |
 | Env    | REDIS_URL                | Redis connection URL               |
 | Env    | AGENT_PROMPT             | Custom LLM agent prompt            |
-| Env    | VS_AGENT_ADMIN_URL       | VS Agent admin URL                 |
-| Env    | CREDENTIAL_DEFINITION_ID | VC credential definition           |
+| Env    | VS_AGENT_ADMIN_URL       | VS Agent v2 Admin API URL (e.g. `http://vs-agent:3000`) |
+| Env    | JSON_SCHEMA_CREDENTIAL_ID | VTJSC of the credential schema requested for authentication (any accredited issuer); preferred |
+| Env    | CREDENTIAL_DEFINITION_ID | Alternative: AnonCreds credential definition (one issuer) |
+| Env    | EVENTS_WEBHOOK_API_KEY   | Optional bearer key required on `POST /events` (same value as the VS Agent's) |
 | Env    | POSTGRES_HOST            | Postgres host URL                  |
 | Env    | LLM_TOOLS_CONFIG         | LLM tools config (JSON)            |
 | Env    | STATISTICS_API_URL       | External statistics API endpoint   |
@@ -167,21 +169,22 @@ Below is a summary of the environment variables required by each component. All 
 
 ### 📦 Vs-Agent (via `vs-agent-chart`)
 
-This subchart is fully configured via the `vs-agent-chart` section in `values.yaml`. All `env` variables are defined directly in the template.
+The VS Agent is the `vs-agent-chart` dependency (VS Agent v2, chart and image `v2.0.0-dev.105`), configured in the `vs-agent-chart` section of `values.yaml`. Its chart turns these values into the agent environment; see the vs-agent chart README for the full list.
 
-| Key                                    | Description               |
-| -------------------------------------- | ------------------------- |
-| AGENT_ENDPOINT                         | WebSocket endpoint        |
-| AGENT_LABEL                            | Agent display label       |
-| AGENT_INVITATION_IMAGE_URL             | Image URL for invitations |
-| EVENTS_BASE_URL                        | Event receiver base URL   |
-| AGENT_PUBLIC_DID                       | Public DID                |
-| ANONCREDS_SERVICE_BASE_URL             | Anoncreds service URL     |
-| REDIRECT_DEFAULT_URL_TO_INVITATION_URL | Redirect control          |
-| POSTGRES_HOST                          | Postgres service hostname |
-| POSTGRES_USER                          | Postgres DB user          |
-| POSTGRES_PASSWORD                      | Postgres DB password      |
-| REDIS_HOST                             | Redis service hostname    |
+| Value                     | Agent env                    | Description |
+| ------------------------- | ---------------------------- | ----------- |
+| `name`                    | —                            | Service name; the chatbot reaches the Admin API at `http://<name>:3000` |
+| `image.tag`               | —                            | Pinned VS Agent image tag (`v2.0.0-dev.105`) |
+| `eventsWebhookUrl`        | `EVENTS_WEBHOOK_URL`         | Events webhook: `http://<nameOverride>-chatbot:<chatbot.service.port>/events` |
+| `adminApiAuthMode`        | `ADMIN_API_AUTH_MODE`        | `internal`: the Admin API serves trusted networks only |
+| `adminApiTrustedNetworks` | `ADMIN_API_TRUSTED_NETWORKS` | Must include the pod CIDR, since the chatbot calls the Admin API from another pod. Never publish an ingress to the admin port |
+| `veranaCorporationId`, `veranaRpcEndpointUrl`, `veranaIndexerBaseUrl`, `veranaChainId` | `VERANA_*` | Verana network; the agent refuses to start without them |
+| `agentMode`, `trustedEcsEcosystemDids` | `AGENT_MODE`, `TRUSTED_ECS_ECOSYSTEM_DIDS` | How the agent obtains its ECS credentials |
+| `ingress.host`            | `PUBLIC_API_BASE_URL`        | Public DIDComm host (also the agent's `did:webvh` host) |
+| `database.enabled`        | —                            | `false` (default): the wallet lives in SQLite on the agent volume. There is no wallet key in v2 |
+| `extraEnv`                | —                            | `VERANA_ACCOUNT_MNEMONIC` (from a Secret) and the `ECS_CLAIMS_*` service claims |
+
+For authentication the agent must hold an active VERIFIER participant for the credential schema requested by the chatbot (`JSON_SCHEMA_CREDENTIAL_ID`).
 
 ---
 

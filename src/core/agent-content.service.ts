@@ -132,6 +132,12 @@ export class AgentContentService {
 
   getAuthFlowConfig(): AuthFlowConfig {
     const authConfig = this.agentPack?.flows?.authentication ?? {}
+    // jsonSchemaCredentialId wins over credentialDefinitionId, so an empty value or a
+    // ${VAR} placeholder left unresolved (env unset) must count as unset.
+    const packJsonSchemaCredentialId = this.configuredValue(authConfig.jsonSchemaCredentialId)
+    const jsonSchemaCredentialId =
+      packJsonSchemaCredentialId ??
+      this.configuredValue(this.configService.get<string>('appConfig.jsonSchemaCredentialId'))
     const credentialDefinitionId =
       authConfig.credentialDefinitionId ?? this.configService.get('appConfig.credentialDefinitionId')
     const adminAvatars: string[] = this.configService.get('appConfig.adminAvatars') ?? []
@@ -144,6 +150,7 @@ export class AgentContentService {
     return {
       enabled: this.toBoolean(authConfig.enabled, true),
       required: this.configService.get<boolean>('appConfig.authRequired') ?? false,
+      jsonSchemaCredentialId,
       credentialDefinitionId,
       issuerServiceDid,
       userIdentityAttribute: this.configService.get<string>('appConfig.userIdentityAttribute') ?? 'name',
@@ -161,6 +168,14 @@ export class AgentContentService {
 
   getUserControlledServer(name: string): McpServerDef | undefined {
     return this.getUserControlledServers().find((s) => s.name === name)
+  }
+
+  /** A trimmed config value, or undefined when empty or an unresolved ${VAR} placeholder. */
+  private configuredValue(value: unknown): string | undefined {
+    if (typeof value !== 'string') return undefined
+    const trimmed = value.trim()
+    if (!trimmed || /^\$\{[\w]+\}$/.test(trimmed)) return undefined
+    return trimmed
   }
 
   private toBoolean(value: unknown, fallback: boolean) {

@@ -22,28 +22,26 @@ When enabled, the stats module connects to a JMS broker (such as Artemis) and su
 ## Enabling JMS Stats Integration in `main.module.ts`
 
 ```typescript
-import { ConfigService } from '@nestjs/config'
+import { EventsModule } from '@verana-labs/vs-agent-nestjs-client'
 
 EventsModule.register({
+  url: process.env.VS_AGENT_ADMIN_URL || 'http://localhost:3001',
+  webhookApiKey: process.env.EVENTS_WEBHOOK_API_KEY || undefined,
+  // a thin handler that delegates to the CoreService exported by the global CoreModule
+  eventHandler: VsAgentEventHandler,
   modules: {
-    messages: true,
     connections: true,
     stats: process.env.VS_AGENT_STATS_ENABLED === 'true',
   },
-  options: {
-    statOptions: {
-      host: process.env.VS_AGENT_STATS_HOST,
-      port: Number(process.env.VS_AGENT_STATS_PORT),
-      queue: process.env.VS_AGENT_STATS_QUEUE,
-      username: process.env.VS_AGENT_STATS_USER,
-      password: process.env.VS_AGENT_STATS_PASSWORD,
-      reconnectLimit: 10,
-      threads: 2,
-      delay: 1000,
-    },
-    eventHandler: CoreService,
-    url: process.env.VS_AGENT_ADMIN_URL,
-    imports: [ChatbotModule],
+  statOptions: {
+    host: process.env.VS_AGENT_STATS_HOST,
+    port: Number(process.env.VS_AGENT_STATS_PORT),
+    queue: process.env.VS_AGENT_STATS_QUEUE,
+    username: process.env.VS_AGENT_STATS_USER,
+    password: process.env.VS_AGENT_STATS_PASSWORD,
+    reconnectLimit: 10,
+    threads: 2,
+    delay: 1000,
   },
 })
 ```
@@ -56,7 +54,7 @@ Use the `sendStats()` method (already included in your CoreService) to produce e
 
 ```typescript
 import { STAT_KPI } from './common'
-import { StatEnum } from '@2060.io/service-agent-model'
+import { StatEnum } from '@verana-labs/vs-agent-model'
 
 async sendStats(kpi: STAT_KPI, session: SessionEntity) {
   this.logger.debug(`***send stats***`)

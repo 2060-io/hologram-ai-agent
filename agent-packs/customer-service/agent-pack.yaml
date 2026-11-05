@@ -213,6 +213,9 @@ flows:
     templateKey: greetingMessage
   authentication:
     enabled: true
+    # Credential schema (VTJSC) requested for authentication, any accredited issuer;
+    # preferred over credentialDefinitionId (one issuer) when set.
+    jsonSchemaCredentialId: ${JSON_SCHEMA_CREDENTIAL_ID}
     credentialDefinitionId: ${CREDENTIAL_DEFINITION_ID}
   menu:
     items:

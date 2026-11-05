@@ -1,27 +1,19 @@
 import {
+  ActionMenuOption,
   ApiClient,
-  ApiVersion,
+  Claim,
+  EventEnvelope,
   EventHandler,
+  isEventEnvelope,
+  PresentationStateUpdatedData,
+  RequestedCredentialInput,
+  ShareMediaReceivedData,
   StatProducerService,
-  BaseMessage,
-  ContextualMenuItem,
-  ContextualMenuSelectMessage,
-  ContextualMenuUpdateMessage,
-  IdentityProofRequestMessage,
-  IdentityProofSubmitMessage,
-  MediaMessage,
-  MenuDisplayMessage,
-  MenuSelectMessage,
-  ProfileMessage,
-  StatEnum,
-  TextMessage,
-  InvitationMessage,
-  VerifiableCredentialRequestedProofItem,
-  VerifiableCredentialSubmittedProofItem,
-} from '@2060.io/vs-agent-nestjs-client'
+  UnknownEventEnvelope,
+} from '@verana-labs/vs-agent-nestjs-client'
+import { StatEnum } from '@verana-labs/vs-agent-model'
 import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common'
 import { SessionEntity } from './models'
-import { JsonTransformer } from '@credo-ts/core'
 import { STAT_KPI } from './common'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -40,6 +32,28 @@ import type { AuthFlowConfig } from '../config/agent-pack.loader'
 import { SttService } from '../stt/stt.service'
 import { VisionService } from '../vision/vision.service'
 import { ImageRefStore } from '../media/image-ref.store'
+
+/** A user utterance routed into the state machine (text, voice note transcript, image description). */
+interface TextInput {
+  content: string
+  /** Message replied to. VS Agent v2 basic-message events carry no reply reference, so it is unset for now. */
+  threadId?: string
+}
+
+/** The outcome of an authentication presentation request, routed into the AUTH state. */
+interface PresentationResult {
+  kind: 'presentation'
+  state: PresentationStateUpdatedData['state']
+  verified: boolean
+  claims: Claim[]
+  errorMessage?: string
+}
+
+/** Presentation states that end an exchange: only these reach the state machine. */
+const TERMINAL_PRESENTATION_STATES: PresentationStateUpdatedData['state'][] = ['done', 'abandoned', 'declined']
+
+const isPresentationResult = (content: unknown): content is PresentationResult =>
+  typeof content === 'object' && content !== null && (content as PresentationResult).kind === 'presentation'
 
 @Injectable()
 export class CoreService implements EventHandler, OnModuleInit {
@@ -63,7 +77,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     private readonly imageRefStore: ImageRefStore,
   ) {
     const baseUrl = configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
-    this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
+    this.apiClient = new ApiClient(baseUrl)
     this.menuItems = this.agentContent.getMenuItems()
     this.menuActions = this.menuItems.reduce<Record<string, string | undefined>>((acc, item) => {
       if (item.action) acc[item.id] = item.action
@@ -71,9 +85,8 @@ export class CoreService implements EventHandler, OnModuleInit {
     }, {})
     this.welcomeFlowConfig = this.agentContent.getWelcomeFlowConfig()
     this.authFlowConfig = this.agentContent.getAuthFlowConfig()
-    this.credentialDefinitionId = this.authFlowConfig.credentialDefinitionId
     this.logger.log(
-      `[INIT] authFlowConfig: enabled=${this.authFlowConfig.enabled}, credDefId=${this.credentialDefinitionId?.substring(0, 40)}..., adminAvatars=${JSON.stringify(this.authFlowConfig.adminAvatars)}`,
+      `[INIT] authFlowConfig: enabled=${this.authFlowConfig.enabled}, jsonSchemaCredentialId=${this.authFlowConfig.jsonSchemaCredentialId ?? '-'}, credDefId=${this.authFlowConfig.credentialDefinitionId?.substring(0, 40) ?? '-'}, adminAvatars=${JSON.stringify(this.authFlowConfig.adminAvatars)}`,
     )
     this.logger.log(`[INIT] menuItems: ${JSON.stringify(this.menuItems.map((i) => i.id))}`)
   }
@@ -89,7 +102,15 @@ export class CoreService implements EventHandler, OnModuleInit {
   private readonly menuActions: Record<string, string | undefined>
   private readonly welcomeFlowConfig: { enabled: boolean; sendOnProfile: boolean; templateKey: string }
   private readonly authFlowConfig: AuthFlowConfig
-  private readonly credentialDefinitionId?: string
+
+  /**
+   * Question threads sent with sendQuestion (threadId → response text → selection id).
+   * The question-answer protocol answers with the text of the selected response,
+   * so the selection id of the menu entry is recovered here. Bounded: the oldest
+   * thread is dropped first.
+   */
+  private readonly questionSelections = new Map<string, Map<string, string>>()
+  private static readonly MAX_QUESTION_THREADS = 1000
 
   private isAdmin(session: SessionEntity): boolean {
     // New RBAC: check adminUsers by identity
@@ -106,41 +127,58 @@ export class CoreService implements EventHandler, OnModuleInit {
   async onModuleInit() {}
 
   /**
-   * Handles incoming messages and manages the input flow.
-   * Routes the message to the appropriate handler based on its type.
+   * Handles the events that the VS Agent delivers to the events webhook and
+   * manages the input flow. Routes each event to the appropriate handler based
+   * on its type; events this agent does not act on are ignored.
    *
-   * @param message - The incoming message to process.
+   * @param envelope - The event envelope received from the VS Agent.
    */
-  async inputMessage(message: BaseMessage): Promise<void> {
-    let content
-    const session: SessionEntity = await this.handleSession(message.connectionId)
+  async onEvent(envelope: EventEnvelope | UnknownEventEnvelope): Promise<void> {
+    if (!isEventEnvelope(envelope)) return
+    const event = envelope
+
+    switch (event.type) {
+      case 'didcomm.basic-messages.message-received':
+      case 'didcomm.action-menu.menu-request-received':
+      case 'didcomm.action-menu.perform-received':
+      case 'didcomm.question-answer.answer-received':
+      case 'didcomm.media-sharing.share-media-received':
+      case 'didcomm.user-profile.profile-received':
+        break
+      case 'didcomm.presentations.state-updated':
+        // Only the outcome of a presentation request sent by this agent on a
+        // connection reaches the state machine; intermediate states are ignored.
+        if (event.data.role !== 'verifier' || !event.data.connectionId) return
+        if (!TERMINAL_PRESENTATION_STATES.includes(event.data.state)) return
+        break
+      default:
+        return
+    }
+
+    const connectionId = event.data.connectionId as string
+    let content: TextInput | PresentationResult | null = null
+    const session: SessionEntity = await this.handleSession(connectionId)
 
     try {
-      this.logger.debug('inputMessage: ' + JSON.stringify(message))
+      this.logger.debug('onEvent: ' + JSON.stringify(event))
 
-      switch (message.type) {
-        case TextMessage.type:
-          content = JsonTransformer.fromJSON(message, TextMessage)
-          //entry message user to chatbot agent service ,send session connection
+      switch (event.type) {
+        case 'didcomm.basic-messages.message-received':
+          content = { content: event.data.content }
           break
-        case ContextualMenuSelectMessage.type: {
-          const inMsg = JsonTransformer.fromJSON(
-            message,
-            ContextualMenuSelectMessage,
-          ) as unknown as ContextualMenuSelectMessage
-          const selectionId = inMsg.selectionId as string | undefined
+        case 'didcomm.action-menu.perform-received': {
+          const selectionId = event.data.name
           const action = selectionId ? this.menuActions[selectionId] : undefined
           if (selectionId && action) {
-            this.logger.debug(`ContextualMenuSelectMessage with selectionId: ${selectionId} and action: ${action}`)
+            this.logger.debug(`Contextual menu selection with selectionId: ${selectionId} and action: ${action}`)
             await this.handleContextualAction(action, session)
           } else {
             this.logger.warn(`Invalid or missing selectionId: ${selectionId}`)
           }
           break
         }
-        case MenuSelectMessage.type: {
-          const rawItems = (message as any).menuItems as Array<{ id: string }> | undefined
-          const selectedId = rawItems?.[0]?.id
+        case 'didcomm.question-answer.answer-received': {
+          const selectedId = this.resolveQuestionSelection(event.data.threadId, event.data.response)
           if (selectedId && this.isApprovalSelection(selectedId)) {
             await this.handleApprovalSelection(selectedId, session)
           } else if (session.state === StateStep.MCP_CONFIG && !session.mcpConfigServer && selectedId) {
@@ -148,119 +186,137 @@ export class CoreService implements EventHandler, OnModuleInit {
           }
           break
         }
-        case MediaMessage.type: {
-          const mediaMsg = JsonTransformer.fromJSON(message, MediaMessage)
-          const audioItem = mediaMsg.items?.find((item) => this.sttService.isAudioMimeType(item.mimeType))
-          if (audioItem && this.sttService.isEnabled) {
-            if (!this.sttService.isAllowed(session.isAuthenticated ?? false)) {
-              this.logger.log(`[STT] Blocked voice note from unauthenticated user ${session.connectionId}`)
-              await this.sendText(session.connectionId, this.getText('VOICE_AUTH_REQUIRED', session.lang), session.lang)
-            } else {
-              try {
-                const result = await this.sttService.transcribeFromUrl(
-                  audioItem.uri,
-                  audioItem.mimeType,
-                  audioItem.ciphering,
-                )
-                if (result.text.trim().length > 0) {
-                  content = new TextMessage({
-                    connectionId: message.connectionId,
-                    content: `[Voice note] ${result.text.trim()}`,
-                    ...(message.threadId ? { threadId: message.threadId } : {}),
-                  })
-                }
-              } catch (err) {
-                this.logger.error(`[STT] Transcription failed: ${err}`)
-                await this.sendText(session.connectionId, this.getText('ERROR_MESSAGES', session.lang), session.lang)
-              }
-            }
-          } else {
-            // Non-audio media: try vision (image-to-text) first, then fall
-            // back to a descriptive stub so the LLM always has context.
-            const items = mediaMsg.items ?? []
-            const imageItem = items.find((it) => this.visionService.isImageMimeType(it.mimeType))
-
-            if (imageItem) {
-              if (this.visionService.isEnabled && !this.visionService.isAllowed(session.isAuthenticated ?? false)) {
-                this.logger.log(`[Vision] Blocked image from unauthenticated user ${session.connectionId}`)
-                await this.sendText(
-                  session.connectionId,
-                  this.getText('IMAGE_AUTH_REQUIRED', session.lang),
-                  session.lang,
-                )
-              } else {
-                try {
-                  // Store the user-sent image as an uploadable ref even when no
-                  // vision provider is configured — the description is optional,
-                  // attachability (upload_media_to_mcp by refId) is not.
-                  const buffer = await this.visionService.fetchImage(imageItem.uri, imageItem.ciphering)
-                  const refId = this.imageRefStore.add(
-                    buffer,
-                    imageItem.mimeType,
-                    imageItem.uri ?? '',
-                    message.connectionId,
-                  )
-                  this.logger.log(`[Image] Stored user image as ref "${refId}" (${imageItem.mimeType})`)
-
-                  let description = ''
-                  if (this.visionService.isEnabled) {
-                    try {
-                      description = (await this.visionService.describeBuffer(buffer, imageItem.mimeType)).text.trim()
-                    } catch (err) {
-                      this.logger.error(`[Vision] Description failed: ${err}`)
-                    }
-                  }
-                  content = new TextMessage({
-                    connectionId: message.connectionId,
-                    content: `[Image received — refId: ${refId}]${description ? ` ${description}` : ''}`,
-                    ...(message.threadId ? { threadId: message.threadId } : {}),
-                  })
-                } catch (err) {
-                  this.logger.error(`[Image] Failed to process user image: ${err}`)
-                }
-              }
-            }
-
-            // Fallback stub when vision didn't produce content (not an image,
-            // not enabled, blocked, or errored).
-            if (!content) {
-              const desc = items.map((it) => it.mimeType).join(', ')
-              content = new TextMessage({
-                connectionId: message.connectionId,
-                content: `[Media received: ${desc || 'unknown'}]`,
-                ...(message.threadId ? { threadId: message.threadId } : {}),
-              })
-            }
-          }
+        case 'didcomm.media-sharing.share-media-received':
+          content = await this.handleMediaInput(event.data, session)
           break
-        }
-        case ProfileMessage.type: {
-          const inMsg = JsonTransformer.fromJSON(message, ProfileMessage) as unknown as ProfileMessage
-          if (inMsg.preferredLanguage) {
-            session.lang = inMsg.preferredLanguage
+        case 'didcomm.user-profile.profile-received': {
+          if (event.data.profile.preferredLanguage) {
+            session.lang = event.data.profile.preferredLanguage
           }
           if (this.welcomeFlowConfig.enabled && this.welcomeFlowConfig.sendOnProfile) {
             await this.sendGreetingMessage(session.connectionId)
           }
           break
         }
-        case IdentityProofSubmitMessage.type:
-          content = JsonTransformer.fromJSON(message, IdentityProofSubmitMessage)
+        case 'didcomm.presentations.state-updated':
+          content = {
+            kind: 'presentation',
+            state: event.data.state,
+            verified: event.data.verified,
+            claims: event.data.claims ?? [],
+            errorMessage: event.data.errorMessage,
+          }
           break
         default:
+          // didcomm.action-menu.menu-request-received: no content, the menu is resent below
           break
       }
-
-      if (content != null) {
-        if (typeof content === 'string') content = content.trim()
-        if (typeof content === 'string' && content.length === 0) {
-          content = null
-        }
-      }
     } catch (error) {
-      this.logger.error(`inputMessage: ${error}`)
+      this.logger.error(`onEvent: ${error}`)
     }
     await this.handleStateInput(content, session)
+  }
+
+  /**
+   * Turns received media into the text the LLM gets: a voice note transcript,
+   * an image description (with its uploadable refId), or a descriptive stub.
+   */
+  private async handleMediaInput(data: ShareMediaReceivedData, session: SessionEntity): Promise<TextInput | null> {
+    const items = (data.items ?? []).filter((item) => !!item.uri)
+    const audioItem = items.find((item) => this.sttService.isAudioMimeType(item.mimeType))
+    if (audioItem && this.sttService.isEnabled) {
+      if (!this.sttService.isAllowed(session.isAuthenticated ?? false)) {
+        this.logger.log(`[STT] Blocked voice note from unauthenticated user ${session.connectionId}`)
+        await this.sendText(session.connectionId, this.getText('VOICE_AUTH_REQUIRED', session.lang), session.lang)
+        return null
+      }
+      try {
+        const result = await this.sttService.transcribeFromUrl(audioItem.uri, audioItem.mimeType, audioItem.ciphering)
+        if (result.text.trim().length > 0) {
+          return { content: `[Voice note] ${result.text.trim()}` }
+        }
+      } catch (err) {
+        this.logger.error(`[STT] Transcription failed: ${err}`)
+        await this.sendText(session.connectionId, this.getText('ERROR_MESSAGES', session.lang), session.lang)
+      }
+      return null
+    }
+
+    // Non-audio media: try vision (image-to-text) first, then fall
+    // back to a descriptive stub so the LLM always has context.
+    let content: TextInput | null = null
+    const imageItem = items.find((it) => this.visionService.isImageMimeType(it.mimeType))
+
+    if (imageItem) {
+      if (this.visionService.isEnabled && !this.visionService.isAllowed(session.isAuthenticated ?? false)) {
+        this.logger.log(`[Vision] Blocked image from unauthenticated user ${session.connectionId}`)
+        await this.sendText(session.connectionId, this.getText('IMAGE_AUTH_REQUIRED', session.lang), session.lang)
+      } else {
+        try {
+          // Store the user-sent image as an uploadable ref even when no
+          // vision provider is configured — the description is optional,
+          // attachability (upload_media_to_mcp by refId) is not.
+          const buffer = await this.visionService.fetchImage(imageItem.uri, imageItem.ciphering)
+          const refId = this.imageRefStore.add(buffer, imageItem.mimeType, imageItem.uri ?? '', session.connectionId)
+          this.logger.log(`[Image] Stored user image as ref "${refId}" (${imageItem.mimeType})`)
+
+          let description = ''
+          if (this.visionService.isEnabled) {
+            try {
+              description = (await this.visionService.describeBuffer(buffer, imageItem.mimeType)).text.trim()
+            } catch (err) {
+              this.logger.error(`[Vision] Description failed: ${err}`)
+            }
+          }
+          content = { content: `[Image received — refId: ${refId}]${description ? ` ${description}` : ''}` }
+        } catch (err) {
+          this.logger.error(`[Image] Failed to process user image: ${err}`)
+        }
+      }
+    }
+
+    // Fallback stub when vision didn't produce content (not an image,
+    // not enabled, blocked, or errored).
+    if (!content) {
+      const desc = (data.items ?? []).map((it) => it.mimeType).join(', ')
+      content = { content: `[Media received: ${desc || 'unknown'}]` }
+    }
+    return content
+  }
+
+  /**
+   * Recovers the selection id of a question answer from the response text,
+   * using the mapping recorded when the question was sent. Falls back to the
+   * response text itself when the thread is unknown (e.g. after a restart).
+   */
+  private resolveQuestionSelection(threadId: string | undefined, response: string): string | undefined {
+    const mapping = threadId ? this.questionSelections.get(threadId) : undefined
+    if (!mapping) {
+      this.logger.warn(`[QUESTION] No selection mapping for thread ${threadId}; using the response text as id`)
+      return response || undefined
+    }
+    return mapping.get(response) ?? (response || undefined)
+  }
+
+  /**
+   * Sends a question whose valid responses are the given menu entries, and
+   * records the text → id mapping to resolve the answer.
+   */
+  private async sendQuestionMenu(
+    connectionId: string,
+    question: string,
+    menuItems: { id: string; text: string }[],
+  ): Promise<void> {
+    const { id } = await this.apiClient.didcomm.sendQuestion({
+      connectionId,
+      question,
+      validResponses: menuItems.map((item) => ({ text: item.text })),
+    })
+    this.questionSelections.set(id, new Map(menuItems.map((item) => [item.text, item.id])))
+    if (this.questionSelections.size > CoreService.MAX_QUESTION_THREADS) {
+      const [oldest] = this.questionSelections.keys()
+      this.questionSelections.delete(oldest)
+    }
   }
 
   /**
@@ -317,12 +373,10 @@ export class CoreService implements EventHandler, OnModuleInit {
    * @param lang - The language of the message.
    */
   private async sendText(connectionId: string, text: string, lang: string) {
-    await this.apiClient.messages.send(
-      new TextMessage({
-        connectionId: connectionId,
-        content: this.getText(text, lang),
-      }),
-    )
+    await this.apiClient.didcomm.sendBasicMessage({
+      connectionId: connectionId,
+      content: this.getText(text, lang),
+    })
   }
 
   /**
@@ -336,7 +390,7 @@ export class CoreService implements EventHandler, OnModuleInit {
   }
 
   /**
-   * Processes actions related to `ContextualMenuSelectMessage` messages.
+   * Processes contextual menu selections (action-menu `perform` events).
    * Updates the session based on the selected option.
    *
    * @param action - The resolved action name (e.g. 'authenticate', 'logout', 'mcp-config').
@@ -399,28 +453,41 @@ export class CoreService implements EventHandler, OnModuleInit {
    */
   private async startAuthenticationFlow(session: SessionEntity): Promise<void> {
     const { connectionId, lang } = session
-    const credentialDefinitionId = this.credentialDefinitionId
-    this.logger.debug(`credentialDefinition: ${credentialDefinitionId}`)
-    if (!credentialDefinitionId) {
-      throw new Error('Missing config: credentialDefinitionId')
+    const requestedCredential = this.getRequestedCredential()
+    this.logger.debug(`requestedCredential: ${JSON.stringify(requestedCredential)}`)
+    if (!requestedCredential) {
+      throw new Error('Missing config: jsonSchemaCredentialId or credentialDefinitionId')
     }
 
-    const body = new IdentityProofRequestMessage({
+    // autoAccept: the VS Agent acknowledges the presentation itself once the
+    // proof and the trust decision both succeed; the outcome arrives as a
+    // didcomm.presentations.state-updated event (done / abandoned / declined).
+    const { proofExchangeId } = await this.apiClient.didcomm.createPresentationRequest({
       connectionId,
-      requestedProofItems: [],
+      requestedCredentials: [requestedCredential],
+      autoAccept: true,
     })
-    const requestedProofItem = new VerifiableCredentialRequestedProofItem({
-      id: '1',
-      type: 'verifiable-credential',
-      credentialDefinitionId,
-    })
-    body.requestedProofItems.push(requestedProofItem)
 
-    await this.apiClient.messages.send(body)
-
-    this.logger.debug(`[AUTH] Proof request sent to ${connectionId} (previous state: ${session.state})`)
+    this.logger.debug(
+      `[AUTH] Proof request ${proofExchangeId} sent to ${connectionId} (previous state: ${session.state})`,
+    )
     session.state = StateStep.AUTH
     await this.sendText(connectionId, this.getText('AUTH_PROCESS_STARTED', lang), lang)
+  }
+
+  /**
+   * The credential the authentication presentation request asks for. A
+   * `jsonSchemaCredentialId` (the VTJSC of a credential schema) accepts that
+   * credential from any accredited issuer and wins over a
+   * `credentialDefinitionId`, which restricts it to one issuer. Every attribute
+   * of the schema is requested.
+   */
+  private getRequestedCredential(): RequestedCredentialInput | undefined {
+    const jsonSchemaCredentialId = this.authFlowConfig.jsonSchemaCredentialId?.trim()
+    if (jsonSchemaCredentialId) return { jsonSchemaCredentialId }
+    const credentialDefinitionId = this.authFlowConfig.credentialDefinitionId?.trim()
+    if (credentialDefinitionId) return { credentialDefinitionId }
+    return undefined
   }
 
   /**
@@ -465,23 +532,12 @@ export class CoreService implements EventHandler, OnModuleInit {
 
           break
         case StateStep.AUTH:
-          if (
-            typeof content === 'object' &&
-            content !== null &&
-            'type' in content &&
-            (content as IdentityProofSubmitMessage).type === IdentityProofSubmitMessage.type &&
-            'submittedProofItems' in content
-          ) {
-            const submitMessage = content as IdentityProofSubmitMessage
-            const proofItem = submitMessage.submittedProofItems?.[0] as
-              | VerifiableCredentialSubmittedProofItem
-              | undefined
-
-            if (proofItem?.type === VerifiableCredentialSubmittedProofItem.type && !proofItem.errorCode) {
+          if (isPresentationResult(content)) {
+            if (content.state === 'done' && content.verified) {
               session.isAuthenticated = true
 
-              const claims = proofItem.claims as { name: string; value: string }[] | undefined
-              if (claims) {
+              const claims = content.claims
+              if (claims.length > 0) {
                 const firstName = claims.find((c) => c.name === 'firstName')?.value
                 const lastName = claims.find((c) => c.name === 'lastName')?.value
                 const fullName = [firstName, lastName].filter(Boolean).join(' ').trim()
@@ -511,36 +567,32 @@ export class CoreService implements EventHandler, OnModuleInit {
                 : this.getText('AUTH_SUCCESS', userLang)
 
               await this.sendText(connectionId, message, userLang)
-            } else if (proofItem?.errorCode) {
-              this.logger.warn(`[AUTH] Proof submission failed with error: ${proofItem.errorCode}`)
+            } else {
+              // abandoned (problem report from the holder, or a failed proof /
+              // trust decision), declined, or done without verification. A
+              // problem report gives an errorMessage of the form "<code>: <description>".
+              const errorMessage = content.errorMessage || (content.verified ? content.state : 'not verified')
+              this.logger.warn(`[AUTH] Presentation ended in "${content.state}": ${errorMessage}`)
 
-              if (proofItem.errorCode === 'e.req.no-compatible-credentials' && this.authFlowConfig.issuerServiceDid) {
+              if (errorMessage.includes('no-compatible-credentials') && this.authFlowConfig.issuerServiceDid) {
                 await this.sendText(connectionId, this.getText('AUTH_NO_CREDENTIAL', userLang), userLang)
-                await this.apiClient.messages.send(
-                  new InvitationMessage({
-                    connectionId,
-                    did: this.authFlowConfig.issuerServiceDid,
-                  }),
-                )
+                await this.apiClient.didcomm.createInvitation({
+                  connectionId,
+                  did: this.authFlowConfig.issuerServiceDid,
+                })
                 this.logger.log(
                   `[AUTH] Sent invitation to issuer service ${this.authFlowConfig.issuerServiceDid} for ${connectionId}`,
                 )
-              } else if (proofItem.errorCode === 'Request declined') {
+              } else if (content.state === 'declined' || /request declined/i.test(errorMessage)) {
                 // The user actively declined the proof request — no error, just
                 // let them know how to retry when ready.
                 await this.sendText(connectionId, this.getText('AUTH_DECLINED', userLang), userLang)
               } else {
-                await this.sendText(
-                  connectionId,
-                  `${this.getText('AUTH_ERROR', userLang)}: ${proofItem.errorCode}`,
-                  userLang,
-                )
+                await this.sendText(connectionId, `${this.getText('AUTH_ERROR', userLang)}: ${errorMessage}`, userLang)
               }
 
               session.state = StateStep.CHAT
               await this.sessionRepository.save(session)
-            } else {
-              await this.sendText(connectionId, this.getText('WAITING_CREDENTIAL', userLang), userLang)
             }
           } else {
             await this.sendText(connectionId, this.getText('WAITING_CREDENTIAL', userLang), userLang)
@@ -626,7 +678,7 @@ export class CoreService implements EventHandler, OnModuleInit {
     // Resolve dynamic badge counts for approval menu items
     const badgeCounts = await this.resolveBadgeCounts(session)
 
-    const options: ContextualMenuItem[] = this.menuItems
+    const options: ActionMenuOption[] = this.menuItems
       .filter(
         (item) =>
           this.isMenuItemVisible(item.visibleWhen, session, isConfiguring, badgeCounts) &&
@@ -638,7 +690,7 @@ export class CoreService implements EventHandler, OnModuleInit {
         if (item.badge && badgeCounts[item.badge] > 0) {
           title = `(${badgeCounts[item.badge]}) ${title}`
         }
-        return new ContextualMenuItem({ id: item.id, title })
+        return { name: item.id, title, description: '' }
       })
 
     this.logger.log(
@@ -657,18 +709,13 @@ export class CoreService implements EventHandler, OnModuleInit {
       : 'Not Authenticated'
 
     this.logger.log(
-      `[MENU] Sending ContextualMenuUpdate: title="${title}", desc="${description}", options=${JSON.stringify(options.map((o) => o.id))}`,
+      `[MENU] Sending contextual menu: title="${title}", desc="${description}", options=${JSON.stringify(options.map((o) => o.name))}`,
     )
-    await this.apiClient.messages.send(
-      new ContextualMenuUpdateMessage({
-        title,
-        description,
-        connectionId: session.connectionId,
-        options,
-        timestamp: new Date(),
-      }),
-    )
-    this.logger.log(`[MENU] ContextualMenuUpdate sent successfully.`)
+    await this.apiClient.didcomm.sendMenu({
+      connectionId: session.connectionId,
+      menu: { title, description, options },
+    })
+    this.logger.log(`[MENU] Contextual menu sent successfully.`)
     return await this.sessionRepository.save(session)
   }
 
@@ -728,8 +775,7 @@ export class CoreService implements EventHandler, OnModuleInit {
 
   private isMenuActionEnabled(action?: string) {
     if (!action) return true
-    if (action === 'authenticate')
-      return this.authFlowConfig.enabled && !!this.authFlowConfig.credentialDefinitionId?.trim()
+    if (action === 'authenticate') return this.authFlowConfig.enabled && !!this.getRequestedCredential()
     if (action === 'mcp-config')
       return this.mcpConfigService.isAvailable && this.agentContent.getUserControlledServers().length > 0
     return true
@@ -754,12 +800,10 @@ export class CoreService implements EventHandler, OnModuleInit {
       action: `cancel-approval:${r.id}`,
     }))
 
-    await this.apiClient.messages.send(
-      new MenuDisplayMessage({
-        connectionId: session.connectionId,
-        prompt: this.getText('MY_APPROVAL_REQUESTS_PROMPT', session.lang),
-        menuItems,
-      }),
+    await this.sendQuestionMenu(
+      session.connectionId,
+      this.getText('MY_APPROVAL_REQUESTS_PROMPT', session.lang),
+      menuItems,
     )
   }
 
@@ -780,13 +824,7 @@ export class CoreService implements EventHandler, OnModuleInit {
       action: `review-approval:${r.id}`,
     }))
 
-    await this.apiClient.messages.send(
-      new MenuDisplayMessage({
-        connectionId: session.connectionId,
-        prompt: this.getText('PENDING_APPROVALS_PROMPT', session.lang),
-        menuItems,
-      }),
-    )
+    await this.sendQuestionMenu(session.connectionId, this.getText('PENDING_APPROVALS_PROMPT', session.lang), menuItems)
   }
 
   private static readonly APPROVAL_MENU_ACTIONS = [
@@ -876,24 +914,16 @@ export class CoreService implements EventHandler, OnModuleInit {
     }
     await this.sendText(connectionId, details, lang)
 
-    await this.apiClient.messages.send(
-      new MenuDisplayMessage({
-        connectionId,
-        prompt: this.getText('APPROVAL_REVIEW_PROMPT', lang),
-        menuItems: [
-          {
-            id: `approve-approval:${request.id}`,
-            text: this.getText('APPROVE', lang),
-            action: `approve-approval:${request.id}`,
-          },
-          {
-            id: `reject-approval:${request.id}`,
-            text: this.getText('REJECT', lang),
-            action: `reject-approval:${request.id}`,
-          },
-        ],
-      }),
-    )
+    await this.sendQuestionMenu(connectionId, this.getText('APPROVAL_REVIEW_PROMPT', lang), [
+      {
+        id: `approve-approval:${request.id}`,
+        text: this.getText('APPROVE', lang),
+      },
+      {
+        id: `reject-approval:${request.id}`,
+        text: this.getText('REJECT', lang),
+      },
+    ])
   }
 
   /**
@@ -942,13 +972,7 @@ export class CoreService implements EventHandler, OnModuleInit {
       }),
     )
 
-    await this.apiClient.messages.send(
-      new MenuDisplayMessage({
-        connectionId: session.connectionId,
-        prompt: this.getText('MCP_CONFIG_SELECT_SERVER', session.lang),
-        menuItems,
-      }),
-    )
+    await this.sendQuestionMenu(session.connectionId, this.getText('MCP_CONFIG_SELECT_SERVER', session.lang), menuItems)
 
     this.logger.log(`[MCP_CONFIG] Server selection menu sent to ${session.connectionId}`)
   }

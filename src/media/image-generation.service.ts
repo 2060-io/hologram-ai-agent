@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { AsyncLocalStorage } from 'async_hooks'
 import { randomUUID } from 'crypto'
-import { ApiClient, ApiVersion } from '@2060.io/vs-agent-nestjs-client'
+import { ApiClient, SharedMediaItem } from '@verana-labs/vs-agent-nestjs-client'
 import type { ImageProvider, ImageProviderConfig } from './providers/image-provider.interface'
 import { createImageProvider } from './providers/image-provider.factory'
 import { ImageConverterService, ConversionOptions } from './image-converter.service'
@@ -45,7 +45,7 @@ export class ImageGenerationService implements OnModuleInit {
     private readonly refStore: ImageRefStore,
   ) {
     const baseUrl = config.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
-    this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
+    this.apiClient = new ApiClient(baseUrl)
   }
 
   async onModuleInit() {
@@ -151,36 +151,36 @@ export class ImageGenerationService implements OnModuleInit {
 
     this.logger.log(`Generated and stored ${results.length} image(s): ${results.map((r) => r.refId).join(', ')}`)
 
-    // Send MediaMessage directly to the user (avoids event triple-fire)
+    // Share the media directly with the user (avoids event triple-fire)
     let sentMessageId: string | undefined
     const ctx = this.callerCtx.getStore()
     if (ctx?.connectionId) {
       try {
-        const { MediaItem, MediaMessage } = await import('@2060.io/vs-agent-nestjs-client')
-        const items = eventImages.map(
-          (img) =>
-            new MediaItem({
-              uri: img.url,
-              mimeType: img.mimeType,
-              ...(img.width ? { width: img.width } : {}),
-              ...(img.height ? { height: img.height } : {}),
-              ...(img.preview ? { preview: img.preview } : {}),
-              ...(img.ciphering ? { ciphering: img.ciphering } : {}),
-            }),
-        )
-        const sent = await this.apiClient.messages.send(
-          new MediaMessage({
-            connectionId: ctx.connectionId,
-            items,
-          }),
-        )
+        // preview / width / height travel in the item metadata, as the v1 MediaMessage mapped them
+        const items: SharedMediaItem[] = eventImages.map((img) => {
+          const metadata: Record<string, unknown> = {
+            ...(img.width ? { width: img.width } : {}),
+            ...(img.height ? { height: img.height } : {}),
+            ...(img.preview ? { preview: img.preview } : {}),
+          }
+          return {
+            uri: img.url,
+            mimeType: img.mimeType,
+            ...(img.ciphering ? { ciphering: img.ciphering } : {}),
+            ...(Object.keys(metadata).length ? { metadata } : {}),
+          }
+        })
+        const sent = await this.apiClient.didcomm.shareMedia({
+          connectionId: ctx.connectionId,
+          items,
+        })
         sentMessageId = sent?.id
-        this.logger.log(`Sent MediaMessage ${sentMessageId} to ${ctx.connectionId}: ${items.length} item(s)`)
+        this.logger.log(`Shared media ${sentMessageId} with ${ctx.connectionId}: ${items.length} item(s)`)
       } catch (err) {
-        this.logger.error(`Failed to send MediaMessage: ${err}`)
+        this.logger.error(`Failed to share media: ${err}`)
       }
     } else {
-      this.logger.warn('No connectionId in caller context — MediaMessage will not be sent to user.')
+      this.logger.warn('No connectionId in caller context — media will not be shared with the user.')
     }
 
     return { images: results, sentMessageId }

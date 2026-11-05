@@ -5,7 +5,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { ConfigService } from '@nestjs/config'
-import { ApiClient, ApiVersion, TextMessage } from '@2060.io/vs-agent-nestjs-client'
+import { ApiClient } from '@verana-labs/vs-agent-nestjs-client'
 import { ApprovalRequestEntity, ApprovalStatus } from './approval-request.entity'
 import { SessionEntity } from '../core/models'
 
@@ -23,7 +23,7 @@ export class ApprovalEventHandler {
     private readonly configService: ConfigService,
   ) {
     const baseUrl = this.configService.get<string>('appConfig.vsAgentAdminUrl') || 'http://localhost:3001'
-    this.apiClient = new ApiClient(baseUrl, ApiVersion.V1)
+    this.apiClient = new ApiClient(baseUrl)
   }
 
   /**
@@ -145,13 +145,7 @@ export class ApprovalEventHandler {
 
   private async sendText(connectionId: string, text: string): Promise<void> {
     try {
-      await this.apiClient.messages.send(
-        new TextMessage({
-          connectionId,
-          content: text,
-          timestamp: new Date(),
-        }),
-      )
+      await this.apiClient.didcomm.sendBasicMessage({ connectionId, content: text })
     } catch (err) {
       this.logger.error(`[EVENT] Failed to send message to ${connectionId}: ${err}`)
     }

@@ -1,11 +1,10 @@
-import { MenuSelectMessage } from '@2060.io/vs-agent-nestjs-client'
 import { CoreService } from './core.service'
 import { SessionEntity } from './models'
 import { StateStep } from './common/enums/state-step.enum'
 import { ApprovalRequestEntity, ApprovalStatus } from '../rbac/approval-request.entity'
 
 /**
- * Tests for the approval menu wiring: MenuSelect messages carrying
+ * Tests for the approval menu wiring: question-answer answers carrying
  * review-approval / approve-approval / reject-approval / cancel-approval
  * ids must reach ApprovalService with the proper authorization checks.
  */
@@ -20,7 +19,7 @@ describe('CoreService approval selections', () => {
     getPendingForApprover: jest.Mock
   }
   let sessionRepository: { findOneBy: jest.Mock; findOne: jest.Mock; create: jest.Mock; save: jest.Mock }
-  let sentMessages: { type?: string; content?: string; prompt?: string; menuItems?: { id: string }[] }[]
+  let sentMessages: { content?: string; question?: string; validResponses?: { text: string }[] }[]
   let service: CoreService
   let session: SessionEntity
 
@@ -96,22 +95,26 @@ describe('CoreService approval selections', () => {
     )
 
     sentMessages = []
+    let messageCount = 0
+    const send = jest.fn(async (msg: (typeof sentMessages)[number]) => {
+      sentMessages.push(msg)
+      return { id: `msg-${++messageCount}` }
+    })
     ;(service as never as { apiClient: unknown }).apiClient = {
-      messages: {
-        send: jest.fn(async (msg: (typeof sentMessages)[number]) => {
-          sentMessages.push(msg)
-          return {}
-        }),
-      },
+      didcomm: { sendBasicMessage: send, sendQuestion: send, sendMenu: send },
     }
   })
 
-  const selectFromMenu = async (id: string) =>
-    service.inputMessage({
-      type: MenuSelectMessage.type,
-      connectionId: session.connectionId,
-      menuItems: [{ id }],
-    } as never)
+  const answer = async (threadId: string, response: string) =>
+    service.onEvent({
+      id: `evt-${threadId}-${response}`,
+      type: 'didcomm.question-answer.answer-received',
+      timestamp: new Date().toISOString(),
+      data: { connectionId: session.connectionId, threadId, response },
+    })
+
+  // No question was recorded for this thread, so the response text is the selection id
+  const selectFromMenu = async (id: string) => answer('unknown-thread', id)
 
   it('routes approve-approval selections to ApprovalService.resolve with the approver identity', async () => {
     approvalService.getById.mockResolvedValue(request())
@@ -162,8 +165,23 @@ describe('CoreService approval selections', () => {
       (m) => typeof m.content === 'string' && m.content.startsWith('APPROVAL_REVIEW_DETAILS'),
     )
     expect(details).toBeDefined()
-    const menu = sentMessages.find((m) => m.menuItems?.length === 2)
-    expect(menu?.menuItems?.map((i) => i.id)).toEqual(['approve-approval:req-1', 'reject-approval:req-1'])
+    const menu = sentMessages.find((m) => m.validResponses?.length === 2)
+    expect(menu?.question).toBe('APPROVAL_REVIEW_PROMPT')
+    expect(menu?.validResponses?.map((r) => r.text)).toEqual(['APPROVE', 'REJECT'])
+  })
+
+  it('maps the answer text of a sent question back to its selection id', async () => {
+    approvalService.getById.mockResolvedValue(request())
+
+    await selectFromMenu('review-approval:req-1')
+    const questionIndex = sentMessages.findIndex((m) => m.validResponses?.length === 2)
+    // the mocked client numbers sent messages; the answer arrives on the question thread
+    const threadId = `msg-${questionIndex + 1}`
+
+    await answer(threadId, 'APPROVE')
+
+    expect(approvalService.resolve).toHaveBeenCalledWith('req-1', 'approve', 'alice')
+    expect(sentMessages.some((m) => m.content === 'APPROVAL_APPROVED_CONFIRM')).toBe(true)
   })
 
   it('cancel-approval delegates to ApprovalService.cancel with the actor identity', async () => {

@@ -74,9 +74,12 @@ chatbot:
         Your role is to greet users and provide help.
         Always be polite and concise. Use external tools for stats.
     - name: VS_AGENT_ADMIN_URL
-      value: 'http://example-vs-agent:3000'
-    - name: CREDENTIAL_DEFINITION_ID
-      value: 'did:web:example.com?service=anoncreds&relativeRef=/credDef/example'
+      value: 'http://vs-agent:3000'
+    # Authentication credential: the VTJSC of the credential schema (e.g. the Avatar Credential),
+    # accepted from any accredited issuer. Alternative: CREDENTIAL_DEFINITION_ID (one issuer).
+    # The VS Agent must hold an active VERIFIER participant for that schema.
+    - name: JSON_SCHEMA_CREDENTIAL_ID
+      value: 'https://ecosystem.example.com/vt/schemas-avatar-jsc.json'
     - name: POSTGRES_HOST
       value: 'example-postgres-host'
     - name: POSTGRES_USER
@@ -133,32 +136,54 @@ chatbot:
 
 vs-agent-chart:
   enabled: true
+  # Service name: the chatbot reaches the Admin API at http://vs-agent:3000 (VS_AGENT_ADMIN_URL)
   name: vs-agent
-  didcommLabel: hologram-generic
-  eventsBaseUrl: http://chatbot:3003
+  image:
+    repository: veranalabs/vs-agent
+    tag: v2.0.0-dev.105
+  # Events webhook (VS Agent v2): every event is POSTed to this URL. The chatbot serves it at
+  # /events on its Service, named "<nameOverride>-chatbot" on chatbot.service.port.
+  eventsWebhookUrl: http://hologram-welcome-ai-agent-chatbot:3003/events
+  # The chatbot pod calls the Admin API from the pod network. In "internal" mode the agent
+  # serves only requests from these CIDR blocks (default 127.0.0.0/8,::1/128); set the
+  # cluster pod CIDR. Never publish an ingress to the admin port: the ingress controller
+  # runs in the pod network, so it would serve the Admin API without authentication.
+  adminApiAuthMode: internal
+  adminApiTrustedNetworks: '127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+  # Verana network (required by the agent to start)
+  veranaCorporationId: '' # VPR Corporation id the agent belongs to, e.g. '16'
+  veranaRpcEndpointUrl: https://rpc.testnet.verana.network
+  veranaIndexerBaseUrl: https://idx.testnet.verana.network
+  veranaChainId: vna-testnet-1
+  agentMode: standalone
+  trustedEcsEcosystemDids: '' # required in standalone mode: comma-separated ECS ecosystem DIDs
   ingress:
     host: vs-agent.dev.2060.io
     tlsSecret: public.vs-agent.dev.2060.io-cert
+  # No wallet key in v2. database.enabled defaults to false: the wallet lives in SQLite on the agent volume.
   database:
     enabled: false
-    host: localhost
-    user: example-db-user
-    pwd: example-db-password
-  redis:
-    enabled: false
   extraEnv:
-    - name: ANONCREDS_SERVICE_BASE_URL
-      value: 'https://chatbot.dev.2060.io'
-    - name: REDIRECT_DEFAULT_URL_TO_INVITATION_URL
-      value: 'true'
-    - name: POSTGRES_HOST
-      value: 'localhost'
-    - name: POSTGRES_USER
-      value: 'example-db-user'
-    - name: POSTGRES_PASSWORD
-      value: 'example-db-password'
-    - name: REDIS_HOST
-      value: 'localhost'
+    - name: VERANA_ACCOUNT_MNEMONIC
+      valueFrom:
+        secretKeyRef:
+          name: vs-agent-secret
+          key: VERANA_ACCOUNT_MNEMONIC
+    # Standalone mode: ECS Service credential claims (see the vs-agent chart README for the ORG claims)
+    - name: ECS_CLAIMS_SERVICE_NAME
+      value: 'Hologram AI Agent'
+    - name: ECS_CLAIMS_SERVICE_TYPE
+      value: 'AIAgent'
+    - name: ECS_CLAIMS_SERVICE_DESCRIPTION
+      value: 'Example AI agent verifiable service'
+    - name: ECS_CLAIMS_SERVICE_LOGO_URI
+      value: 'https://example.com/logo.svg'
+    - name: ECS_CLAIMS_SERVICE_MINIMUM_AGE_REQUIRED
+      value: '0'
+    - name: ECS_CLAIMS_SERVICE_TERMS_AND_CONDITIONS_URI
+      value: 'https://example.com/terms.html'
+    - name: ECS_CLAIMS_SERVICE_PRIVACY_POLICY_URI
+      value: 'https://example.com/privacy.html'
 
 redis:
   enabled: true
@@ -187,7 +212,7 @@ postgres:
   image:
     # pgvector-enabled Postgres, drop-in replacement for the previous postgres:15.2
     # (pg15 major matches existing data volumes; required for VECTOR_STORE=pgvector)
-    repository: 'pgvector/pgvector:pg15'
+    repository: 'pgvector/pgvector:0.8.7-pg15'
     pullPolicy: Always
   env:
     - name: PGDATA
