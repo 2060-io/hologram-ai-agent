@@ -5,5 +5,8 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@verana-labs/vs-agent-model$": "<rootDir>/../node_modules/@verana-labs/vs-agent-model/build/utils/stats.js"
   }
 }
