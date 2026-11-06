@@ -1,0 +1,45 @@
+# x-autonomous-mcp, the MCP server of the X Agent: it holds the X API
+# credentials of the one account the agent publishes on, and serves the X
+# tools over streamable HTTP at http://x-mcp:8000/mcp.
+#
+#   helm upgrade --install x-mcp oci://registry-1.docker.io/io2060/x-autonomous-mcp-chart \
+#     --version v0.1.13 -n <namespace> -f x-mcp.yaml \
+#     --set secret.X_API_KEY=... --set secret.X_API_SECRET=... \
+#     --set secret.X_ACCESS_TOKEN=... --set secret.X_ACCESS_TOKEN_SECRET=... \
+#     --set secret.X_BEARER_TOKEN=...
+#
+# Credentials: https://developer.x.com/en/portal/dashboard (OAuth 1.0a with
+# "Read and write" app permissions, plus the OAuth 2.0 Bearer Token).
+nameOverride: x-mcp
+
+image:
+  repository: io2060/x-autonomous-mcp
+  tag: v0.1.13
+
+# Budget counters and engagement dedup live in a state file on this volume.
+persistence:
+  enabled: true
+  size: 1Gi
+
+# Safety rails: the most actions per day.
+env:
+  - name: X_MCP_MAX_ORIGINALS
+    value: '10'
+  - name: X_MCP_MAX_REPLIES
+    value: '8'
+  - name: X_MCP_MAX_LIKES
+    value: '20'
+  - name: X_MCP_MAX_RETWEETS
+    value: '5'
+  - name: X_MCP_MAX_FOLLOWS
+    value: '10'
+  - name: X_MCP_MAX_UNFOLLOWS
+    value: '10'
+  - name: X_MCP_MAX_DELETES
+    value: '5'
+  - name: X_MCP_TOON
+    value: 'false'
+  - name: X_MCP_COMPACT
+    value: 'true'
+  - name: X_MCP_DEDUP
+    value: 'true'

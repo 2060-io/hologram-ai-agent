@@ -48,7 +48,8 @@ docker/
 
 agent-packs/
   ├── hologram-welcome/    # Default welcome agent pack
-  └── github-agent/        # GitHub MCP agent pack (example)
+  ├── github-agent/        # GitHub MCP agent pack (example)
+  └── x-agent/             # X (Twitter) publishing agent (example, with deploy values)
 
 charts/                    # Helm chart for Kubernetes deployment
 ```
@@ -182,6 +183,7 @@ Three example packs are included:
 - **`agent-packs/hologram-welcome/`** — default Hologram welcome agent
 - **`agent-packs/github-agent/`** — GitHub MCP-enabled agent with per-user token configuration
 - **`agent-packs/customer-service/`** — PQRSD customer-service intake demo
+- **`agent-packs/x-agent/`** — X (Twitter) publishing agent through the x-autonomous-mcp MCP server, with the Helm values to deploy your own ([README](agent-packs/x-agent/README.md))
 
 Full schema reference: [`docs/agent-pack-schema.md`](./docs/agent-pack-schema.md)
 
