@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/2060-io/hologram-ai-agent/compare/v2.0.0...v2.1.0) (2026-11-06)
+
+
+### Features
+
+* **agent-packs:** x-agent, an X (Twitter) publishing agent to deploy your own ([#114](https://github.com/2060-io/hologram-ai-agent/issues/114)) ([9666443](https://github.com/2060-io/hologram-ai-agent/commit/966644322d3cfe44ab023939e82dac46104457f0))
+
 ## [2.0.0](https://github.com/2060-io/hologram-ai-agent/compare/v1.15.0...v2.0.0) (2026-11-05)
 
 
