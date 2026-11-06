@@ -1,0 +1,165 @@
+# X Agent: hologram-ai-agent v2 with the agent pack of this folder, and its VS
+# Agent on Verana testnet. Replace every <...>; see README.md for the steps.
+#
+#   helm upgrade --install x-agent oci://registry-1.docker.io/io2060/hologram-ai-agent-chart \
+#     --version v2.0.0 -n <namespace> -f x-agent.yaml \
+#     --set-file chatbot.agentPack.content=agent-pack.yaml \
+#     --set chatbot.secret.OPENAI_API_KEY=... \
+#     --set chatbot.secret.POSTGRES_PASSWORD=<pw> --set postgres.secret.POSTGRES_PASSWORD=<pw>
+global:
+  domain: <your-domain>
+
+nameOverride: x-agent
+
+redis:
+  enabled: true
+  port: 6379
+  persistence:
+    enabled: true
+    mountPath: /data
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+
+postgres:
+  enabled: true
+  port: 5432
+  env:
+    - name: PGDATA
+      value: /var/lib/postgresql/data/pgdata
+  secret:
+    POSTGRES_PASSWORD: placeholder
+    POSTGRES_USER: x_agent_db
+    POSTGRES_DB: x-agent
+  storage:
+    size: 2Gi
+
+chatbot:
+  replicas: 1
+  env:
+    - name: APP_PORT
+      value: '3003'
+    - name: LOG_LEVEL
+      value: '3'
+    - name: VECTOR_STORE
+      value: 'redis'
+    - name: VECTOR_INDEX_NAME
+      value: 'x_agent'
+    - name: RAG_DOCS_PATH
+      value: '/app/rag/docs'
+    - name: REDIS_URL
+      value: 'redis://x-agent-redis:6379'
+    - name: POSTGRES_HOST
+      value: 'x-agent-postgres'
+    - name: VS_AGENT_ADMIN_URL
+      value: 'http://x-agent-vsa:3000'
+    - name: VS_AGENT_STATS_ENABLED
+      value: 'false'
+    # Login with the Avatar Credential (2060 demo ecosystem, testnet), from any
+    # accredited issuer. Users without it get an invitation to the Avatar demo.
+    - name: JSON_SCHEMA_CREDENTIAL_ID
+      value: 'https://corp.2060.io/vt/schemas-57-jsc.json'
+    - name: ISSUER_SERVICE_DID
+      value: 'did:webvh:QmayhyuL4ZWaVZN2rdMmJjsx2debs3iQDG9Zjd8tanNjai:avatar.demos.hologram.zone'
+    # Avatar names allowed to draft and publish on the X account (CSV).
+    - name: ADMIN_USERS
+      value: '<your-avatar-name>'
+    # The x-mcp release (x-mcp.yaml).
+    - name: X_MCP_URL
+      value: 'http://x-mcp:8000/mcp'
+    # Image generation stores the images in an S3-compatible object store
+    # (MinIO API), for example SeaweedFS. Without MINIO_ENDPOINT the agent
+    # still drafts and publishes text posts, without images.
+    # - name: MINIO_ENDPOINT
+    #   value: '<s3-host>'
+    # - name: MINIO_PORT
+    #   value: '8333'
+    # - name: MINIO_PUBLIC_URL
+    #   value: 'https://<public-s3-host>'
+    # - name: MINIO_BUCKET
+    #   value: 'image-gen'
+  secret:
+    OPENAI_API_KEY: placeholder
+    POSTGRES_PASSWORD: placeholder
+    POSTGRES_USER: x_agent_db
+    POSTGRES_DB_NAME: x-agent
+    # With image generation: the keys of the object store.
+    # MINIO_ACCESS_KEY: placeholder
+    # MINIO_SECRET_KEY: placeholder
+  service:
+    type: ClusterIP
+    port: 3003
+  storage:
+    size: 1Gi
+  ingress:
+    enabled: false
+  agentPack:
+    enabled: true
+    name: x-agent
+    mountPath: /app/agent-packs/x-agent
+    fileName: agent-pack.yaml
+    existingConfigMap: ''
+    # Set with --set-file chatbot.agentPack.content=agent-pack.yaml
+    content: ''
+
+stats:
+  enabled: false
+artemis:
+  enabled: false
+
+# The VS Agent: the DIDComm endpoint users connect to, and the service's
+# identity on Verana. Here a delegated service of your organization's VS Agent,
+# which issues its ECS-Service credential (as the Hologram demos, with 2060 OÜ).
+vs-agent-chart:
+  enabled: true
+  name: x-agent-vsa
+  image:
+    repository: veranalabs/vs-agent
+    tag: v2.0.0-dev.105
+  eventsWebhookUrl: http://x-agent-chatbot:3003/events
+  adminApiAuthMode: internal
+  adminApiTrustedNetworks: "127.0.0.0/8,::1/128,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+  veranaCorporationId: "<your-corporation-id>"
+  veranaRpcEndpointUrl: "https://rpc.testnet.verana.network"
+  veranaIndexerBaseUrl: "https://idx.testnet.verana.network"
+  veranaChainId: "vna-testnet-1"
+  agentMode: delegated
+  delegatedParentVsDid: "<DID of your organization's VS Agent>"
+  # The ECS Ecosystem of the Verana Council (testnet).
+  trustedEcsEcosystemDids: "did:webvh:QmaG8Zk91utJCRpHZ6ruVKwedNEWXUm1vnXvttf6pENZHM:council.testnet.verana.network"
+  ingress:
+    host: "x-agent.{{ .Values.global.domain }}"
+    tlsSecret: "public.x-agent.{{ .Values.global.domain }}-cert"
+    public:
+      enableCors: true
+    private:
+      whitelistSourceRange: ""
+      host: ""
+  database:
+    enabled: false
+  extraEnv:
+    - name: AGENT_LOG_LEVEL
+      value: "info"
+    - name: VERANA_GAS_PRICE
+      value: "0.01uvna"
+    # Verana account of the service (a Secret you create, key mnemonic).
+    - name: VERANA_ACCOUNT_MNEMONIC
+      valueFrom:
+        secretKeyRef:
+          name: x-agent-verana-account
+          key: mnemonic
+    # Claims of the ECS-Service credential.
+    - name: ECS_CLAIMS_SERVICE_NAME
+      value: "X Agent"
+    - name: ECS_CLAIMS_SERVICE_TYPE
+      value: "AI_AGENT"
+    - name: ECS_CLAIMS_SERVICE_DESCRIPTION
+      value: "AI agent that drafts and publishes posts on X (Twitter)"
+    - name: ECS_CLAIMS_SERVICE_LOGO_URI
+      value: "https://hologram.zone/images/x-white.svg"
+    - name: ECS_CLAIMS_SERVICE_MINIMUM_AGE_REQUIRED
+      value: "0"
+    - name: ECS_CLAIMS_SERVICE_TERMS_AND_CONDITIONS_URI
+      value: "https://x-agent.<your-domain>/vt/default/terms.html"
+    - name: ECS_CLAIMS_SERVICE_PRIVACY_POLICY_URI
+      value: "https://x-agent.<your-domain>/vt/default/privacy.html"
